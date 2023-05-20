@@ -294,10 +294,10 @@ namespace RatioShop.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsNew")
+                    b.Property<bool>("IsNew")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("ModifiedDate")
@@ -490,7 +490,7 @@ namespace RatioShop.Data.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("ModifiedDate")

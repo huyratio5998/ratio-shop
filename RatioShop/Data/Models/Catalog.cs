@@ -5,6 +5,6 @@
         public string? Name { get; set; }
         public string? DisplayName { get; set; }
 
-        List<Category> Categories { get; set; }
+        List<Category>? Categories { get; set; }
     }
 }

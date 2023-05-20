@@ -7,14 +7,14 @@
         public string? ProductFriendlyName { get; set; }
         public string? ProductRawName { get; set; }
         public string? Description { get; set; }
-        public bool? IsDelete { get; set; }
-        public bool? IsNew { get; set; }
+        public bool IsDelete { get; set; }
+        public bool IsNew { get; set; }
 
         // Media
         public string? ProductImage { get; set; }
         // Techspec
 
-        public List<ProductVariant> Variants { get; set; }
-        public List<ProductCategory> ProductCategories { get; set; }        
+        public List<ProductVariant>? Variants { get; set; }
+        public List<ProductCategory>? ProductCategories { get; set; }        
     }
 }

@@ -5,8 +5,8 @@
         public string? Status { get; set; }
 
         public Guid ProductVariantCartId { get; set; }
-        public ProductVariantCart ProductVariantCart { get; set; }
+        public ProductVariantCart? ProductVariantCart { get; set; }
         public string ShopUserId { get; set; }
-        public ShopUser ShopUser { get; set; }        
+        public ShopUser? ShopUser { get; set; }        
     }
 }

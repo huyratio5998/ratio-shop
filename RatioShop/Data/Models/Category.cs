@@ -5,8 +5,8 @@
         public string? Name { get; set; }
         public string? DisplayName { get; set; }
 
-        List<ProductCategory> ProductCategories { get; set; }
+        List<ProductCategory>? ProductCategories { get; set; }
         public int CatalogId { get; set; }
-        public Catalog Catalog { get; set; }
+        public Catalog? Catalog { get; set; }
     }
 }

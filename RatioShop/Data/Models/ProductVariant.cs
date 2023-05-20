@@ -8,7 +8,7 @@
         public double? DiscountRate { get; set; }
 
         public Guid ProductId { get; set; }
-        public Product Product { get; set; }
-        public List<ProductVariantStock> productVariantStocks { get; set; }
+        public Product? Product { get; set; }
+        public List<ProductVariantStock>? productVariantStocks { get; set; }
     }
 }

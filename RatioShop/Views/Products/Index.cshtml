@@ -1,90 +1,112 @@
-﻿@model IEnumerable<RatioShop.Data.Models.Product>
+﻿@using RatioShop.Data.Models
+@using RatioShop.Data.ViewModels
+@using RatioShop.Enums
+@model ListProductViewModel
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Pages/Shared/_Layout.cshtml";
+    var currentSortType = !string.IsNullOrEmpty(ViewBag.SortBy) ? ViewBag.SortBy.ToLower() : "default";
+    var currentPage = ViewBag.Page;
 }
 
-<h1>Index</h1>
+<h1>Product Settings</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>    
-</p>
+<div style="display:inline-flex">
+    <span style="margin-right:300px">
+        <a asp-action="Create">Create New</a>
+    </span>
+    <span>
+        <form asp-action="Index">
+            <label for="sortBy">Sort By:</label>
+            <select name="sortBy" id="sortBy">
+                @foreach (SortingEnum item in Enum.GetValues(typeof(SortingEnum)))
+                {
+                    var sortValue = item.ToString();
+                    if (sortValue.Equals(currentSortType, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <option value="@sortValue" selected>@sortValue</option>
+                    }
+                    else
+                    {
+                        <option value="@sortValue">@sortValue</option>
+                    }
+                }
+            </select>
+            <input type="hidden" name="page" value="@currentPage" />
+            <input type="submit" value="Sort" />
+        </form>
+    </span>
+</div>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Code)
+                Code
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                Product Image
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductFriendlyName)
+                Product Name
             </th>
+
             <th>
-                @Html.DisplayNameFor(model => model.ProductRawName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDelete)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsNew)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductImage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ModifiedDate)
+                Created Date
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Code)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductFriendlyName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductRawName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDelete)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsNew)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductImage)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ModifiedDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.Products)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.Code)
+                </td>
+
+                @if (string.IsNullOrEmpty(item.ProductImageName))
+                {
+                    <td>
+                        <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Product.Name">
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <img src="~/images/products/@item.ProductImageName" style="height:150px;width:auto" alt="@item.Product.Name">
+                    </td>
+                }
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.ProductFriendlyName)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.CreatedDate)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Product.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Product.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Product.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+<div>
+    @for (var i = 1; i <= Model.TotalPage; i++)
+    {
+        var parms = new Dictionary<string, string>
+    {
+    { "sortby", currentSortType },
+    { "page", i.ToString() }
+    };
+
+        <a asp-action="index" asp-all-route-data="parms" class="@(i == Model.PageIndex ? "page-selected" : "")">@i</a>
+        @if (Model.TotalPage > 1 && i < Model.TotalPage)
+        {
+            <span> > </span>
+        }
+    }
+</div>

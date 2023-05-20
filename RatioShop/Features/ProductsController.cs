@@ -1,44 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using RatioShop.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using RatioShop.Data.Models;
+using RatioShop.Data.ViewModels;
+using RatioShop.Helpers.FileHelpers;
+using RatioShop.Services.Abstract;
 
 namespace RatioShop.Features
 {
     public class ProductsController : Controller
-    {
-        private readonly ApplicationDbContext _context;
+    {        
+        private readonly IProductService _productService;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private const int pageSizeDefault = 5;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment)
         {
-            _context = context;
+            this._productService = productService;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortBy= "default", int page=1)
         {
-              return View(await _context.Product.ToListAsync());
+            var listProductViewModel = new ListProductViewModel();            
+            listProductViewModel.Products = _productService.GetProducts(sortBy, page, pageSizeDefault);
+            //paging information
+            listProductViewModel.PageIndex = page;
+            listProductViewModel.PageSize = pageSizeDefault;
+            listProductViewModel.TotalCount = _productService.GetProducts().Count();
+            listProductViewModel.TotalPage = listProductViewModel.TotalCount == 0 ? 1 : (int)Math.Ceiling((double)listProductViewModel.TotalCount / pageSizeDefault);
+            //
+            ViewBag.SortBy = sortBy;
+            ViewBag.Page = page;
+
+            return View(listProductViewModel);
+        }
+
+        public async Task<IActionResult> ProductSettings(string sortBy = "default", int page = 1)
+        {
+            var listProductViewModel = new ListProductViewModel();
+            listProductViewModel.Products = _productService.GetProducts(sortBy, page, pageSizeDefault);
+            //paging information
+            listProductViewModel.PageIndex = page;
+            listProductViewModel.PageSize = pageSizeDefault;
+            listProductViewModel.TotalCount = _productService.GetProducts().Count();
+            listProductViewModel.TotalPage = listProductViewModel.TotalCount == 0 ? 1 : (int)Math.Ceiling((double)listProductViewModel.TotalCount / pageSizeDefault);
+            //
+            ViewBag.SortBy = sortBy;
+            ViewBag.Page = page;
+
+            return View(listProductViewModel);
         }
 
         // GET: Products/Details/5
         public async Task<IActionResult> Details(Guid? id)
-        {
-            if (id == null || _context.Product == null)
-            {
-                return NotFound();
-            }
+        {            
+            if (id == null) return NotFound();
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            var product = _productService.GetProduct((Guid)id);
+           
+            if (product == null) return NotFound();
 
             return View(product);
         }
@@ -54,31 +74,32 @@ namespace RatioShop.Features
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Code,Name,ProductFriendlyName,ProductRawName,Description,IsDelete,IsNew,ProductImage,Id,CreatedDate,ModifiedDate")] Product product)
+        public async Task<IActionResult> Create(ProductViewModel model)
         {
             if (ModelState.IsValid)
             {
-                product.Id = Guid.NewGuid();
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                var productEntity = model.Product;
+                productEntity.Id = Guid.NewGuid();
+
+                FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
+                productEntity.ProductImage = model.ProductImage?.FileName;
+
+                await _productService.AddProduct(productEntity);
+                
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(model);
         }
 
         // GET: Products/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null || _context.Product == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var product = await _context.Product.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            var product = _productService.GetProduct((Guid)id);
+
+            if (product == null) return NotFound();
+
             return View(product);
         }
 
@@ -87,50 +108,35 @@ namespace RatioShop.Features
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Code,Name,ProductFriendlyName,ProductRawName,Description,IsDelete,IsNew,ProductImage,Id,CreatedDate,ModifiedDate")] Product product)
+        public IActionResult Edit(Guid id, ProductViewModel model)
         {
-            if (id != product.Id)
+            if (model == null || model.Product == null || id != model.Product.Id)
             {
                 return NotFound();
-            }
+            }            
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                var productEntity = model.Product;
+
+                FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
+                if(model.ProductImage != null) productEntity.ProductImage =  model.ProductImage.FileName;
+                
+                _productService.UpdateProduct(productEntity);
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(model);
         }
 
         // GET: Products/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == null || _context.Product == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            var product = _productService.GetProduct((Guid)id);
+
+            if (product == null) return NotFound();
 
             return View(product);
         }
@@ -140,23 +146,9 @@ namespace RatioShop.Features
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (_context.Product == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Product'  is null.");
-            }
-            var product = await _context.Product.FindAsync(id);
-            if (product != null)
-            {
-                _context.Product.Remove(product);
-            }
+            var product = _productService.DeleteProduct(id);
             
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductExists(Guid id)
-        {
-          return _context.Product.Any(e => e.Id == id);
-        }
+        }       
     }
 }

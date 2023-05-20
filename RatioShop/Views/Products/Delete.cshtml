@@ -1,4 +1,4 @@
-﻿@model RatioShop.Data.Models.Product
+﻿@model RatioShop.Data.ViewModels.ProductViewModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -13,69 +13,69 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Code)
+            @Html.DisplayNameFor(model => model.Product.Code)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Code)
+            @Html.DisplayFor(model => model.Product.Code)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.DisplayNameFor(model => model.Product.Name)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
+            @Html.DisplayFor(model => model.Product.Name)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductFriendlyName)
+            @Html.DisplayNameFor(model => model.Product.ProductFriendlyName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductFriendlyName)
+            @Html.DisplayFor(model => model.Product.ProductFriendlyName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductRawName)
+            @Html.DisplayNameFor(model => model.Product.ProductRawName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductRawName)
+            @Html.DisplayFor(model => model.Product.ProductRawName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
+            @Html.DisplayNameFor(model => model.Product.Description)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
+            @Html.DisplayFor(model => model.Product.Description)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDelete)
+            @Html.DisplayNameFor(model => model.Product.IsDelete)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDelete)
+            @Html.DisplayFor(model => model.Product.IsDelete)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsNew)
+            @Html.DisplayNameFor(model => model.Product.IsNew)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsNew)
+            @Html.DisplayFor(model => model.Product.IsNew)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductImage)
+            @Html.DisplayNameFor(model => model.Product.ProductImage)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductImage)
+            @Html.DisplayFor(model => model.Product.ProductImage)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
+            @Html.DisplayNameFor(model => model.Product.CreatedDate)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
+            @Html.DisplayFor(model => model.Product.CreatedDate)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
+            @Html.DisplayNameFor(model => model.Product.ModifiedDate)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
+            @Html.DisplayFor(model => model.Product.ModifiedDate)
         </dd>
     </dl>
     
     <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Product.Id" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>
     </form>

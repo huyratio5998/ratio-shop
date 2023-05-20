@@ -18,5 +18,11 @@ namespace RatioShop.Data
 
         }
         public DbSet<RatioShop.Data.Models.Product> Product { get; set; }
+        public DbSet<RatioShop.Data.Models.Address>? Address { get; set; }
+        public DbSet<RatioShop.Data.Models.Payment>? Payment { get; set; }
+        public DbSet<RatioShop.Data.Models.Stock>? Stock { get; set; }
+        public DbSet<RatioShop.Data.Models.Order>? Order { get; set; }
+        public DbSet<RatioShop.Data.Models.Cart>? Cart { get; set; }
+        public DbSet<RatioShop.Data.Models.ProductVariant>? ProductVariant { get; set; }
     }
 }
