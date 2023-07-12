@@ -34,15 +34,15 @@ namespace RatioShop.Data.Repository.Implement
         {
             if (CategoryId == 0 || ProductId == null || ProductId == Guid.Empty) return null;
 
-            return _context.Set<ProductCategory>().AsNoTracking().FirstOrDefault(x => x.CategoryId == CategoryId && x.ProductId.ToString().Equals(ProductId.ToString(), StringComparison.OrdinalIgnoreCase));
+            return _context.Set<ProductCategory>().AsNoTracking().FirstOrDefault(x => x.CategoryId == CategoryId && x.ProductId.ToString().ToLower().Equals(ProductId.ToString().ToLower()));
         }
 
-        public IEnumerable<ProductCategory> GetProductCategorys()
+        public IQueryable<ProductCategory> GetProductCategorys()
         {
             return _context.Set<ProductCategory>().AsNoTracking();
         }
 
-        public IEnumerable<ProductCategory> GetProductCategorys(int pageIndex, int pageSize)
+        public IQueryable<ProductCategory> GetProductCategorys(int pageIndex, int pageSize)
         {
             return _context.Set<ProductCategory>()
                 .AsNoTracking()

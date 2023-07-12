@@ -17,7 +17,7 @@
         <a asp-action="Create">Create New</a>
     </span>
     <span>
-        <form asp-action="Index">
+        <form asp-action="ProductSettings">
             <label for="sortBy">Sort By:</label>
             <select name="sortBy" id="sortBy">
                 @foreach (SortingEnum item in Enum.GetValues(typeof(SortingEnum)))
@@ -51,9 +51,14 @@
             <th>
                 Product Name
             </th>
-
+             <th>
+                Categories
+            </th>
+             <th>
+                EnableStockTracking
+            </th>
             <th>
-                Created Date
+                Modified Date
             </th>
             <th></th>
         </tr>
@@ -81,9 +86,14 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Product.ProductFriendlyName)
                 </td>
-
+                 <td>
+                    @string.Join(", ", item.ProductCategories.Select(x=>x.DisplayName))
+                </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Product.CreatedDate)
+                    @Html.DisplayFor(modelItem => item.Product.EnableStockTracking)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.ModifiedDate)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Product.Id">Edit</a> |
@@ -103,7 +113,7 @@
     { "page", i.ToString() }
     };
 
-        <a asp-action="index" asp-all-route-data="parms" class="@(i == Model.PageIndex ? "page-selected" : "")">@i</a>
+        <a asp-action="ProductSettings" asp-all-route-data="parms" class="@(i == Model.PageIndex ? "page-selected" : "")">@i</a>
         @if (Model.TotalPage > 1 && i < Model.TotalPage)
         {
             <span> > </span>

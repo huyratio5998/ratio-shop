@@ -1,13 +1,23 @@
 ﻿using RatioShop.Data.Models;
+using RatioShop.Data.ViewModels;
 
 namespace RatioShop.Services.Abstract
 {
     public interface IOrderService
     {
         IEnumerable<Order> GetOrders();
-        Order? GetOrder(int id);
+        IEnumerable<Order> GetOrders(int pageIndex, int pageSize);
+        Order? GetOrder(string id);
         Task<Order> CreateOrder(Order Order);
+        Task<Order> CreateOrder(OrderViewModel Order);
         bool UpdateOrder(Order Order);
-        bool DeleteOrder(int id);
+        bool DeleteOrder(string id);
+
+        // Business logics
+        bool UpdateOrder(Order order, string newStatus);
+        bool UpdateOrder(string orderId, string newStatus);
+        OrderViewModel? GetOrderDetail(string id);
+        IEnumerable<OrderViewModel>? GetOrderHistoryByUserId(string userId, int pageIndex = 1, int pageSize = 5);
+        int GetTotalOrderByUserId(string userId);
     }
 }

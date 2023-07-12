@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "External login failure";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    var returnUrl = ViewBag.ReturnUrl ?? "/";
+}
+<div class="ratio-empty-page text-center">
+    <h1>External authentication Failure!! Please try again</h1>
+    <p>
+        <a href="@returnUrl">Go back to previous page</a>
+    </p>
+</div>

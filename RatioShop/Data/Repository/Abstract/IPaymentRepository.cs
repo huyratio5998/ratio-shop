@@ -5,9 +5,9 @@ namespace RatioShop.Data.Repository.Abstract
     public interface IPaymentRepository
     {
         IEnumerable<Payment> GetPayments();
-        Payment? GetPayment(int id);
+        Payment? GetPayment(string id);
         Task<Payment> CreatePayment(Payment Payment);
         bool UpdatePayment(Payment Payment);        
-        bool DeletePayment(int id);
+        bool DeletePayment(string id);
     }
 }

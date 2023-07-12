@@ -1,5 +1,6 @@
 ﻿using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
+using System.Linq.Expressions;
 
 namespace RatioShop.Data.Repository.Implement
 {
@@ -19,7 +20,7 @@ namespace RatioShop.Data.Repository.Implement
             return Delete(id);
         }
 
-        public IEnumerable<Address> GetAddresss()
+        public IQueryable<Address> GetAddresses()
         {
             return GetAll();
         }
@@ -32,6 +33,11 @@ namespace RatioShop.Data.Repository.Implement
         public bool UpdateAddress(Address Address)
         {
             return Update(Address);
+        }
+
+        Address? IAddressRepository.Find(Expression<Func<Address, bool>> predicate)
+        {
+            return Find(predicate).FirstOrDefault();
         }
     }
 }

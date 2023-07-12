@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RatioShop.Data.Models
 {
     public class ProductVariantStock
-    {        
+    {
+        public int ProductNumber { get; set; }
         public int StockId { get; set; }
         public Stock? Stock { get; set; }        
         public Guid ProductVariantId { get; set; }

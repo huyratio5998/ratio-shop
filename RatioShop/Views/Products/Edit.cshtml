@@ -1,8 +1,9 @@
-﻿@model RatioShop.Data.ViewModels.ProductViewModel
+﻿@using Newtonsoft.Json;
+@model RatioShop.Data.ViewModels.ProductViewModel
 
 @{
     ViewData["Title"] = "Edit";
-    Layout = "~/Pages/Shared/_Layout.cshtml";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
 <h1>Edit</h1>
@@ -30,12 +31,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Product.ProductRawName" class="control-label"></label>
-                <textarea asp-for="Product.ProductRawName" class="form-control" ></textarea>
+                <textarea asp-for="Product.ProductRawName" class="form-control"></textarea>
                 <span asp-validation-for="Product.ProductRawName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Product.Description" class="control-label"></label>
-                <textarea asp-for="Product.Description" class="form-control" ></textarea>
+                <textarea asp-for="Product.Description" class="form-control"></textarea>
                 <span asp-validation-for="Product.Description" class="text-danger"></span>
             </div>
             <div class="form-group form-check">
@@ -48,8 +49,13 @@
                     <input class="form-check-input" asp-for="Product.IsNew" /> @Html.DisplayNameFor(model => model.Product.IsNew)
                 </label>
             </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Product.EnableStockTracking" /> @Html.DisplayNameFor(model => model.Product.EnableStockTracking)
+                </label>
+            </div>
             <div class="form-group">
-                <label asp-for="ProductImage" class="control-label js_img_changeTarget">   
+                <label asp-for="ProductImage" class="control-label js_img_changeTarget">
                     <span>ProductImage</span>
                     @if (string.IsNullOrEmpty(Model.Product.ProductImage))
                     {
@@ -69,7 +75,7 @@
             <input type="hidden" asp-for="Product.ModifiedDate" />
             <input type="hidden" asp-for="Product.Id" />
             <input type="hidden" asp-for="Product.ProductImage" />
-            
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -77,12 +83,227 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<br />
+<p><button id="advance-settings">Advance Settings</button></p>
+<div id="advance-setting-area" class="hidden">
+    <h3>Product Additional Informations</h3>
+    <h4>Product Variants</h4>
+    <p>
+        <button id="addVariant" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#variantModal">Add Product Variant</button>
+    </p>
+    <table class="table" id="variantTable">
+        <thead>
+            <tr>
+                <th>
+                    Code
+                </th>
+                <th>
+                    Number
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    DiscountRate
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Product.Variants != null && Model.Product.Variants.Any())
+            {
+                var count = 0;
+                foreach (var item in Model.Product.Variants)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Code)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Number)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Price)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DiscountRate)
+                        </td>
+                        <td data-variantId="@item.Id" data-index="@count">
+                            <a class="variant-edit mouse-hover" data-bs-toggle="modal" data-bs-target="#variantModal">Edit</a> |
+                            <a class="variant-delete mouse-hover">Delete</a>
+                        </td>
+                    </tr>
+                    count++;
+                }
+            }
+
+        </tbody>
+    </table>
+
+    <h4>Product Categories</h4>
+
+    <p>
+        <button id="addProductCategory" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productCategoryModal">Add Product Category</button>
+    </p>
+    <table class="table" id="productCategoryTable">
+        <thead>
+            <tr>
+                <th>
+                    Category
+                </th>
+                <th>
+                    Catalog
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ProductCategories != null && Model.ProductCategories.Any())
+            {
+                var count = 0;
+                foreach (var item in Model.ProductCategories)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DisplayName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Catalog.DisplayName)
+                        </td>
+                        <td data-productCategoryId="@item.Id" data-index="@count">
+                            <a class="productCategory-edit mouse-hover" data-bs-toggle="modal" data-bs-target="#productCategoryModal">Edit</a> |
+                            <a class="productCategory-delete mouse-hover">Delete</a>
+                        </td>
+                    </tr>
+                    count++;
+                }
+            }
+
+        </tbody>
+    </table>
+
+
+    @*modal content*@
+
+    <div class="modal fade" id="variantModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Product variant</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="btn-modalVariantClose">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-variant">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label for="variant-code" class="control-label">Variant Code</label>
+                            <input type="text" id="variant-code" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="variant-number" class="control-label">Variant Number</label>
+                            <input type="number" id="variant-number" disabled class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="variant-price" class="control-label">Variant Price</label>
+                            <input type="number" id="variant-price" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="variant-discountRate" class="control-label">Variant Discount Rate</label>
+                            <input type="number" id="variant-discountRate" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <br />
+                            <a id="variant-addStock" class="btn-primary btn">Add stock</a>
+                            <table class="table" id="variantStocksTable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Stock
+                                        </th>
+                                        <th>
+                                            Product Number
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   
+                                </tbody>
+                            </table>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <input type="submit" value="Save" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="productCategoryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Product productCategory</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="btn-modalProductCategoryClose">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-productCategory">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label for="productCategory-code" class="control-label">Category</label>
+                            @if (Model.AvailableCategories != null && Model.AvailableCategories.Any())
+                            {
+                                <select name="categoryId" id="categoryId" class="form-control">
+                                    @foreach (var item in Model.AvailableCategories)
+                                    {
+                                        <option value="@item.Id">@item.DisplayName</option>
+                                    }
+                                </select>
+                                <div class="form-group">
+                                    <label for="productCategory-catalog" class="control-label">Catalog</label>
+                                    <input type="text" id="productCategory-catalog" disabled value="@Model.AvailableCategories.FirstOrDefault().Catalog?.DisplayName" class="form-control" />
+                                </div>
+                            }
+                        </div>
+
+                        <br />
+                        <div class="form-group">
+                            <input type="submit" value="Save" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*end*@
+
+    <div>
+        <p id="response-message"></p>
+        <button id="saveAdditionalInformation" class="btn btn-dark">Save Additional Information</button>
+        <br />
+    </div>
 </div>
+<div><a asp-action="ProductSettings">Back to List</a></div>
+
 
 @section Scripts {
     @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
+<script>
+    let productVariants = @Html.Raw(JsonConvert.SerializeObject(Model.Product.Variants));
+    let productCategories = @Html.Raw(JsonConvert.SerializeObject(Model.ProductCategories?.Select(x=>new {Id= x.Id, DisplayName= x.DisplayName})));
+    let availableCategories = @Html.Raw(JsonConvert.SerializeObject(Model.AvailableCategories));
+    const availableStocks = @Html.Raw(JsonConvert.SerializeObject(Model.AvailableStocks));
+    const currentProductId = '@Model.Product.Id';
+</script>
+
+<script type="module" defer src="@Url.Content("~/js/administrator/product/updateProduct.js")"></script>
+
 }

@@ -1,0 +1,100 @@
+﻿@using RatioShop.Data.ViewModels.Layout
+@model ILayoutSettingsViewModel
+@{
+    var isHideRegisterPopup = Model.CommonSettings().IsHideRegisterPopup;    
+}
+
+@if(!isHideRegisterPopup){
+<div class="js_register-popup-area">
+    <!-- Style -->
+    <link rel="stylesheet" href="/login/fonts/icomoon/style.css">
+    <link rel="stylesheet" href="/login/css/style.css">
+
+    <!-- Login Popup -->
+    <div class="wrap-modal1 js-registerPopup p-t-60 p-b-20" data-register-first-load="true">
+        <div class="overlay-modal1 js-hide-loginPopup"></div>
+        <div class="login-popup-container">
+            <div class="bg-login-popup p-t-60 p-b-30 p-lr-15-lg how-pos3-parent">
+                <button class="how-pos3 hov3 trans-04 js-hide-loginPopup">
+                    <img src="/images/icons/icon-close.png" alt="CLOSE">
+                </button>
+                <div class="row justify-content-center">
+                    <div class="js_login-image">
+                    </div>
+                    <div class="col-md-6 contents">
+                        <div class="row justify-content-center">
+                            <div class="col-md-12">
+                                <div class="form-block">
+                                    <div class="mb-4 js_register-header-popup">
+                                    </div>
+                                    <form action="/" method="post" id="js_register-form">
+                                        <div class="form-group first">
+                                            <label for="username">Username <span class="text-danger" title="this field is required">(*)</span></label>
+                                            <input type="text" name="userName" class="form-control" id="username" />
+                                        </div>
+                                        <div class="form-group last mb-4">
+                                            <label for="password">Password <span class="text-danger" title="this field is required">(*)</span></label>
+                                            <input type="password" name="password" class="form-control" id="password" />
+                                        </div>
+                                        <div class="mb-4">
+                                            <h5>Addition informations</h5>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="fullName">Full name</label>
+                                            <input type="text" name="fullName" class="form-control" id="fullName" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="phoneNumber">Phone Number</label>
+                                            <input type="text" name="phoneNumber" class="form-control" id="phoneNumber" />
+                                        </div>
+
+                                        <div class="js_address-shared-component">
+                                            <div class="form-group first">
+                                                <label class="mb-3">Shipping Address</label>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <label class="mb-3" for="city">City</label>
+                                                        <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
+                                                            <select class="js-select2 form-group js_popup-city" name="city">
+                                                                <option value="">Select city...</option>
+                                                            </select>
+                                                            <div class="dropDownSelect2"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="mb-3" for="district">District</label>
+                                                        <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
+                                                            <select class="js-select2 form-group js_popup-district" name="district">
+                                                                <option value="">Select district...</option>
+                                                            </select>
+                                                            <div class="dropDownSelect2"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-5">
+                                            <label for="addressDetail">Address Detail</label>
+                                            <input type="text" name="addressDetail" class="form-control" placeholder="eg: 05N05 - trieu khuc" id="addressDetail" />
+                                        </div>
+
+                                        <div class="text-danger js_authentication-popup-error-message mb-2"></div>
+                                        <input type="submit" value="Sign up" id="register-button" class="login-popup-btn-login btn btn-pill text-white btn-block btn-primary mouse-hover" />
+                                    </form>
+                                    <span class="d-block text-center my-4 text-muted"> or sign in with</span>
+                                    <div class="js_external-login-html">
+                                    </div>
+                                    <div class="text-center">
+                                        <a href="#" class="js_switch-to-login-popup" title="Click here to change to login form">Already have an account?</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}

@@ -4,7 +4,7 @@ namespace RatioShop.Data.Repository.Abstract
 {
     public interface IProductVariantStockRepository
     {
-        IEnumerable<ProductVariantStock> GetProductVariantStocks();
+        IQueryable<ProductVariantStock> GetProductVariantStocks();
         ProductVariantStock? GetProductVariantStock(int StockId, Guid ProductVariantId);
         Task<ProductVariantStock> CreateProductVariantStock(ProductVariantStock ProductVariantStock);
         bool UpdateProductVariantStock(ProductVariantStock ProductVariantStock);        

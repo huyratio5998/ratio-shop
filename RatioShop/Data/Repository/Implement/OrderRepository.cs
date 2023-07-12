@@ -14,7 +14,7 @@ namespace RatioShop.Data.Repository.Implement
             return await Create(Order);
         }
 
-        public bool DeleteOrder(int id)
+        public bool DeleteOrder(string id)
         {
             return Delete(id);
         }
@@ -24,7 +24,12 @@ namespace RatioShop.Data.Repository.Implement
             return GetAll();
         }
 
-        public Order? GetOrder(int id)
+        public IEnumerable<Order> GetOrders(int pageIndex, int pageSize)
+        {
+            return GetAll(pageIndex, pageSize);
+        }
+
+        public Order? GetOrder(string id)
         {
             return GetById(id);
         }

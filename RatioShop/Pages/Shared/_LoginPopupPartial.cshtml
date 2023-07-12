@@ -1,0 +1,27 @@
+﻿<div class="js_login-popup-area">
+    <form action="/" method="post" id="js_login-form">
+        <div class="form-group first">
+          <label for="username">Username</label>
+          <input type="text" name="userName" class="form-control" />
+        </div>
+        <div class="form-group last mb-4">
+          <label for="password">Password</label>
+          <input type="password" name="password" class="form-control" />
+        </div>
+        <div class="d-flex mb-5 align-items-center">
+          <label class="control control--checkbox mb-0">
+            <span class="caption">Remember me</span>
+            <input type="checkbox" name="rememberMe" checked="checked" />
+            <div class="control__indicator"></div>
+          </label>
+          <span class="ml-auto"><a href="#" class="ratio-forgot-pass">Forgot Password</a></span>
+        </div>
+        <div class="text-danger js_authentication-popup-error-message mb-2"></div>
+        <input type="submit" value="Log In" id="login-button" class="login-popup-btn-login btn btn-pill text-white btn-block btn-primary mouse-hover" />
+      </form>
+      <span class="d-block text-center my-4 text-muted"> or sign in with</span>
+      ${externalLoginsHtml}
+      <div class="text-center">
+        <a href="#" class="js_switch-to-register-popup" title="Click here to register an account">Don't have an account?</a>
+      </div>
+</div>	

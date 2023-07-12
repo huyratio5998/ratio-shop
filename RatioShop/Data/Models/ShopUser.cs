@@ -4,8 +4,11 @@ namespace RatioShop.Data.Models
 {
     public class ShopUser : IdentityUser
     {
+        public string? FullName { get; set; }
+        public string? AddressDetail { get; set; }
         public int? AddressId { get; set; }
         public Address? Address { get; set; }
         public List<Cart>? Carts { get; set; }
+        public List<Shipment>? Shipments { get; set; }
     }
 }

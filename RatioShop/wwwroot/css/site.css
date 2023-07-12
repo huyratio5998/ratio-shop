@@ -17,6 +17,14 @@ body {
   margin-bottom: 60px;
 }
 
-.page-selected{
-    color: red;
+.page-selected {
+  color: red;
+}
+
+.mouse-hover:hover {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
 }

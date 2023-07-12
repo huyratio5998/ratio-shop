@@ -1,5 +1,8 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿import * as LoginService from "./login/login.js";
+
+const storeNameElement = document.querySelector(".js_store-name");
+const storeName = storeNameElement.dataset.storeName;
+
 const ImageChangeAction = (images) => {
   for (const image of images) {
     const elements = image.parentElement.children;
@@ -22,18 +25,19 @@ const ImageChangeAction = (images) => {
   }
 };
 
-// init tiny mce function
-//const tinyInit = (element) => {
-//    tinymce.init({
-//        selector: `${element}`
-//    });
-//};
-
 // Write your JavaScript code.
 let images = document.querySelectorAll(".js_img_changeEvent");
 ImageChangeAction(images);
 
 // tiny mce init
-    tinymce.init({
-        selector: 'textarea'
-    });
+tinymce.init({
+  selector: "textarea",
+});
+
+// Use
+const Init = () => {
+  console.log("outside: site.js");
+  LoginService.AllLoginRegisterEvents();
+  LoginService.ClientLogoutEvent();
+};
+Init();

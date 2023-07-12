@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    var orderNumber = ViewBag.OrderNumber;
+}
+<div class="ratio-empty-page text-center">
+    <h1>Order Success</h1>
+    <p>
+        <h3>Order Number: </h3><span>@orderNumber</span>                
+    </p>
+    <p>
+        Your order has been created successfully! Just wait some minutes we would call to confirm.
+        Thank you so much for shopping.
+    </p>
+    <p>
+        <a asp-controller="Products" asp-action="Index">Continue shopping</a>
+    </p>
+</div>
+
+<script type="module" defer src="@Url.Content("~/js/cart/cart-common.js")"></script>

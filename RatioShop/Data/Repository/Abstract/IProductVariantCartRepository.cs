@@ -4,10 +4,10 @@ namespace RatioShop.Data.Repository.Abstract
 {
     public interface IProductVariantCartRepository
     {
-        IEnumerable<ProductVariantCart> GetProductVariantCarts();
+        IQueryable<ProductVariantCart> GetProductVariantCarts();
         ProductVariantCart? GetProductVariantCart(int id);
         Task<ProductVariantCart> CreateProductVariantCart(ProductVariantCart ProductVariantCart);
         bool UpdateProductVariantCart(ProductVariantCart ProductVariantCart);        
-        bool DeleteProductVariantCart(int id);
+        bool DeleteProductVariantCart(string id);
     }
 }

@@ -19,7 +19,7 @@ namespace RatioShop.Data.Repository.Implement
             return Delete(id);
         }
 
-        public IEnumerable<Category> GetCategories()
+        public IQueryable<Category> GetCategories()
         {
             return GetAll();
         }

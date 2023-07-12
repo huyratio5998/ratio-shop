@@ -14,17 +14,17 @@ namespace RatioShop.Data.Repository.Implement
             return await Create(Cart);
         }
 
-        public bool DeleteCart(int id)
+        public bool DeleteCart(string id)
         {
             return Delete(id);
         }
 
-        public IEnumerable<Cart> GetCarts()
+        public IQueryable<Cart> GetCarts()
         {
             return GetAll();
         }
 
-        public Cart? GetCart(int id)
+        public Cart? GetCart(string id)
         {
             return GetById(id);
         }

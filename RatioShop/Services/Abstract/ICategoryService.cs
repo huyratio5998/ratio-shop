@@ -5,6 +5,7 @@ namespace RatioShop.Services.Abstract
     public interface ICategoryService
     {
         IEnumerable<Category> GetCategories();
+        IEnumerable<Category> GetCategorysByProductId(Guid productId);
         Category? GetCategory(int id);
         Task<Category> CreateCategory(Category category);
         bool UpdateCategory(Category category);

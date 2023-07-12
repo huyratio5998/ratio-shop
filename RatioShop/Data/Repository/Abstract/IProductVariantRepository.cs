@@ -5,9 +5,10 @@ namespace RatioShop.Data.Repository.Abstract
     public interface IProductVariantRepository
     {
         IEnumerable<ProductVariant> GetProductVariants();
-        ProductVariant? GetProductVariant(int id);
+        IQueryable<ProductVariant> GetProductVariantsByProductId(Guid productId);        
+        ProductVariant? GetProductVariant(string id);
         Task<ProductVariant> CreateProductVariant(ProductVariant ProductVariant);
         bool UpdateProductVariant(ProductVariant ProductVariant);        
-        bool DeleteProductVariant(int id);
+        bool DeleteProductVariant(string id);
     }
 }

@@ -9,6 +9,7 @@
         public string? Description { get; set; }
         public bool IsDelete { get; set; }
         public bool IsNew { get; set; }
+        public bool EnableStockTracking { get; set; }
 
         // Media
         public string? ProductImage { get; set; }

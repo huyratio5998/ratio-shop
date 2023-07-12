@@ -8,33 +8,12 @@
     var currentPage = ViewBag.Page;
 }
 
-<h1>Category Settings</h1>
+<h1>Address Settings</h1>
 
 <div style="display:inline-flex">
     <span style="margin-right:300px">
         <a asp-action="Create">Create New</a>
-    </span>
-    @* <span>
-        <form asp-action="Index">
-        <label for="sortBy">Sort By:</label>
-        <select name="sortBy" id="sortBy">
-        @foreach (SortingEnum item in Enum.GetValues(typeof(SortingEnum)))
-        {
-        var sortValue = item.ToString();
-        if (sortValue.Equals(currentSortType, StringComparison.OrdinalIgnoreCase))
-        {
-        <option value="@sortValue" selected>@sortValue</option>
-        }
-        else
-        {
-        <option value="@sortValue">@sortValue</option>
-        }
-        }
-        </select>
-        <input type="hidden" name="page" value="@currentPage" />
-        <input type="submit" value="Sort" />
-        </form>
-        </span>*@
+    </span> 
 </div>
 
 <table class="table">
@@ -58,7 +37,9 @@
             <th>
                 Address 5
             </th>
-
+            <th>
+                Shipping Fee
+            </th>
             <th>
                 Created Date
             </th>
@@ -90,7 +71,9 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Address5)
                 </td>
-
+                  <td>
+                    @Html.DisplayFor(modelItem => item.ShippingFee)
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.CreatedDate)
                 </td>

@@ -16,7 +16,7 @@ namespace RatioShop.Features
         // GET: AddressController
         public ActionResult Index()
         {
-            var categories = _AddressService.GetAddresss();
+            var categories = _AddressService.GetAddresses();
             return View(categories);
         }
 

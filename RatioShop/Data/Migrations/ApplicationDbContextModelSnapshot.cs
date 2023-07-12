@@ -17,7 +17,7 @@ namespace RatioShop.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.14")
+                .HasAnnotation("ProductVersion", "6.0.18")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -102,12 +102,10 @@ namespace RatioShop.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -144,12 +142,10 @@ namespace RatioShop.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -185,8 +181,14 @@ namespace RatioShop.Data.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ShippingFee")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -199,14 +201,23 @@ namespace RatioShop.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AddressDetail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ProductVariantCartId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShopUserId")
                         .IsRequired()
@@ -217,11 +228,38 @@ namespace RatioShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductVariantCartId");
-
                     b.HasIndex("ShopUserId");
 
                     b.ToTable("Cart");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.CartDiscount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<Guid>("CartId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DiscountId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartId");
+
+                    b.HasIndex("DiscountId");
+
+                    b.ToTable("CartDiscount");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.Catalog", b =>
@@ -279,6 +317,131 @@ namespace RatioShop.Data.Migrations
                     b.ToTable("Category");
                 });
 
+            modelBuilder.Entity("RatioShop.Data.Models.Discount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DiscountType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Discount");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CartId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRefund")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("ShipmentFee")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ShipmentStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("TotalMoney")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
+
+                    b.ToTable("Order");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Logo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Payment");
+                });
+
             modelBuilder.Entity("RatioShop.Data.Models.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -293,6 +456,9 @@ namespace RatioShop.Data.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EnableStockTracking")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
@@ -375,8 +541,17 @@ namespace RatioShop.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CartId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsReverted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemNumber")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
@@ -384,7 +559,18 @@ namespace RatioShop.Data.Migrations
                     b.Property<Guid>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("StockItems")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StockTrackingStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TrackUpdated")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CartId");
 
                     b.HasIndex("ProductVariantId");
 
@@ -399,11 +585,57 @@ namespace RatioShop.Data.Migrations
                     b.Property<Guid>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("ProductNumber")
+                        .HasColumnType("int");
+
                     b.HasKey("StockId", "ProductVariantId");
 
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductVariantStock");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Shipment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Images")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reasons")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Request")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShipmentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShipperId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool?>("UpdateStatus")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ShipperId");
+
+                    b.ToTable("Shipment");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.ShopUser", b =>
@@ -413,6 +645,9 @@ namespace RatioShop.Data.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("AddressDetail")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("AddressId")
                         .HasColumnType("int");
@@ -427,6 +662,9 @@ namespace RatioShop.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -559,21 +797,32 @@ namespace RatioShop.Data.Migrations
 
             modelBuilder.Entity("RatioShop.Data.Models.Cart", b =>
                 {
-                    b.HasOne("RatioShop.Data.Models.ProductVariantCart", "ProductVariantCart")
-                        .WithMany("Carts")
-                        .HasForeignKey("ProductVariantCartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("RatioShop.Data.Models.ShopUser", "ShopUser")
                         .WithMany("Carts")
                         .HasForeignKey("ShopUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductVariantCart");
-
                     b.Navigation("ShopUser");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.CartDiscount", b =>
+                {
+                    b.HasOne("RatioShop.Data.Models.Cart", "Cart")
+                        .WithMany("CartDiscounts")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RatioShop.Data.Models.Discount", "Discount")
+                        .WithMany("CartDiscounts")
+                        .HasForeignKey("DiscountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Discount");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.Category", b =>
@@ -585,6 +834,17 @@ namespace RatioShop.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Catalog");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Order", b =>
+                {
+                    b.HasOne("RatioShop.Data.Models.Payment", "Payment")
+                        .WithMany("Orders")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.ProductCategory", b =>
@@ -619,11 +879,19 @@ namespace RatioShop.Data.Migrations
 
             modelBuilder.Entity("RatioShop.Data.Models.ProductVariantCart", b =>
                 {
+                    b.HasOne("RatioShop.Data.Models.Cart", "Cart")
+                        .WithMany("ProductVariantCarts")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RatioShop.Data.Models.ProductVariant", "ProductVariant")
-                        .WithMany()
+                        .WithMany("ProductVariantCarts")
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Cart");
 
                     b.Navigation("ProductVariant");
                 });
@@ -631,7 +899,7 @@ namespace RatioShop.Data.Migrations
             modelBuilder.Entity("RatioShop.Data.Models.ProductVariantStock", b =>
                 {
                     b.HasOne("RatioShop.Data.Models.ProductVariant", "ProductVariant")
-                        .WithMany("productVariantStocks")
+                        .WithMany("ProductVariantStocks")
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -645,6 +913,23 @@ namespace RatioShop.Data.Migrations
                     b.Navigation("ProductVariant");
 
                     b.Navigation("Stock");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Shipment", b =>
+                {
+                    b.HasOne("RatioShop.Data.Models.Order", "Order")
+                        .WithMany("Shipments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RatioShop.Data.Models.ShopUser", "Shipper")
+                        .WithMany("Shipments")
+                        .HasForeignKey("ShipperId");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Shipper");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.ShopUser", b =>
@@ -674,6 +959,28 @@ namespace RatioShop.Data.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("RatioShop.Data.Models.Cart", b =>
+                {
+                    b.Navigation("CartDiscounts");
+
+                    b.Navigation("ProductVariantCarts");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Discount", b =>
+                {
+                    b.Navigation("CartDiscounts");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Order", b =>
+                {
+                    b.Navigation("Shipments");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Payment", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("RatioShop.Data.Models.Product", b =>
                 {
                     b.Navigation("ProductCategories");
@@ -683,17 +990,16 @@ namespace RatioShop.Data.Migrations
 
             modelBuilder.Entity("RatioShop.Data.Models.ProductVariant", b =>
                 {
-                    b.Navigation("productVariantStocks");
-                });
+                    b.Navigation("ProductVariantCarts");
 
-            modelBuilder.Entity("RatioShop.Data.Models.ProductVariantCart", b =>
-                {
-                    b.Navigation("Carts");
+                    b.Navigation("ProductVariantStocks");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.ShopUser", b =>
                 {
                     b.Navigation("Carts");
+
+                    b.Navigation("Shipments");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.Stock", b =>

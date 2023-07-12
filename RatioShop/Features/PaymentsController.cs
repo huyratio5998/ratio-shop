@@ -1,42 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RatioShop.Data;
 using RatioShop.Data.Models;
+using RatioShop.Services.Abstract;
 
 namespace RatioShop.Features
 {
     public class PaymentsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentsController(ApplicationDbContext context)
+        public PaymentsController(IPaymentService paymentService)
         {
-            _context = context;
+            _paymentService = paymentService;
         }
 
         // GET: Payments
         public async Task<IActionResult> Index()
         {
-              return _context.Payment != null ? 
-                          View(await _context.Payment.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Payment'  is null.");
+            var payments = _paymentService.GetPayments();
+            return View(payments);
         }
 
         // GET: Payments/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
-            if (id == null || _context.Payment == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var payment = await _context.Payment
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var payment = _paymentService.GetPayment(id.ToString());
             if (payment == null)
             {
                 return NotFound();
@@ -56,13 +49,11 @@ namespace RatioShop.Features
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Logo,Name,DisplayName,Description,IsActive,Id,CreatedDate,ModifiedDate")] Payment payment)
+        public async Task<IActionResult> Create([Bind("Logo,Name,DisplayName,Description,IsActive,Id,Type")] Payment payment)
         {
             if (ModelState.IsValid)
             {
-                payment.Id = Guid.NewGuid();
-                _context.Add(payment);
-                await _context.SaveChangesAsync();
+                var newPayment = await _paymentService.CreatePayment(payment);
                 return RedirectToAction(nameof(Index));
             }
             return View(payment);
@@ -71,12 +62,12 @@ namespace RatioShop.Features
         // GET: Payments/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null || _context.Payment == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var payment = await _context.Payment.FindAsync(id);
+            var payment = _paymentService.GetPayment(id.ToString());
             if (payment == null)
             {
                 return NotFound();
@@ -89,7 +80,7 @@ namespace RatioShop.Features
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Logo,Name,DisplayName,Description,IsActive,Id,CreatedDate,ModifiedDate")] Payment payment)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Logo,Name,DisplayName,Description,IsActive,Id,Type")] Payment payment)
         {
             if (id != payment.Id)
             {
@@ -100,8 +91,7 @@ namespace RatioShop.Features
             {
                 try
                 {
-                    _context.Update(payment);
-                    await _context.SaveChangesAsync();
+                    _paymentService.UpdatePayment(payment);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -122,13 +112,12 @@ namespace RatioShop.Features
         // GET: Payments/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == null || _context.Payment == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var payment = await _context.Payment
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var payment = _paymentService.GetPayment(id.ToString());
             if (payment == null)
             {
                 return NotFound();
@@ -142,23 +131,18 @@ namespace RatioShop.Features
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (_context.Payment == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Payment'  is null.");
-            }
-            var payment = await _context.Payment.FindAsync(id);
+            var payment = _paymentService.GetPayment(id.ToString());
             if (payment != null)
             {
-                _context.Payment.Remove(payment);
+                _paymentService.DeletePayment(id.ToString());
             }
-            
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PaymentExists(Guid id)
         {
-          return (_context.Payment?.Any(e => e.Id == id)).GetValueOrDefault();
+            var payment = _paymentService.GetPayment(id.ToString());
+            return payment != null;
         }
     }
 }

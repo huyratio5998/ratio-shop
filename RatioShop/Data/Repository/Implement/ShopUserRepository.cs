@@ -34,7 +34,7 @@ namespace RatioShop.Data.Repository.Implement
         {
             if (string.IsNullOrEmpty(id)) return null;
 
-            return _context.Set<ShopUser>().AsNoTracking().FirstOrDefault(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+            return _context.Set<ShopUser>().AsNoTracking().FirstOrDefault(x => x.Id.Equals(id));
         }
 
         public IEnumerable<ShopUser> GetShopUsers()

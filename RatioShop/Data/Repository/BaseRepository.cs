@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace RatioShop.Data.Repository
 {
@@ -18,12 +19,13 @@ namespace RatioShop.Data.Repository
 
         public IQueryable<T> GetAll()
         {
-            return _context.Set<T>().AsNoTracking();
+            return _context.Set<T>().AsQueryable().AsNoTracking();
         }
 
         public IQueryable<T> GetAll(int pageIndex, int pageSize)
         {
             return _context.Set<T>()
+                .AsQueryable()
                 .AsNoTracking()                
                 .Skip((pageIndex-1) * pageSize)
                 .Take(pageSize);
@@ -47,5 +49,10 @@ namespace RatioShop.Data.Repository
         public abstract bool Delete(int id);
         public abstract T? GetById(int id);
         public abstract T? GetById(string id);
+
+        public IQueryable<T> Find(Expression<Func<T, bool>> condition)
+        {
+            return GetAll().Where(condition);
+        }
     }
 }

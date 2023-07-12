@@ -1,0 +1,256 @@
+﻿@using RatioShop.Constants
+@using RatioShop.Data.ViewModels.MyAccount
+@using RatioShop.Helpers
+@model MyAccountViewModel
+@{
+    ViewData["Title"] = "My account page";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    var language = "vi-VN";
+    var orderHistoryHasValue = Model.OrderHistory != null && Model.OrderHistory.Orders != null && Model.OrderHistory.Orders.Any();
+}
+<!-- Title page -->
+<section class="bg-img1 txt-center p-lr-15 p-tb-92" style="background-image: url('images/bg-02.jpg');">
+    <h2 class="ltext-105 cl0 txt-center">
+        My Account
+    </h2>
+</section>
+<!-- Content page -->
+<section class="bg0 p-t-62 p-b-60">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-lg-3 p-b-50">
+                <div class="side-menu">
+                    <div>
+                        <h4 class="mtext-112 cl2 p-b-33">
+                            Account management
+                        </h4>
+
+                        <ul>
+                            <li class="bor18 @(Model.SelectedTab.Equals(CommonConstant.MyAccount.PersonalTab, StringComparison.OrdinalIgnoreCase) ? "selected":"")">
+                                <a asp-action="Index" class="dis-block stext-115 cl6 hov-cl1 trans-04 p-tb-8 p-lr-4">
+                                    My information
+                                </a>
+                            </li>
+
+                            <li class="bor18 @(Model.SelectedTab.Equals(CommonConstant.MyAccount.OrderHistoryTab, StringComparison.OrdinalIgnoreCase) ? "selected":"")">
+                                <a asp-action="Index" asp-route-tab="orderHistory" class="dis-block stext-115 cl6 hov-cl1 trans-04 p-tb-8 p-lr-4">
+                                    Order history
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-8 col-lg-9">
+                <div class="p-l-45 p-l-0-lg">
+                    @if (Model.SelectedTab.Equals(CommonConstant.MyAccount.PersonalTab, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="p-b-63 js_PersonalInfoTabArea">
+                            <h3 class="mtext-105 cl2">Personal informations</h3>
+                            <div class="mt-5 mb-4 js_personalInfoArea">
+                                <div class="flex-col-m">
+                                    <div class="flex-w w-full p-b-42">
+                                        <span class="fs-18 cl5 txt-center size-211">
+                                            <span class="lnr lnr-user"></span>
+                                        </span>
+
+                                        <div class="size-212 p-t-2">
+                                            <span class="mtext-110 cl2">
+                                                Full Name
+                                            </span>
+
+                                            <p class="stext-115 cl6 size-213 p-t-18 js_personalInfoFullName">
+                                                @Model.UserData?.User?.FullName
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-w w-full p-b-42">
+                                        <span class="fs-18 cl5 txt-center size-211">
+                                            <span class="lnr lnr-map-marker"></span>
+                                        </span>
+
+                                        <div class="size-212 p-t-2">
+                                            <span class="mtext-110 cl2">
+                                                Address
+                                            </span>
+
+                                            <p class="stext-115 cl6 size-213 p-t-18 js_personalInfoAddress">
+                                                @Model.UserData?.DefaultShippingAddress
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-w w-full p-b-42">
+                                        <span class="fs-18 cl5 txt-center size-211">
+                                            <span class="lnr lnr-phone-handset"></span>
+                                        </span>
+
+                                        <div class="size-212 p-t-2">
+                                            <span class="mtext-110 cl2">
+                                                Phone Number
+                                            </span>
+
+                                            <p class="stext-115 cl1 size-213 p-t-18 js_personalInfoPhoneNumber">
+                                                @Model.UserData?.User?.PhoneNumber
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ratio-link mouse-hover js_updatePersonalInfo">Update personal informations <span class="lnr lnr-pencil"></span></div>
+                            </div>
+                            <div class="mt-5 mb-4 js_personalInfoFormArea ratio-hidden">
+                                <div>
+                                    <form action="/" method="post" id="js_personalInfoForm">
+                                        @Html.AntiForgeryToken()
+                                        <div>
+                                            <div class="form-group">
+                                                <label for="fullName">Full name</label>
+                                                <input type="text" name="fullName" value="@Model.UserData?.User?.FullName" class="stext-111 cl2 plh3 size-116 p-lr-18 form-control" id="fullName">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="phoneNumber">Phone Number</label>
+                                                <input type="text" name="phoneNumber" value="@Model.UserData?.User?.PhoneNumber" class="stext-111 cl2 plh3 size-116 p-lr-18 form-control" id="phoneNumber">
+                                            </div>
+                                        </div>
+                                        <h5 class="cl2 m-b-12 m-t-9">Default shipping address</h5>
+                                        <div class="js_myAccountAddressComponent">
+                                            <div>
+                                                <span>City</span>
+                                                <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
+                                                    <select class="js-select2 js-select-city" name="city">
+                                                        @if (Model.ListCities != null && Model.ListCities.Any())
+                                                        {
+                                                            foreach (var city in Model.ListCities)
+                                                            {
+                                                                if (city.Equals(Model.UserData?.User?.Address?.Address1))
+                                                                {
+                                                                    <option value="@city" selected>@city</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@city">@city</option>
+                                                                }
+                                                            }
+                                                        }
+                                                    </select>
+                                                    <div class="dropDownSelect2"></div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <span>District</span>
+                                                <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
+                                                    <select class="js-select2 js-select-district" name="district">
+                                                        @if (Model.ListDistrict != null && Model.ListDistrict.Any())
+                                                        {
+                                                            foreach (var district in Model.ListDistrict)
+                                                            {
+                                                                if (district.Equals(Model.UserData?.User?.Address?.Address2))
+                                                                {
+                                                                    <option value="@district" selected>@district</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@district">@district</option>
+                                                                }
+                                                            }
+                                                        }
+                                                    </select>
+                                                    <div class="dropDownSelect2"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-5">
+                                            <label for="addressDetail">Address Detail</label>
+                                            <input type="text" name="addressDetail" value="@Model.UserData?.User?.AddressDetail" class="stext-111 cl2 plh3 size-116 p-lr-18 form-control" placeholder="eg: 05N05 - trieu khuc" id="addressDetail">
+                                        </div>
+
+                                        <div class="text-danger js_personal-info-error-message mb-2"></div>
+                                        <div class="flex-w">
+                                            <div class="col-6 flex-c-m stext-101 cl0 ratio-button-size bg3 bor13 hov-btn3 p-lr-15 trans-04 pointer js_submitUpdatePersonalInfo">Save</div>
+                                            <div class="col-6 flex-c-m stext-101 ratio-button-size cl2 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer js_cancelUpdateMyAccountInfo">Cancel</div>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                    else if (Model.SelectedTab.Equals(CommonConstant.MyAccount.OrderHistoryTab, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="p-b-63 js_OrderHistoryTabArea">
+                            <div class="m-lr-0-xl">
+                                <div class="col-8 bor17 of-hidden pos-relative m-b-15">
+                                    <input class="stext-103 cl2 plh4 size-116 p-l-28 p-r-55" type="text" name="search" placeholder="Search">
+
+                                    <button class="flex-c-m size-122 ab-t-r fs-18 cl4 hov-cl1 trans-04">
+                                        <i class="zmdi zmdi-search"></i>
+                                    </button>
+                                </div>
+                                <div class="wrap-table-shopping-cart">
+                                    <table class="table">
+                                        <tbody>
+                                            <tr class="table_head">
+                                                <th>Order Number</th>
+                                                <th>Total Items</th>
+                                                <th>Total Price</th>
+                                                <th>Order Date</th>
+                                                <th>Order Status</th>
+                                                <th class="column-5">Shipment Status</th>
+
+                                            </tr>
+                                            @if (orderHistoryHasValue)
+                                            {
+                                                foreach (var item in Model.OrderHistory.Orders)
+                                                {
+                                                    var orderStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.Status);
+                                                    var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.ShipmentStatus);
+                                                    var shipmentStatusDisplay = item.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Pending) ? "In Progress" : item.ShipmentStatus;
+
+                                                    <tr class="table_row ratio-table-td">
+                                                        <td class="column-1"><a href="#">@item.OrderNumber</a></td>
+                                                        <td>@item.TotalItems</td>
+                                                        <td class="ratio-table-td-nowrap">@CommonHelper.CurrencyFormat(item.TotalMoney, language)</td>
+                                                        <td class="ratio-table-td-nowrap">@item.Order?.CreatedDate?.ToString("dd-MM-yyyy")</td>
+                                                        <td>
+                                                            <div class="badge badge-pill @orderStatusBadgeClass flex-c-m stext-107 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                                                @item.Status
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="badge badge-pill @shipmentStatusBadgeClass flex-c-m stext-107 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+                                                                @shipmentStatusDisplay
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                    @if (orderHistoryHasValue)
+                                    {
+                                        <!-- Pagination -->
+                                        <div class="flex-c-m flex-w w-full mb-2">
+                                            @for (var i = 1; i <= Model.OrderHistory.TotalPage; i++)
+                                            {
+                                                var parms = new Dictionary<string, string> { { "tab", "orderHistory" }, { "page", i.ToString() } };
+                                                <a asp-action="Index" asp-all-route-data="parms" class="flex-c-m how-pagination1 trans-04 m-all-7 @(i == Model.OrderHistory.PageIndex ? "active-pagination1" : "")">@i</a>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                <div class="flex-w flex-sb-m bor15 p-t-5 p-lr-40 p-lr-15-sm"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="module" defer src="@Url.Content("~/js/cart/cart-common.js")"></script>
+<script type="module" defer src="@Url.Content("~/js/my-account/my-account.js")"></script>

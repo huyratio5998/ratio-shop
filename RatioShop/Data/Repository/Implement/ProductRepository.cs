@@ -23,6 +23,15 @@ namespace RatioShop.Data.Repository.Implement
             return Delete(productId.ToString());
         }
 
+        public IQueryable<ProductViewModel> GetAllProductsByPageNumber(string sortBy, int pageNumber, int pageSize)
+        {
+            var sortedProducts = SortedProducts(sortBy);
+
+            return sortedProducts
+                .Take(pageNumber * pageSize)
+                .Select(x => new ProductViewModel() { Product = x, ProductImageName = x.ProductImage });
+        }
+
         public ProductViewModel GetProduct(Guid productId)
         {
             var product = GetById(productId.ToString().ToLower());
@@ -44,7 +53,7 @@ namespace RatioShop.Data.Repository.Implement
             return GetAll(pageNumber, pageSize).Select(x => new ProductViewModel() { Product = x, ProductImageName = x.ProductImage });
         }
 
-        public IEnumerable<ProductViewModel> GetProducts(string sortBy, int pageNumber, int pageSize)
+        public IQueryable<ProductViewModel> GetProducts(string sortBy, int pageNumber, int pageSize)
         {
             var sortedProducts = SortedProducts(sortBy);
 

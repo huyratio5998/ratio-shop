@@ -14,7 +14,7 @@ namespace RatioShop.Data.Repository.Implement
             return await Create(Payment);
         }
 
-        public bool DeletePayment(int id)
+        public bool DeletePayment(string id)
         {
             return Delete(id);
         }
@@ -24,7 +24,7 @@ namespace RatioShop.Data.Repository.Implement
             return GetAll();
         }
 
-        public Payment? GetPayment(int id)
+        public Payment? GetPayment(string id)
         {
             return GetById(id);
         }

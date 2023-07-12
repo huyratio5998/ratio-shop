@@ -34,17 +34,18 @@ namespace RatioShop.Data.Repository.Implement
         {
             if (StockId == 0 || ProductVariantId == null || ProductVariantId == Guid.Empty) return null;
 
-            return _context.Set<ProductVariantStock>().AsNoTracking().FirstOrDefault(x => x.StockId == StockId && x.ProductVariantId.ToString().Equals(ProductVariantId.ToString(), StringComparison.OrdinalIgnoreCase));
+            return _context.Set<ProductVariantStock>().AsQueryable().AsNoTracking().FirstOrDefault(x => x.StockId == StockId && x.ProductVariantId.ToString().ToLower().Equals(ProductVariantId.ToString().ToLower()));
         }
 
-        public IEnumerable<ProductVariantStock> GetProductVariantStocks()
+        public IQueryable<ProductVariantStock> GetProductVariantStocks()
         {
-            return _context.Set<ProductVariantStock>().AsNoTracking();
+            return _context.Set<ProductVariantStock>().AsQueryable().AsNoTracking();
         }
 
         public IEnumerable<ProductVariantStock> GetProductVariantStocks(int pageIndex, int pageSize)
         {
             return _context.Set<ProductVariantStock>()
+                .AsQueryable()
                 .AsNoTracking()
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize);

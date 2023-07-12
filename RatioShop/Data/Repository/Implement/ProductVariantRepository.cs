@@ -14,7 +14,7 @@ namespace RatioShop.Data.Repository.Implement
             return await Create(ProductVariant);
         }
 
-        public bool DeleteProductVariant(int id)
+        public bool DeleteProductVariant(string id)
         {
             return Delete(id);
         }
@@ -24,7 +24,12 @@ namespace RatioShop.Data.Repository.Implement
             return GetAll();
         }
 
-        public ProductVariant? GetProductVariant(int id)
+        public IQueryable<ProductVariant> GetProductVariantsByProductId(Guid productId)
+        {
+            return GetAll().Where(x=>x.ProductId.ToString().ToLower().Equals(productId.ToString().ToLower())).OrderBy(x=>x.Price);
+        }
+
+        public ProductVariant? GetProductVariant(string id)
         {
             return GetById(id);
         }

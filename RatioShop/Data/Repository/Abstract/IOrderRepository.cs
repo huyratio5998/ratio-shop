@@ -5,9 +5,10 @@ namespace RatioShop.Data.Repository.Abstract
     public interface IOrderRepository
     {
         IEnumerable<Order> GetOrders();
-        Order? GetOrder(int id);
+        IEnumerable<Order> GetOrders(int pageIndex, int pageSize);
+        Order? GetOrder(string id);
         Task<Order> CreateOrder(Order Order);
         bool UpdateOrder(Order Order);        
-        bool DeleteOrder(int id);
+        bool DeleteOrder(string id);
     }
 }

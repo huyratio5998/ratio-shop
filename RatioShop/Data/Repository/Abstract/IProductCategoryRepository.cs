@@ -4,7 +4,8 @@ namespace RatioShop.Data.Repository.Abstract
 {
     public interface IProductCategoryRepository
     {
-        IEnumerable<ProductCategory> GetProductCategorys();
+        IQueryable<ProductCategory> GetProductCategorys();
+        IQueryable<ProductCategory> GetProductCategorys(int pageIndex, int pageSize);
         ProductCategory? GetProductCategory(int CategoryId, Guid ProductId);
         Task<ProductCategory> CreateProductCategory(ProductCategory ProductCategory);
         bool UpdateProductCategory(ProductCategory ProductCategory);        

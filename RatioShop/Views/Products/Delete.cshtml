@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Delete";
-    Layout = "~/Pages/Shared/_Layout.cshtml";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
 <h1>Delete</h1>
@@ -55,6 +55,12 @@
             @Html.DisplayFor(model => model.Product.IsNew)
         </dd>
         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.EnableStockTracking)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Product.EnableStockTracking)
+        </dd>
+        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Product.ProductImage)
         </dt>
         <dd class = "col-sm-10">
@@ -76,7 +82,7 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="Product.Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Delete" class="btn btn-danger" /> |        
+        <a asp-action="ProductSettings">Back to List</a>
     </form>
 </div>
