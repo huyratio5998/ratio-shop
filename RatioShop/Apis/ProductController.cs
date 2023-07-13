@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using RatioShop.Data.ViewModels;
 using RatioShop.Services.Abstract;
 
 namespace RatioShop.Apis
@@ -20,11 +18,10 @@ namespace RatioShop.Apis
 
         [HttpGet]
         [Route("")]
-        public IActionResult GetProducts([FromQuery] int page, [FromQuery] int pageSize)
+        public IActionResult GetProducts([FromQuery] string? search = "", [FromQuery] int page = 1, [FromQuery] int pageSize = 8)
         {
-            string sortBy = "default";
-            var products = _productService.GetProducts(sortBy, page, pageSize).ToList();
-            products = _productService.GetProductsRelatedInformation(products);
+            var sortBy = "default";
+            var products = _productService.GetListProducts(search, sortBy, page, pageSize);
 
             return Ok(products);
         }
@@ -37,6 +34,6 @@ namespace RatioShop.Apis
 
             var product = _productService.GetProduct(productId);
             return Ok(product);
-        }        
+        }
     }
 }

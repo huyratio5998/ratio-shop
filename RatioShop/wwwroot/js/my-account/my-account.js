@@ -220,7 +220,9 @@ const OrderDetailEvent = () => {
         } else {
           // action
           orderNumberEl.innerHTML = data.orderNumber;
-          orderCreatedDateEl.innerHTML = data.createdDate;
+          orderCreatedDateEl.innerHTML = new Date(
+            data.createdDate
+          ).toLocaleDateString("en-GB");
           orderTableEl.innerHTML = BuildTableItems(data);
           orderSubTotalEl.innerHTML = VNDong.format(data.cartDetail.totalPrice);
           orderCouponAreaEl.innerHTML = BuildCouponArea(data);
@@ -338,6 +340,9 @@ const Init = () => {
   ToggleFormUpdatePersonalInformationEvent();
   UpdatePersonalInfoSubmit();
   OrderDetailEvent();
+
+  // format date
+  ConvertToLocalDate();
 };
 
 Init();

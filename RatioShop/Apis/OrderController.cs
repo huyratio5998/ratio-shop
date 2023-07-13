@@ -35,8 +35,7 @@ namespace RatioShop.Apis
 
             // get order
             var orderDetail = _orderService.GetOrderDetailResponse(id.ToString());
-            if (orderDetail == null) return NotFound();
-
+            if (orderDetail == null) return NotFound();            
             return Ok(orderDetail);
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using RatioShop.Data.Models;
+using System.Linq.Expressions;
 
 namespace RatioShop.Helpers.QueryableHelpers
 {
@@ -20,6 +21,22 @@ namespace RatioShop.Helpers.QueryableHelpers
             var propAsObject = Expression.Convert(property, typeof(object));
 
             return Expression.Lambda<Func<T, object>>(propAsObject, parameter);
+        }
+
+        public static IQueryable<Product> SortedProducts(this IQueryable<Product> products, string sortBy)
+        {
+            switch (sortBy.ToLower())
+            {
+                case "default":
+                    return products.OrderByDescending(nameof(Product.CreatedDate));
+                case "oldest":
+                    return products.OrderBy(nameof(Product.CreatedDate));
+                case "name":
+                    return products.OrderBy(nameof(Product.Name));
+                case "recentupdate":
+                    return products.OrderByDescending(nameof(Product.ModifiedDate));
+                default: return products.OrderByDescending(nameof(Product.CreatedDate));
+            }
         }
     }
 }

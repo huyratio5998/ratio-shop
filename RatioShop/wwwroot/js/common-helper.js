@@ -13,6 +13,18 @@ const IsNullOrEmptyString = (checkValue) => {
   return !checkValue || result;
 };
 
+const ConvertToLocalDate = () => {
+  const elements = document.querySelectorAll(".js_date-format-local");
+  if (!elements) return;
+
+  elements.forEach((el) => {
+    const date = el.dataset.dateValue;
+    if (date) {
+      el.innerHTML = new Date(date).toLocaleDateString("en-GB");
+    }
+  });
+};
+
 const DisplayMessageInMoment = (element, message, className, timeOut) => {
   if (!element) return;
 

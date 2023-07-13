@@ -216,7 +216,7 @@
                                                         <td class="column-1"><a href="#" class="js_myaccount-order-detail">@item.OrderNumber</a></td>
                                                         <td>@item.TotalItems</td>
                                                         <td class="ratio-table-td-nowrap">@CommonHelper.CurrencyFormat(item.TotalMoney, language)</td>
-                                                        <td class="ratio-table-td-nowrap">@item.Order?.CreatedDate?.ToString("dd-MM-yyyy")</td>
+                                                        <td class="ratio-table-td-nowrap js_date-format-local" data-date-value="@item.Order?.CreatedDate?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")">@item.Order?.CreatedDate?.ToString("dd/MM/yyyy")</td>
                                                         <td>
                                                             <div class="badge badge-pill @orderStatusBadgeClass flex-c-m stext-107 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
                                                                 @item.Status

@@ -57,12 +57,13 @@
             <!-- Search product -->
             <div class="dis-none panel-search w-full p-t-10 p-b-15">
                 <div class="bor8 dis-flex p-l-15">
-                    <button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+                    <button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04 js_search-products-btn" data-page-size=@Model.PageSize>
                         <i class="zmdi zmdi-search"></i>
                     </button>
 
-                    <input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+                    <input class="mtext-107 cl2 size-114 plh2 p-r-15 js_search-products-input" value="@Model.SearchText" type="text" name="search-product" placeholder="Search">
                 </div>
+                <div class="js_product-search-error-message"></div>
             </div>
 
             <!-- Filter -->
@@ -296,14 +297,16 @@
         </div>
 
         <!-- Load more -->
-        @if(Model.PageIndex < Model.TotalPage)
-        {
-        <div class="flex-c-m flex-w w-full p-t-45">
-            <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04" id="btn-loadMore" data-next-page=@(++Model.PageIndex) data-page-size=@Model.PageSize data-total-page=@Model.TotalPage>
-                Load More
-            </a>
-        </div>    
-        }           
+        <div class="js_load-more-area">
+            @if (Model.PageIndex < Model.TotalPage)
+            {
+                <div class="flex-c-m flex-w w-full p-t-45">
+                    <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04" id="btn-loadMore" data-next-page=@(++Model.PageIndex) data-page-size=@Model.PageSize data-total-page=@Model.TotalPage>
+                        Load More
+                    </a>
+                </div>
+            }
+        </div>
     </div>
 </div>
 
@@ -426,4 +429,4 @@
 	</div>
 
     <script type="module" defer src="@Url.Content("~/js/cart/cart-common.js")"></script>
-<script type="module" defer src="@Url.Content("~/js/product/productListing.js")"></script>
+<script type="module" defer src="@Url.Content("~/js/product/product-listing.js")"></script>

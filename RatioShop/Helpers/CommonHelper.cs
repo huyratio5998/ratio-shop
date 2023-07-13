@@ -102,6 +102,13 @@ namespace RatioShop.Helpers
                     break;
             }
             return badgeClass;
-        }                
+        }
+
+        public static DateTime? GetCorrectUTC(this DateTime? dateTime)
+        {            
+            var isParseSuccess = DateTime.TryParse(dateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"), out var dateTimeUTC);            
+            if(isParseSuccess) return dateTimeUTC.ToUniversalTime();
+            return dateTime;            
+        }
     }
 }

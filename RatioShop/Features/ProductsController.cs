@@ -34,26 +34,30 @@ namespace RatioShop.Features
 
         // GET: Products
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string sortBy = "default", int page = 1)
+        public async Task<IActionResult> Index(string search = "", string sortBy = "default", int page = 1)
         {
-            
-            var listProductViewModel = new ListProductViewModel();
             var pageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
-            var listProducts = _productService.GetAllProductsByPageNumber(sortBy, page, pageSize).ToList();
-            listProducts = _productService.GetProductsRelatedInformation(listProducts);
+            var listProductViewModel = _productService.GetAllListProducts(search, sortBy, page, pageSize);            
+            //var listProductViewModel = new ListProductViewModel();
 
-            listProductViewModel.Products = listProducts;
-            
-            //paging information
-            listProductViewModel.PageIndex = page;
-            listProductViewModel.PageSize = pageSize;
-            listProductViewModel.TotalCount = _productService.GetProducts().Count();
-            listProductViewModel.TotalPage = listProductViewModel.TotalCount == 0 ? 1 : (int)Math.Ceiling((double)listProductViewModel.TotalCount / pageSize);
+            //listProductViewModel.Products = listProducts;
+
+            ////paging information
+            //listProductViewModel.PageIndex = page;
+            //listProductViewModel.PageSize = pageSize;
+            //listProductViewModel.TotalCount = _productService.GetProducts().Count();
+            //listProductViewModel.TotalPage = listProductViewModel.TotalCount == 0 ? 1 : (int)Math.Ceiling((double)listProductViewModel.TotalCount / pageSize);
             //
-            ViewBag.SortBy = sortBy;
-            ViewBag.Page = page;
+            ViewBag.Search = search;            
 
             return View(listProductViewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Search(string search = "", string sortBy = "default", int page = 1)
+        {
+            return RedirectToAction("Index", new { search, sortBy, page });
         }
 
         [AllowAnonymous]

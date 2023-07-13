@@ -13,5 +13,9 @@ namespace RatioShop.Data.Repository.Abstract
         public Task<bool> AddProduct(Product product);
         public bool UpdateProduct(Product product);
         public bool DeleteProduct(Guid productId);
+
+        //
+        ListProductViewModel GetListProducts(string searchText, string sortBy, int pageNumber, int pageSize);
+        ListProductViewModel GetAllListProducts(string searchText, string sortBy, int pageNumber, int pageSize);
     }
 }

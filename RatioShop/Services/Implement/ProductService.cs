@@ -1,6 +1,7 @@
 ﻿using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels;
+using RatioShop.Helpers;
 using RatioShop.Services.Abstract;
 
 namespace RatioShop.Services.Implement
@@ -44,7 +45,7 @@ namespace RatioShop.Services.Implement
             if(pageNumber <= 0) pageNumber = 1;
             IEnumerable<ProductViewModel> products = productRepository.GetAllProductsByPageNumber(sortBy, pageNumber, pageSize); ;            
             return products;
-        }
+        }        
 
         public ProductViewModel GetProduct(Guid productId)
         {
@@ -94,6 +95,9 @@ namespace RatioShop.Services.Implement
 
         public void GetProductRelatedInformation(ProductViewModel product)
         {
+            product.Product.CreatedDate = product.Product.CreatedDate.GetCorrectUTC();
+            product.Product.ModifiedDate = product.Product.ModifiedDate.GetCorrectUTC();
+
             var productId = product.Product.Id;
             var productVariants = _productVariantService.GetProductVariantsByProductId(productId).ToList();
             //product variants stock
@@ -178,6 +182,23 @@ namespace RatioShop.Services.Implement
             product.ModifiedDate = DateTime.UtcNow;
 
             return productRepository.UpdateProduct(product);
+        }
+
+        public ListProductViewModel GetListProducts(string searchText, string orderBy, int pageNumber, int pageSize)
+        {
+            var products = productRepository.GetListProducts(searchText, orderBy, pageNumber, pageSize);
+            products.Products = GetProductsRelatedInformation(products.Products.ToList());
+
+            return products;
+        }
+
+        public ListProductViewModel GetAllListProducts(string searchText, string orderBy, int pageNumber, int pageSize)
+        {
+            var products = productRepository.GetAllListProducts(searchText, orderBy, pageNumber, pageSize);
+            products.Products = GetProductsRelatedInformation(products.Products.ToList());
+            products.SearchText = searchText;
+
+            return products;
         }
     }
 }

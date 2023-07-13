@@ -15,11 +15,13 @@ namespace RatioShop.Services.Abstract
         // get product on public page
         public IEnumerable<ProductViewModel> GetProductsAvailable();
         public IEnumerable<ProductViewModel> GetProductsAvailable(int pageNumber, int pageSize);
-        public IEnumerable<ProductViewModel> GetProductsAvailable(string sortBy, int pageNumber, int pageSize);
-        //
+        public IEnumerable<ProductViewModel> GetProductsAvailable(string sortBy, int pageNumber, int pageSize);        
         public Task<bool> AddProduct(Product product);
         public bool UpdateProduct(Product product);
         public bool DeleteProduct(Guid productId);
         // Addition logic        
+        public ListProductViewModel GetListProducts(string searchText, string orderBy, int pageNumber, int pageSize);
+        public ListProductViewModel GetAllListProducts(string searchText, string orderBy, int pageNumber, int pageSize);
+        
     }
 }
