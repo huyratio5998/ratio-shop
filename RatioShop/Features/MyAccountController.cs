@@ -62,5 +62,12 @@ namespace RatioShop.Features
             };
             return View(myAccount);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult OrderHistorySearch(string? searchText = null, string tab = CommonConstant.MyAccount.PersonalTab, int page = 1)
+        {
+            return RedirectToAction("Index", new { searchText, tab, page });
+        }
     }
 }
