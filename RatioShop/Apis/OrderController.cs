@@ -51,14 +51,7 @@ namespace RatioShop.Apis
 
             var orderPageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
             var totalOrderByUser = _orderService.GetTotalOrderByUserId(userId);
-            ListOrderViewModel orderHistories = new ListOrderViewModel
-            {
-                Orders = _orderService.GetOrderHistoryByUserId(userId, page, orderPageSize)?.ToList(),
-                PageIndex = page,
-                PageSize = orderPageSize,
-                TotalCount = totalOrderByUser,
-                TotalPage = totalOrderByUser == 0 ? 1 : (int)Math.Ceiling((double)totalOrderByUser / orderPageSize),
-            };
+            ListOrderViewModel orderHistories = _orderService.GetOrderHistoryByUserId(userId, page, orderPageSize);
 
             var result = _mapper.Map<OrdersResponseViewModel>(orderHistories);
 

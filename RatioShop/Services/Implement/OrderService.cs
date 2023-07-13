@@ -3,6 +3,7 @@ using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels;
+using RatioShop.Data.ViewModels.MyAccountViewModel;
 using RatioShop.Data.ViewModels.OrdersViewModel;
 using RatioShop.Data.ViewModels.ShipmentViewModel;
 using RatioShop.Helpers;
@@ -141,22 +142,35 @@ namespace RatioShop.Services.Implement
             return orderDetail;
         }
 
-        public IEnumerable<OrderViewModel>? GetOrderHistoryByUserId(string userId, int pageIndex = 1, int pageSize = 5)
+        public ListOrderViewModel? GetOrderHistoryByUserId(string userId, int pageIndex = 1, int pageSize = 5)
         {
-            if (string.IsNullOrEmpty(userId)) return Enumerable.Empty<OrderViewModel>();
-            var orders = GetOrders().AsQueryable()
+            ListOrderViewModel orderHistories = null;            
+
+            if (string.IsNullOrEmpty(userId)) return null;
+            var orderSearchQuery = GetOrders().AsQueryable()
                 .Join(_cartService.GetAllCartByUserId(userId),
                 x => x.CartId,
                 y => y.Id,
-                (x, y) => new { Order = x, Cart = y })
-                .OrderByDescending(x => x.Order.CreatedDate)
+                (x, y) => new { Order = x, Cart = y })                
+                .OrderByDescending(x => x.Order.CreatedDate);
+
+            var orderSearchResult = orderSearchQuery
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
                 .ToList()
                 .Select(x => GetOrderDetail(x.Order.Id.ToString()))
                 .Where(x => x != null);
 
-            return orders;
+            var totalMatch = orderSearchQuery.Count();
+            orderHistories = new ListOrderViewModel
+            {
+                Orders = orderSearchResult,
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalCount = orderSearchQuery.Count(),
+                TotalPage = totalMatch == 0 ? 1 : (int)Math.Ceiling((double)totalMatch / pageSize),
+            };
+            return orderHistories;
         }
 
         public int GetTotalOrderByUserId(string userId)
@@ -178,6 +192,39 @@ namespace RatioShop.Services.Implement
             {
                 return 0;
             }
+        }
+
+        public ListOrderViewModel? GetOrderHistoryByUserId(string userId, string orderNumber, int pageIndex = 1, int pageSize = 5)
+        {
+            ListOrderViewModel orderHistories = null;
+            var searchText = orderNumber.Trim();
+
+            if (string.IsNullOrEmpty(userId)) return null;
+            var orderSearchQuery = GetOrders().AsQueryable()
+                .Join(_cartService.GetAllCartByUserId(userId),
+                x => x.CartId,
+                y => y.Id,
+                (x, y) => new { Order = x, Cart = y })
+                .Where(x => x.Order.OrderNumber.ToLower().Contains(searchText.ToLower()))
+                .OrderByDescending(x => x.Order.CreatedDate);
+
+            var orderSearchResult = orderSearchQuery
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList()
+                .Select(x => GetOrderDetail(x.Order.Id.ToString()))
+                .Where(x => x != null);
+
+            var totalMatch = orderSearchQuery.Count();
+            orderHistories = new ListOrderViewModel
+            {
+                Orders = orderSearchResult,
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalCount = orderSearchQuery.Count(),
+                TotalPage = totalMatch == 0 ? 1 : (int)Math.Ceiling((double)totalMatch / pageSize),
+            };
+            return orderHistories;
         }
     }
 }
