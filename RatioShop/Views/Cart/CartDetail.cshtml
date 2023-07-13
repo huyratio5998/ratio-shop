@@ -147,7 +147,7 @@
                                         <div><b>Phone number: </b>@Model.PhoneNumber</div>
                                         <div><b>Address: </b>@Model.FullShippingAddress</div>
                                     </div>
-                                    <div class="ratio-link mouse-hover js_change-shipping-address">Change shipping address</div>
+                                    <div class="ratio-link mouse-hover js_change-shipping-address">Change shipping address <span class="lnr lnr-pencil"></span></div>
                                 </div>
                                 <div class="js_update-shipping-addess-area @hideFormUpdateShippingClass">
                                     <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
@@ -241,7 +241,7 @@
                                     <span class="stext-110 cl2"></span>
                                 </div>
                                 <div class="">
-                                    <span class="stext-115 cl2">@CommonHelper.CurrencyFormat(Model.TotalPrice + Model.ShippingFee, language)</span>
+                                    <span class="cl2">@CommonHelper.CurrencyFormat(Model.TotalPrice + Model.ShippingFee, language)</span>
                                 </div>
                             </div>
                         }

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using RatioShop.Data.Models;
 
 namespace RatioShop.Data.ViewModels.User
 {

@@ -1,7 +1,7 @@
 ﻿using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels.User;
 
-namespace RatioShop.Data.ViewModels.MyAccount
+namespace RatioShop.Data.ViewModels.MyAccountViewModel
 {
     public class MyAccountViewModel
     {

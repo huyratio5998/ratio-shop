@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace RatioShop.Data.ViewModels.Cart
+namespace RatioShop.Data.ViewModels.CartViewModel
 {
     public class DefaultShippingAddressViewModel
     {
@@ -15,6 +15,6 @@ namespace RatioShop.Data.ViewModels.Cart
         public int? ShippingAddressId { get; set; }
 
         [JsonProperty("shippingAddressDetail")]
-        public string? ShippingAddressDetail { get; set; }        
+        public string? ShippingAddressDetail { get; set; }
     }
 }

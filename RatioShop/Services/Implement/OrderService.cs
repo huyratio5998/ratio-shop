@@ -3,6 +3,8 @@ using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels;
+using RatioShop.Data.ViewModels.OrdersViewModel;
+using RatioShop.Data.ViewModels.ShipmentViewModel;
 using RatioShop.Helpers;
 using RatioShop.Services.Abstract;
 
@@ -97,6 +99,32 @@ namespace RatioShop.Services.Implement
             return UpdateOrder(Order);
         }
 
+        public OrderResponseViewModel? GetOrderDetailResponse(string id)
+        {
+            var order = GetOrder(id);
+            if (order == null) return null;
+
+            var cartDetail = _cartService.GetCartDetail(order.CartId);
+            if (cartDetail == null) return null;
+
+            var orderDetail = _mapper.Map<OrderResponseViewModel>(order);
+            orderDetail.CartDetail = cartDetail;
+            orderDetail.TotalItems = cartDetail.TotalItems;
+
+            orderDetail.Payment = _mapper.Map<PaymentResponseViewModel>(_paymentService.GetPayment(order.PaymentId.ToString()));
+            orderDetail.ShipmentHistory = new ShipmentsResponseViewModel
+            {
+                Shipments = _mapper.Map<List<ShipmentResponseViewModel>>(
+                    _shipmentService.GetShipments()
+                    .Where(x => x.OrderId == order.Id && x.UpdateStatus != null && (bool)x.UpdateStatus)
+                    .OrderByDescending(x => x.CreatedDate)
+                    .ToList()
+                    )
+            };
+
+            return orderDetail;
+        }
+
         public OrderViewModel? GetOrderDetail(string id)
         {
             var order = GetOrder(id);
@@ -108,7 +136,7 @@ namespace RatioShop.Services.Implement
             var orderDetail = _mapper.Map<OrderViewModel>(order);
             orderDetail.TotalItems = cartDetail.TotalItems;
             orderDetail.Payment = _paymentService.GetPayment(order.PaymentId.ToString());
-            orderDetail.Shipments = _shipmentService.GetShipments().Where(x => x.OrderId == order.Id).OrderBy(x => x.CreatedDate).ToList();
+            orderDetail.Shipments = _shipmentService.GetShipments().Where(x => x.OrderId == order.Id).OrderByDescending(x => x.CreatedDate).ToList();
 
             return orderDetail;
         }
@@ -120,8 +148,8 @@ namespace RatioShop.Services.Implement
                 .Join(_cartService.GetAllCartByUserId(userId),
                 x => x.CartId,
                 y => y.Id,
-                (x, y) => new { Order = x, Cart = y })                
-                .OrderByDescending(x => x.Order.CreatedDate)                
+                (x, y) => new { Order = x, Cart = y })
+                .OrderByDescending(x => x.Order.CreatedDate)
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
                 .ToList()

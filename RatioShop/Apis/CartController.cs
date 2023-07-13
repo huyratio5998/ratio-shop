@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RatioShop.Constants;
 using RatioShop.Data.ViewModels;
+using RatioShop.Data.ViewModels.CartViewModel;
 using RatioShop.Helpers.CookieHelpers;
 using RatioShop.Services.Abstract;
 using System.Security.Claims;
@@ -81,7 +82,7 @@ namespace RatioShop.Apis
             }
 
             Guid.TryParse(cartIdString, out var cartId);
-            if (cartId == Guid.Empty) return Ok(new CartDetailResponsetViewModel());
+            if (cartId == Guid.Empty) return Ok(new CartDetailResponsViewModel());
 
             var cartDetail = _cartService.GetCartDetail(cartId);
 

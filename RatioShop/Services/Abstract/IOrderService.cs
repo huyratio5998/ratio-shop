@@ -1,5 +1,6 @@
 ﻿using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
+using RatioShop.Data.ViewModels.OrdersViewModel;
 
 namespace RatioShop.Services.Abstract
 {
@@ -19,5 +20,6 @@ namespace RatioShop.Services.Abstract
         OrderViewModel? GetOrderDetail(string id);
         IEnumerable<OrderViewModel>? GetOrderHistoryByUserId(string userId, int pageIndex = 1, int pageSize = 5);
         int GetTotalOrderByUserId(string userId);
+        OrderResponseViewModel? GetOrderDetailResponse(string id);
     }
 }

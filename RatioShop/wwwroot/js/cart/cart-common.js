@@ -190,7 +190,7 @@ const BuildDiscountArea = (cartDetail) => {
                                     <span class="stext-110 cl2"></span>
                                 </div>
                                 <div class="">
-                                    <span class="stext-115 cl2">
+                                    <span class="cl2">
                                     ${VNDong.format(
                                       +cartDetail.totalPrice +
                                         +cartDetail.shippingFee

@@ -1,9 +1,8 @@
 ﻿using Newtonsoft.Json;
-using RatioShop.Data.ViewModels.Cart;
 
-namespace RatioShop.Data.ViewModels
+namespace RatioShop.Data.ViewModels.CartViewModel
 {
-    public class CartDetailResponsetViewModel
+    public class CartDetailResponsViewModel
     {
         [JsonProperty("cartItems")]
         public List<CartItemResponseViewModel> CartItems { get; set; }
@@ -38,20 +37,16 @@ namespace RatioShop.Data.ViewModels
         [JsonProperty("phoneNumber")]
         public string? PhoneNumber { get; set; }
 
-        [JsonProperty("shippingAddressId")]       
+        [JsonProperty("shippingAddressId")]
         public int? ShippingAddressId { get; set; }
 
         [JsonProperty("fullShippingAddress")]
         public string? FullShippingAddress { get; set; }
 
         [JsonProperty("shippingAddressDetail")]
-        public string? ShippingAddressDetail { get; set; }  
-        
+        public string? ShippingAddressDetail { get; set; }
+
         [JsonProperty("shippingFee")]
-        public decimal? ShippingFee { get; set; }       
-      
-        // User
-        [JsonProperty("userID")]
-        public Guid UserID { get; set; }
+        public decimal? ShippingFee { get; set; }        
     }
 }

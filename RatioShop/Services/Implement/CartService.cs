@@ -3,7 +3,7 @@ using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels;
-using RatioShop.Data.ViewModels.Cart;
+using RatioShop.Data.ViewModels.CartViewModel;
 using RatioShop.Enums;
 using RatioShop.Services.Abstract;
 
@@ -152,7 +152,7 @@ namespace RatioShop.Services.Implement
             return result;
         }
 
-        public CartDetailResponsetViewModel? GetCartDetail(Guid id)
+        public CartDetailResponsViewModel? GetCartDetail(Guid id)
         {
             if (id == Guid.Empty) return null;
 
@@ -206,7 +206,7 @@ namespace RatioShop.Services.Implement
             var shippingAddress = _addressService.GetAddress(currentCart?.AddressId ?? 0);
             var shippingFee = cartItems?.Count == 0 ? 0 : shippingAddress?.ShippingFee ?? null;
 
-            var cartDetail = new CartDetailResponsetViewModel()
+            var cartDetail = new CartDetailResponsViewModel()
             {
                 CartItems = cartItems,
                 TotalItems = cartItems?.Sum(x=>x.Number) ?? 0,
@@ -329,7 +329,7 @@ namespace RatioShop.Services.Implement
             return UpdateCart(cart);
         }
 
-        public bool TrackingProductItemByCart(CartDetailResponsetViewModel? cartDetail, Guid cartId)
+        public bool TrackingProductItemByCart(CartDetailResponsViewModel? cartDetail, Guid cartId)
         {            
             if (cartId == Guid.Empty || cartDetail == null || cartDetail.CartItems == null || !cartDetail.CartItems.Any()) return true;
 
@@ -388,7 +388,7 @@ namespace RatioShop.Services.Implement
         /// </summary>
         /// <param name="cartId"></param>
         /// <returns></returns>
-        public bool UpdateStoreItemsForCart(Guid cartId, ref CartDetailResponsetViewModel? cartDetail)
+        public bool UpdateStoreItemsForCart(Guid cartId, ref CartDetailResponsViewModel? cartDetail)
         {            
             if (cartId == Guid.Empty) return false;
             if (cartDetail == null) return true;
@@ -446,7 +446,7 @@ namespace RatioShop.Services.Implement
             return true;
         }
 
-        public bool ValidateItemsOnCartWhenCheckout(CartDetailResponsetViewModel? cartDetail)
+        public bool ValidateItemsOnCartWhenCheckout(CartDetailResponsViewModel? cartDetail)
         {
             if (cartDetail == null || cartDetail.TotalItems == 0 || cartDetail.CartItems == null || !cartDetail.CartItems.Any()) return false;
 

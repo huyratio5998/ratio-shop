@@ -102,6 +102,6 @@ namespace RatioShop.Helpers
                     break;
             }
             return badgeClass;
-        }        
+        }                
     }
 }

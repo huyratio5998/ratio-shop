@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RatioShop.Constants;
-using RatioShop.Data.ViewModels.MyAccount;
+using RatioShop.Data.ViewModels.MyAccountViewModel;
 using RatioShop.Data.ViewModels.User;
 using RatioShop.Helpers;
 using RatioShop.Services.Abstract;
 using System.Security.Claims;
 
 namespace RatioShop.Features
-{    
+{
     public class MyAccountController : Controller
     {
         private readonly IShopUserService _shopUserService;
@@ -37,9 +37,10 @@ namespace RatioShop.Features
             List<string> districts = new List<string>();
             UserViewModel userData = null;
             if (tab.Equals(CommonConstant.MyAccount.OrderHistoryTab, StringComparison.OrdinalIgnoreCase))
-            {
-                var orderPageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
+            {                
                 var totalOrderByUser = _orderService.GetTotalOrderByUserId(userId);
+                var orderPageSize = GetDynamicPageSizeForOrderHistory(totalOrderByUser);
+
                 orderHistories = new ListOrderViewModel
                 {
                     Orders = _orderService.GetOrderHistoryByUserId(userId, page, orderPageSize)?.ToList(),
@@ -65,6 +66,17 @@ namespace RatioShop.Features
                 ListDistrict = districts
             };
             return View(myAccount);
+        }
+
+        private int GetDynamicPageSizeForOrderHistory(int totalItems)
+        {
+            var orderPageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
+            var step = 50;
+            for(int i = 0; i < totalItems; i+= step)
+            {
+                if (i >= step) orderPageSize += 5;
+            }
+            return orderPageSize;            
         }
     }
 }

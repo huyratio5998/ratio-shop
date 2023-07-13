@@ -1,4 +1,4 @@
-﻿namespace RatioShop.Data.ViewModels.MyAccount
+﻿namespace RatioShop.Data.ViewModels.MyAccountViewModel
 {
     public class ListOrderViewModel : BaseListingPageViewModel
     {

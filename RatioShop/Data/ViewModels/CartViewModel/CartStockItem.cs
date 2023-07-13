@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace RatioShop.Data.ViewModels.Cart
+namespace RatioShop.Data.ViewModels.CartViewModel
 {
     public class CartStockItem
     {
