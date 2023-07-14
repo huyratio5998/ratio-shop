@@ -108,9 +108,10 @@ const BuildProductCartItem = (item, modalClass) => {
   const productImage = item.productImageName
     ? `<img src="images/products/${item.productImageName}" alt="${item.product?.name}">`
     : `<img src="images/default-placeholder.jpg" alt="${item.product?.name}">`;
-  const productPrice = item.product?.variants[0]
-    ? `${VNDong.format(item.product?.variants[0].price)}`
-    : `Not set`;
+  const productPrice =
+    item.product?.variants && item.product?.variants[0]
+      ? `${VNDong.format(item.product?.variants[0].price)}`
+      : `Not set`;
 
   const productItem = ` <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women ratio">                        
                         <div class="block2">

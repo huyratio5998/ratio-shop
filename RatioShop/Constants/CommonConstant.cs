@@ -14,5 +14,12 @@
             public const string PersonalTab = "Personal";
             public const string OrderHistoryTab = "OrderHistory";
         }
+
+        public static class FilterType
+        {
+            public const string NumberRange = "NumberRange";
+            public const string Text = "Text";
+            public const string FreeText = "FreeText";
+        }
     }
 }

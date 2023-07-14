@@ -9,10 +9,25 @@ const productSearchErrorMessageEl = document.querySelector(
 const loadMoreArea = document.querySelector(".js_load-more-area");
 
 // Api
-const GetProducts = async (searchText, page, pageSize) => {
+const GetProducts = async (
+  filterItems,
+  sortType,
+  isSelectPreviousItems,
+  page,
+  pageSize
+) => {
+  const searchParams = new URLSearchParams({
+    filterItems: JSON.stringify(filterItems),
+    sortType: sortType,
+    isSelectPreviousItems: isSelectPreviousItems,
+    page: page,
+    pageSize: pageSize,
+  });
+
   const result = await fetch(
-    `${baseApiUrl}/product?search=${searchText}&page=${page}&pageSize=${pageSize}`
+    `${baseApiUrl}/product?${searchParams.toString()}`
   );
+
   if (result.ok) {
     return await result.json();
   }
@@ -40,10 +55,23 @@ const ProductSearchEvent = () => {
   searchButtonEl.addEventListener("click", async (e) => {
     const pageIndex = 1;
     const searchValue = searchInputEl.value;
-    const pageSize = searchButtonEl.dataset.pageSize;
-    if (pageSize == 0) pageSize = 5;
+    const pageSize =
+      searchButtonEl.dataset.pageSize == 0
+        ? 5
+        : searchButtonEl.dataset.pageSize;
+    let filterItems = [
+      {
+        fieldName: "",
+        value: searchValue,
+        type: "FreeText",
+      },
+    ];
+    if (!searchValue || searchValue == "") filterItems = null;
+    // change common search value
+    document.querySelector(".js_commonSearch").value = searchValue;
 
-    const data = await GetProducts(searchValue, pageIndex, pageSize);
+    const data = await GetProducts(filterItems, 0, false, pageIndex, pageSize);
+
     if (!data) {
       console.error("Can't search product!");
       DisplayMessageInMoment(
@@ -53,7 +81,7 @@ const ProductSearchEvent = () => {
         5000
       );
     } else {
-      ProductLoadMoreService.UpdateUrlListingParam(pageIndex, searchValue);
+      ProductLoadMoreService.UpdateUrlListingParam(pageIndex, filterItems);
 
       if (data.products.length == 0) {
         const listProducts = document.querySelector(".js-listProducts");

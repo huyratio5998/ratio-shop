@@ -16,9 +16,23 @@ const ResetButtonLoadMore = (nextPage) => {
   }
 };
 
-const UpdateUrlListingParam = (currentPage, searchValue) => {
+const UpdateUrlListingParam = (currentPage, filterItems) => {
   const url = new URL(window.location.href);
 
+  // search text
+  if (filterItems) {
+    const searchFilterItems = url.searchParams.has("filterItems");
+    const filterItemsJson = JSON.stringify(filterItems);
+    if (searchFilterItems) {
+      url.searchParams.set("filterItems", filterItemsJson);
+    } else {
+      url.searchParams.append("filterItems", filterItemsJson);
+    }
+  } else {
+    url.searchParams.delete("filterItems");
+  }
+
+  // paging
   if (currentPage == 1 || currentPage == 0) {
     url.searchParams.delete("page");
   } else {
@@ -30,19 +44,11 @@ const UpdateUrlListingParam = (currentPage, searchValue) => {
     }
   }
 
-  // search text
-  if (searchValue) {
-    const searchText = url.searchParams.has("search");
-    if (searchText) {
-      url.searchParams.set("search", searchValue);
-    } else {
-      url.searchParams.append("search", searchValue);
-    }
-  } else {
-    url.searchParams.delete("search");
-  }
-
-  window.history.pushState({ page: currentPage, search: searchValue }, "", url);
+  window.history.pushState(
+    { filterItems: JSON.stringify(filterItems), page: currentPage },
+    "",
+    url
+  );
 };
 
 // Event
@@ -57,14 +63,25 @@ const LoadMoreEvent = () => {
 
     const pageSize = e.target.dataset.pageSize;
     const searchInputEl = document.querySelector(".js_search-products-input");
-    const searchText = !searchInputEl ? "" : searchInputEl.value;
+    let filterItems = [
+      {
+        fieldName: "",
+        value: !searchInputEl ? "" : searchInputEl.value,
+        type: "FreeText",
+      },
+    ];
 
+    if (!searchInputEl || searchInputEl.value == "") filterItems = null;
     // call api
+
     const data = await ProductSearchService.GetProducts(
-      searchText,
+      filterItems,
+      0,
+      false,
       nextPage,
       pageSize
     );
+
     if (!data) {
       console.error("Can't get products");
     } else {
@@ -73,7 +90,7 @@ const LoadMoreEvent = () => {
         // append product
         ProductItemsService.BuildAdditionProductCartItems(products, nextPage);
         // update url paging
-        UpdateUrlListingParam(nextPage, searchText);
+        UpdateUrlListingParam(nextPage, filterItems);
         // check still paging or not
         ResetButtonLoadMore(++nextPage);
       }

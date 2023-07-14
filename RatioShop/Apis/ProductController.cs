@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Services.Abstract;
 
 namespace RatioShop.Apis
@@ -18,13 +19,20 @@ namespace RatioShop.Apis
 
         [HttpGet]
         [Route("")]
-        public IActionResult GetProducts([FromQuery] string? search = "", [FromQuery] int page = 1, [FromQuery] int pageSize = 8)
+        public IActionResult GetProducts([FromQuery] ProductSearchRequest request)
         {
-            var sortBy = "default";
-            var products = _productService.GetListProducts(search, sortBy, page, pageSize);
+            if (ModelState.IsValid)
+            {
+                var sortBy = "default";
+                var products = _productService.GetListProducts(request);
 
-            return Ok(products);
-        }
+                return Ok(products);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }        
 
         [HttpGet]
         [Route("detail/{productId:guid}")]

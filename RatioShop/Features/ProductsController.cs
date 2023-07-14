@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
+using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Helpers;
 using RatioShop.Helpers.FileHelpers;
+using RatioShop.Helpers.QueryableHelpers;
 using RatioShop.Services.Abstract;
 
 namespace RatioShop.Features
@@ -17,7 +20,7 @@ namespace RatioShop.Features
         private readonly ICategoryService _categoryService;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IProductVariantStockService _productVariantStockService;
-        
+
         private const int pageSizeDefault = 5;
         private const int pageSizeClientDesktopDefault = 8;
         private const int pageSizeClientMobileDefault = 3;
@@ -34,30 +37,35 @@ namespace RatioShop.Features
 
         // GET: Products
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string search = "", string sortBy = "default", int page = 1)
+        public async Task<IActionResult> Index(ProductSearchRequest request)
         {
             var pageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
-            var listProductViewModel = _productService.GetAllListProducts(search, sortBy, page, pageSize);            
-            //var listProductViewModel = new ListProductViewModel();
+            request.PageSize = pageSize;
+            request.IsSelectPreviousItems = true;
 
-            //listProductViewModel.Products = listProducts;
+            var listProductViewModel = _productService.GetListProducts(request);
 
-            ////paging information
-            //listProductViewModel.PageIndex = page;
-            //listProductViewModel.PageSize = pageSize;
-            //listProductViewModel.TotalCount = _productService.GetProducts().Count();
-            //listProductViewModel.TotalPage = listProductViewModel.TotalCount == 0 ? 1 : (int)Math.Ceiling((double)listProductViewModel.TotalCount / pageSize);
-            //
-            ViewBag.Search = search;            
+            ViewBag.Search = QueryableHelpers.GetFreeTextFilter(listProductViewModel?.FilterItems);
 
             return View(listProductViewModel);
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public IActionResult Search(string search = "", string sortBy = "default", int page = 1)
+        public IActionResult Search(string search = "", int page = 1)
         {
-            return RedirectToAction("Index", new { search, sortBy, page });
+            var filterItems = JsonConvert.SerializeObject(
+                    new List<FacetFilterItem>() {
+                        new FacetFilterItem
+                        {
+                            FieldName = "",
+                            Type = CommonConstant.FilterType.FreeText,
+                            Value = search
+                        }
+                    });
+
+            return RedirectToAction("Index", new { filterItems = filterItems, page = page });
         }
 
         [AllowAnonymous]
@@ -129,7 +137,7 @@ namespace RatioShop.Features
                 FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
                 productEntity.ProductImage = model.ProductImage?.FileName;
 
-                await _productService.AddProduct(productEntity);                
+                await _productService.AddProduct(productEntity);
 
                 return RedirectToAction(nameof(ProductSettings));
             }
@@ -141,7 +149,7 @@ namespace RatioShop.Features
         {
             if (id == null) return NotFound();
 
-            var product = _productService.GetProduct((Guid)id);                        
+            var product = _productService.GetProduct((Guid)id);
 
             if (product == null) return NotFound();
 
@@ -197,7 +205,7 @@ namespace RatioShop.Features
         }
 
         [HttpPost]
-        public async Task<string> UpdateProductAdditionalInformation([FromBody]UpdateProductAdditionalInformationRequest data)
+        public async Task<string> UpdateProductAdditionalInformation([FromBody] UpdateProductAdditionalInformationRequest data)
         {
             try
             {
@@ -229,21 +237,21 @@ namespace RatioShop.Features
                     {
                         await _productVariantService.CreateProductVariant(variant);
                         _productVariantStockService.CreateOrUpdateProductVariantStock(true, variant.Id, item.ProductVariantStocks);
-                    }                        
+                    }
                     else
                     {
                         variant.CreatedDate = productVariant.CreatedDate;
                         _productVariantService.UpdateProductVariant(variant);
                         _productVariantStockService.CreateOrUpdateProductVariantStock(false, variant.Id, item.ProductVariantStocks);
-                    }                        
+                    }
                 }
                 // add or update product categories
                 foreach (var item in data.ProductCategories)
                 {
                     var productCategory = new ProductCategory()
-                    {                                               
+                    {
                         ProductId = data.ProductId,
-                        CategoryId = item.Id                        
+                        CategoryId = item.Id
                     };
 
                     var productVariant = _productCategoryService.GetProductCategory(productCategory.CategoryId, productCategory.ProductId);
@@ -256,7 +264,7 @@ namespace RatioShop.Features
                 }
 
                 var response = new UpdateProductAdditionalInformationResponse(true, _productVariantService.GetProductVariantsByProductId(data.ProductId).ToList());
-                
+
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
-﻿using RatioShop.Enums;
+﻿using RatioShop.Data.ViewModels.SearchViewModel;
+using RatioShop.Enums;
 
 namespace RatioShop.Data.ViewModels
 {
@@ -11,6 +12,7 @@ namespace RatioShop.Data.ViewModels
         public int PageSize { get; set; }
         public int TotalCount { get; set; }
         public int TotalPage { get; set; }
-        public string SearchText { get; set; }
+        public IEnumerable<FacetFilterItem>? FilterItems { get; set; }
+        public bool IsSelectPreviousItems {get;set;}
     }
 }

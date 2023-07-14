@@ -2,6 +2,7 @@
 @using RatioShop.Data.ViewModels
 @using RatioShop.Enums
 @using RatioShop.Helpers;
+@using RatioShop.Helpers.QueryableHelpers
 @model ListProductViewModel
 
 @{
@@ -61,7 +62,7 @@
                         <i class="zmdi zmdi-search"></i>
                     </button>
 
-                    <input class="mtext-107 cl2 size-114 plh2 p-r-15 js_search-products-input" value="@Model.SearchText" type="text" name="search-product" placeholder="Search">
+                    <input class="mtext-107 cl2 size-114 plh2 p-r-15 js_search-products-input" value="@QueryableHelpers.GetFreeTextFilter(Model.FilterItems)" type="text" name="search-product" placeholder="Search">
                 </div>
                 <div class="js_product-search-error-message"></div>
             </div>

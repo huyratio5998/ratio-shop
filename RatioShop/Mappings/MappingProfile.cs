@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Newtonsoft.Json;
 using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
 using RatioShop.Data.ViewModels.CartViewModel;
 using RatioShop.Data.ViewModels.MyAccountViewModel;
 using RatioShop.Data.ViewModels.OrdersViewModel;
+using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Data.ViewModels.ShipmentViewModel;
 using RatioShop.Data.ViewModels.User;
 
@@ -35,7 +37,10 @@ namespace RatioShop.Mappings
             CreateMap<Payment, PaymentResponseViewModel>();
             CreateMap<ShopUser, UserResponseViewModel>();            
             CreateMap<Shipment, ShipmentResponseViewModel>()
-                .ForMember(dest => dest.Shipper, opt => opt.MapFrom(x => x.Shipper));            
+                .ForMember(dest => dest.Shipper, opt => opt.MapFrom(x => x.Shipper));
+
+            CreateMap<ProductSearchRequest, BaseSearchRequest>()
+                .ForMember(dest => dest.FilterItems, opt => opt.MapFrom(x => JsonConvert.DeserializeObject<IEnumerable<FacetFilterItem>>(x.FilterItems)));
         }
     }
 }
