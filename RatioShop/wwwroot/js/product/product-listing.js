@@ -2,14 +2,12 @@
 import * as ProductLoadMoreService from "./product-load-more-service.js";
 import * as ProductSearchService from "./product-search-service.js";
 
-const btnQuickViews = document.querySelectorAll(".js-show-modal1");
-
 // Init
 const Init = () => {
   console.log("product-listing.js");
-  ProductItemsService.AddQuickViewProductEvent(btnQuickViews);
+  ProductItemsService.AddQuickViewProductEvent();
   ProductLoadMoreService.LoadMoreEvent();
-  ProductSearchService.ProductSearchEvent();
+  ProductSearchService.ProductFilterAllEvent();
 };
 
 Init();

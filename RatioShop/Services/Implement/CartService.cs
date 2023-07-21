@@ -133,6 +133,8 @@ namespace RatioShop.Services.Implement
             {
                 // update
                 cartItem.ItemNumber += request.Number;
+                cartItem.ItemPrice = variant.Price;
+                cartItem.DiscountRate = variant.DiscountRate;
                 _productVariantCartService.UpdateProductVariantCart(cartItem);
             }
             else
@@ -143,6 +145,8 @@ namespace RatioShop.Services.Implement
                     ItemNumber = request.Number,
                     ProductVariantId = request.VariantId,
                     CartId = cart.Id,
+                    ItemPrice = variant.Price,
+                    DiscountRate = variant.DiscountRate,
                 };
                 await _productVariantCartService.CreateProductVariantCart(item);
             }
@@ -152,7 +156,7 @@ namespace RatioShop.Services.Implement
             return result;
         }
 
-        public CartDetailResponsViewModel? GetCartDetail(Guid id)
+        public CartDetailResponsViewModel? GetCartDetail(Guid id, bool getLatestVariantPrice = true, bool includeInActiveDiscount = false)
         {
             if (id == Guid.Empty) return null;
 
@@ -166,6 +170,8 @@ namespace RatioShop.Services.Implement
                 {
                     VariantId = cartDetail.variantCart.ProductVariantId,
                     Number = cartDetail.variantCart.ItemNumber,
+                    Price = cartDetail.variantCart.ItemPrice,
+                    DiscountRate = cartDetail.variantCart.DiscountRate,
                     StockItems = string.IsNullOrWhiteSpace(cartDetail.variantCart.StockItems) ? null: JsonConvert.DeserializeObject<List<CartStockItem>>(cartDetail.variantCart.StockItems),
 
                 }).ToList();
@@ -175,12 +181,15 @@ namespace RatioShop.Services.Implement
                 var productVariantDetail = _productVariant.GetProductVariant(item.VariantId.ToString());
                 if (productVariantDetail != null)
                 {
-                    item.Price = productVariantDetail.Price;
+                    item.Price = getLatestVariantPrice ? productVariantDetail.Price : item.Price != null ? item.Price : productVariantDetail.Price;
+                    item.DiscountRate = getLatestVariantPrice ? productVariantDetail.DiscountRate : item.DiscountRate != null ? item.DiscountRate : productVariantDetail.DiscountRate;
+                    item.DiscountPrice = item.Price * (decimal)(100 - (item.DiscountRate ?? 0)) / 100;
                     item.VariableName = productVariantDetail.Code;
                     // product info
                     var productDetail = _productService.GetProduct(productVariantDetail.ProductId);
                     if (productDetail != null)
                     {
+                        item.ProductCode = productDetail.Product.Code;
                         item.Name = productDetail.Product.ProductFriendlyName;
                         item.Image = productDetail.ProductImageName;
                         item.EnableStockTracking = productDetail.Product.EnableStockTracking;
@@ -201,8 +210,8 @@ namespace RatioShop.Services.Implement
                     PhoneNumber = currentCart?.ShopUser?.PhoneNumber,
                 };
             }
-            var couponCodes = _cartDiscountService.GetListCouponApplyByCartId(id).ToList();
-            var totalItemPrice = cartItems?.Sum(x => (x.Price * x.Number)) ?? 0;
+            var couponCodes = _cartDiscountService.GetListCouponApplyByCartId(id, includeInActiveDiscount).ToList();
+            var totalItemPrice = cartItems?.Sum(x => (x.DiscountPrice * x.Number)) ?? 0;
             var shippingAddress = _addressService.GetAddress(currentCart?.AddressId ?? 0);
             var shippingFee = cartItems?.Count == 0 ? 0 : shippingAddress?.ShippingFee ?? null;
 
@@ -256,6 +265,8 @@ namespace RatioShop.Services.Implement
             {
                 // update
                 cartItem.ItemNumber = request.Number;
+                cartItem.ItemPrice = variant.Price;
+                cartItem.DiscountRate = variant.DiscountRate;
                 if (cartItem.ItemNumber == 0) _productVariantCartService.DeleteProductVariantCart(cartItem.Id.ToString());
                 else _productVariantCartService.UpdateProductVariantCart(cartItem);
             }
@@ -465,6 +476,26 @@ namespace RatioShop.Services.Implement
             if(userId == null) return Enumerable.Empty<Cart>();
 
             return GetCarts().Where(x => x.ShopUserId.Equals(userId));
+        }
+
+        public bool UpdateCartItemPriceAndDiscountRate(CartDetailResponsViewModel cartDetail, Guid cartId)
+        {
+            if (cartId == Guid.Empty || cartDetail == null || cartDetail.CartItems == null || !cartDetail.CartItems.Any()) return true;
+
+            foreach (var item in cartDetail.CartItems)
+            {
+                var cartItem = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == cartId && x.ProductVariantId == item.VariantId);
+                if (cartItem != null)
+                {
+                    if (cartItem.DiscountRate == item.DiscountRate && cartItem.ItemPrice == item.Price) continue;
+                    cartItem.DiscountRate = item.DiscountRate;
+                    cartItem.ItemPrice = item.Price;
+
+                    var updateVariantCartStatus = _productVariantCartService.UpdateProductVariantCart(cartItem);
+                    if (!updateVariantCartStatus) return false;
+                }
+            }
+            return true;
         }
     }
 }

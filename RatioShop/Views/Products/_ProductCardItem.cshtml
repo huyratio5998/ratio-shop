@@ -1,0 +1,60 @@
+﻿@using RatioShop.Data.ViewModels
+@using RatioShop.Helpers
+
+@model ProductItemViewModel
+
+@if (Model.Product != null)
+{
+    var language = string.IsNullOrEmpty(Model.Language) ? "vi-VN" : Model.Language;
+
+    <div class="block2">
+        <div class="block2-pic hov-img0">
+            @if (string.IsNullOrEmpty(Model.Product.ProductImageName))
+            {
+                <img src="~/images/default-placeholder.jpg" alt="@Model.Product.Product?.Name">
+            }
+            else
+            {
+                <img src="~/images/products/@Model.Product.ProductImageName" alt="@Model.Product.Product?.Name">
+            }
+
+            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1" data-product-id="@Model.Product.Product?.Id">
+                Quick View
+            </a>
+        </div>
+
+        <div class="block2-txt flex-w flex-t p-t-14">
+            <div class="block2-txt-child1 flex-col-l ">
+                <a asp-action="ProductDetail" asp-route-id="@Model.Product.Product?.Id" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                    <p class="text-uppercase">@Model.Product?.Product?.Code</p>
+                    <p>@Model.Product.Product?.ProductFriendlyName</p>
+                </a>
+                @{
+                    var defaultVariant = Model.Product.Product?.Variants?.OrderBy(x => x.Price * (decimal)(100 - (x.DiscountRate) ?? 0) / 100)?.FirstOrDefault();
+                    var discountPrice = defaultVariant?.Price * (decimal)(100 - (defaultVariant?.DiscountRate ?? 0)) / 100;
+                    var hasDiscount = discountPrice != null && discountPrice != defaultVariant?.Price;
+
+                    if (defaultVariant != null)
+                    {
+                        <span class="stext-105 cl3">
+                            @CommonHelper.CurrencyFormat(discountPrice, language)
+                        </span>
+                        if (hasDiscount)
+                        {
+                            <span class="stext-105 cl3 ratio-origional-price">
+                                @CommonHelper.CurrencyFormat(defaultVariant?.Price, language)
+                            </span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="stext-105 cl3">
+                            Not set
+                        </span>
+                    }
+
+                }
+            </div>
+        </div>
+    </div>
+}

@@ -82,7 +82,6 @@ builder.Services.AddSingleton<ILayoutSettingsViewModel, LayoutSettingsViewModel>
 // Inject repository
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IStockRepository, StockRepository>();
@@ -101,7 +100,6 @@ builder.Services.AddScoped<ICartDiscountRepository, CartDiscountRepository>();
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IStockService, StockService>();
@@ -115,6 +113,7 @@ builder.Services.AddScoped<IShopUserService, ShopUserService>();
 builder.Services.AddScoped<IShipmentService, ShipmentService>();
 builder.Services.AddScoped<IDiscountService, DiscountService>();
 builder.Services.AddScoped<ICartDiscountService, CartDiscountService>();
+builder.Services.AddScoped<ICommonService, CommonService>();
 
 var app = builder.Build();
 
@@ -149,6 +148,10 @@ app.UseAuthorization();
 // use session
 app.UseSession();
 
+app.MapControllerRoute(
+            name: "areas",
+            pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+          );
 app.MapDefaultControllerRoute();
 
 app.MapRazorPages();

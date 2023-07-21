@@ -1,6 +1,5 @@
 import * as LoginService from "../login/login.js";
 
-const btnAddCartDetail = document.querySelector(".js-addcart-detail");
 const headerItemCart = document.querySelectorAll(".js-show-cart");
 const listCartItems = document.querySelector(".header-cart-wrapitem");
 const headerCartTotal = document.querySelector(".header-cart-total");
@@ -87,14 +86,8 @@ const RefreshCartView = async () => {
   ResetCartDetail();
   if (cartItems) {
     cartItems.forEach((e, index) => {
-      const item = BuildHeaderCartItem(
-        e.variantId,
-        e.image,
-        e.name,
-        e.variableName,
-        e.number,
-        e.price
-      );
+      const item = BuildHeaderCartItem(e);
+
       listCartItems.insertAdjacentHTML("beforeend", item);
     });
 
@@ -124,25 +117,24 @@ const RefreshCartView = async () => {
   headerCartTotal.innerHTML = `Total: ${VNDong.format(totalPrice)}`;
 };
 
-const BuildHeaderCartItem = (
-  variantId,
-  image,
-  productName,
-  variableName,
-  number,
-  price
-) => {
+const BuildHeaderCartItem = (item) => {
+  const discountPrice = item.discountRate
+    ? `<span class="ratio-origional-price">${VNDong.format(item.price)}</span>`
+    : "";
+  const priceDisplay = `${item.number} x ${VNDong.format(
+    item.discountPrice
+  )} ${discountPrice}`;
   let headerCartItem = `<li class="header-cart-item flex-w flex-t m-b-12">
-                      <div class="header-cart-item-img js_remove-cart-item" data-variant-id="${variantId}">
-                          <img src="/images/products/${image}" alt="${productName}">
+                      <div class="header-cart-item-img js_remove-cart-item" data-variant-id="${item.variantId}">
+                          <img src="/images/products/${item.image}" alt="${item.name}">
                       </div>
                       <div class="header-cart-item-txt p-t-8">
-                          <a href="/products/productdetail/${variantId}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-                          ${productName}
-                          <p><i>${variableName}</i></p>
+                          <a href="/products/productdetail/${item.variantId}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+                          ${item.name} <i>(${item.variableName})</i>
+                          <p class="text-uppercase">${item.productCode}</p>
                           </a>
                           <span class="header-cart-item-info">
-                          ${number} x ${VNDong.format(price)}
+                          ${priceDisplay}
                           </span>
                       </div>
                     </li>`;
@@ -242,36 +234,46 @@ const ResetCartDetail = () => {
   // }
 };
 
-const BuildCartItemDetail = (
-  variantId,
-  image,
-  productName,
-  variableName,
-  number,
-  price
-) => {
-  const itemImage = image
-    ? `/images/products/${image}`
+const BuildCartItemDetail = (item) => {
+  const displayItemPrice = item.discountRate
+    ? `${VNDong.format(item.discountPrice)} <span class="ratio-origional-price">
+  ${VNDong.format(item.price)}</span>`
+    : VNDong.format(item.price);
+  const productNameDisplay = `${item.name} - ${item.variableName}`;
+  const itemImage = item.image
+    ? `/images/products/${item.image}`
     : "/images/default-placeholder.jpg";
   let cartItemDetail = ` <tr class="table_row">
                                         <td class="column-1">
-                                            <div class="how-itemcart1 js_remove-cart-item" data-variant-id="${variantId}">
-                                                <img src="${itemImage}" alt="${variableName}" />
+                                            <div class="how-itemcart1 js_remove-cart-item" data-variant-id="${
+                                              item.variantId
+                                            }">
+                                                <img src="${itemImage}" alt="${
+    item.variableName
+  }" />
                                             </div>
                                         </td>
-                                        <td class="column-2"><a href="/products/productdetail/${variantId}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">${productName} - ${variableName}</a></td>
-                                        <td class="column-3">${VNDong.format(
-                                          price
-                                        )}</td>
+                                        <td class="column-2">
+                                        <a href="/products/productdetail/${
+                                          item.variantId
+                                        }" class="header-cart-item-name m-b-18 hov-cl1 trans-04">${productNameDisplay}
+                                        <p class="text-uppercase">${
+                                          item.productCode
+                                        }</p>
+                                        </a>
+                                        </td>
+                                        <td class="column-3">${displayItemPrice}</td>
                                         <td class="column-4">
-                                            <div class="wrap-num-product flex-w m-l-auto m-r-0" data-variant-id="${variantId}">
+                                            <div class="wrap-num-product flex-w m-l-auto m-r-0" data-variant-id="${
+                                              item.variantId
+                                            }">
                                                 <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m js_change-cart-item-detail">
                                                     <i class="fs-16 zmdi zmdi-minus"></i>
                                                 </div>
                                                 <input class="mtext-104 cl3 txt-center num-product"
                                                type="number"
                                                name="num-product1"
-                                               value="${number}" />
+                                               value="${item.number}" />
 
                                                 <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m js_change-cart-item-detail">
                                                     <i class="fs-16 zmdi zmdi-plus"></i>
@@ -279,7 +281,7 @@ const BuildCartItemDetail = (
                                             </div>
                                         </td>
                                         <td class="column-5">${VNDong.format(
-                                          price * number
+                                          item.discountPrice * item.number
                                         )} </td>
                                     </tr>`;
   return cartItemDetail;
@@ -361,17 +363,7 @@ const RefreshCartDetail = (cartDetail) => {
 
   // update items
   cartDetail.cartItems.forEach((el, index) => {
-    table.insertAdjacentHTML(
-      "beforeend",
-      BuildCartItemDetail(
-        el.variantId,
-        el.image,
-        el.name,
-        el.variableName,
-        el.number,
-        el.price
-      )
-    );
+    table.insertAdjacentHTML("beforeend", BuildCartItemDetail(el));
   });
 
   // update shipping value
@@ -458,14 +450,16 @@ const CartDetailActionEvent = () => {
   }
 };
 
-const AddToCartEvent = () => {
+const AddToCartEvent = (parentElement = document) => {
+  const btnAddCartDetail = parentElement.querySelector(".js-addcart-detail");
   if (!btnAddCartDetail) return;
+
   btnAddCartDetail.addEventListener("click", async (e) => {
     e.preventDefault();
     // get data send
-    const variantSelect = document.querySelector(".js-variants-select");
+    const variantSelect = parentElement.querySelector(".js-variants-select");
     const variantId = variantSelect.value;
-    const number = document.querySelector(".js-variantNumber").value;
+    const number = parentElement.querySelector(".js-variantNumber").value;
     if (!variantId || number <= 0) console.error("Invalid params");
 
     // call api add to cart
@@ -497,7 +491,8 @@ const AddToCartEvent = () => {
       RefreshCartView();
 
       // display popup success
-      const itemName = document.querySelector(".js-name-detail").textContent;
+      const itemName =
+        parentElement.querySelector(".js-name-detail").textContent;
       const itemVariableName =
         variantSelect.options[variantSelect.selectedIndex].text;
       const fullItemDisplayName = itemName.includes(itemVariableName)
@@ -515,9 +510,9 @@ const ViewCartHeaderPannelEvent = () => {
       e.preventDefault();
 
       const data = await LoginService.CheckIsAuthenticated();
-      if (data == true)
+      if (data == true) {
         RedirectToPath(false, headerViewCartBtn.getAttribute("href"));
-      else {
+      } else {
         // hide pannel
         const pannelHeader = document.querySelector(".js-panel-cart");
         if (pannelHeader) pannelHeader.classList.remove("show-header-cart");
@@ -539,4 +534,4 @@ const InitCart = async () => {
 
 InitCart();
 
-export { RefreshCartView };
+export { RefreshCartView, AddToCartEvent };

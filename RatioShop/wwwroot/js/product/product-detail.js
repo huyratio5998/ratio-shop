@@ -1,4 +1,5 @@
 import * as ProductItemsService from "./product-card-items.js";
+import * as CartCommonService from "../cart/cart-common.js";
 
 // Helper function
 const getLastItem = (thePath) =>
@@ -16,8 +17,9 @@ const VariantChangeEventProductDetail = async () => {
   if (!productId) return;
 
   const data = await ProductItemsService.GetProductDetailById(productId);
-  if (data) {
-    ProductItemsService.VariantChangeEvent(data);
+  const productDetailArea = document.querySelector(".js_product-detail-area");
+  if (data && productDetailArea) {
+    ProductItemsService.VariantChangeEvent(data, productDetailArea);
   }
 };
 
@@ -25,6 +27,12 @@ const VariantChangeEventProductDetail = async () => {
 const Init = () => {
   console.log("product-detail.js");
   VariantChangeEventProductDetail();
+
+  const quickViewArea = document.querySelector(".js_quickViewAreaEvent");
+  if (quickViewArea) {
+    ProductItemsService.AddQuickViewProductEvent(quickViewArea);
+    CartCommonService.AddToCartEvent(quickViewArea);
+  }
 };
 
 Init();

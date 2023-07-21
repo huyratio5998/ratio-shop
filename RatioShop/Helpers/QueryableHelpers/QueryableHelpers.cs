@@ -27,7 +27,7 @@ namespace RatioShop.Helpers.QueryableHelpers
             return Expression.Lambda<Func<T, object>>(propAsObject, parameter);
         }        
 
-        public static IQueryable<T> SortedProductsGeneric<T>(this IQueryable<T> queries, SortingEnum? sortBy) where T : BaseProduct
+        public static IQueryable<T> SortedBaseProductsGeneric<T>(this IQueryable<T> queries, SortingEnum? sortBy) where T : BaseProduct
         {
             switch (sortBy)
             {
@@ -41,9 +41,23 @@ namespace RatioShop.Helpers.QueryableHelpers
             }
         }
 
+        public static IQueryable<T> SortedEntitiesGeneric<T>(this IQueryable<T> queries, SortingEnum? sortBy) where T : BaseEntity
+        {
+            switch (sortBy)
+            {
+                case SortingEnum.Default:
+                    return queries.OrderByDescending(nameof(BaseEntity.CreatedDate));
+                case SortingEnum.Oldest:
+                    return queries.OrderBy(nameof(BaseEntity.CreatedDate));
+                case SortingEnum.RecentUpdate:
+                    return queries.OrderByDescending(nameof(BaseEntity.ModifiedDate));
+                default: return queries.OrderByDescending(nameof(BaseEntity.CreatedDate));
+            }
+        }
+
         public static IQueryable<T> PagingProductsGeneric<T>(this IQueryable<T> queries, IBasePagingRequest pagingRequest)
         {
-            pagingRequest.PageIndex = pagingRequest.PageIndex == 0 ? 1 : pagingRequest.PageIndex;
+            pagingRequest.PageIndex = pagingRequest.PageIndex <= 0 ? 1 : pagingRequest.PageIndex;
             pagingRequest.PageSize = pagingRequest.PageSize == 0 ? 5 : pagingRequest.PageSize;
 
             if (pagingRequest.IsSelectPreviousItems)
@@ -56,88 +70,25 @@ namespace RatioShop.Helpers.QueryableHelpers
                 .Take(pagingRequest.PageSize);
             }
             return queries;
-        }
+        }        
 
-        public static IQueryable<Product> BuildProductFilter(this IQueryable<Product> queries, IFacetFilter facetFilter)
-        {
-            if (facetFilter == null || facetFilter.FilterItems == null || !facetFilter.FilterItems.Any()) return queries;
-
-            foreach (var filter in facetFilter.FilterItems)
-            {
-                switch (filter.Type)
-                {
-                    case CommonConstant.FilterType.NumberRange:
-                        break;
-                    case CommonConstant.FilterType.Text:
-                        break;
-                    case CommonConstant.FilterType.FreeText:
-                        {
-                            var searchText = filter.Value;
-                            if (!string.IsNullOrWhiteSpace(searchText))
-                            {
-                                var fullSearchTextResult = queries.Where(x => x.Code.ToLower().Contains(searchText)
-                                                || x.Name.ToLower().Contains(searchText)
-                                                || x.ProductFriendlyName.ToLower().Contains(searchText));
-
-                                if (fullSearchTextResult.Count() == 0)
-                                {
-                                    var predicate = PredicateBuilder.False<Product>();
-
-                                    var listSearchText = searchText.Trim().ToLower().Split(" ").Select(x => x.Trim()).ToList();
-                                    if (listSearchText != null && listSearchText.Any())
-                                    {
-                                        foreach (var text in listSearchText)
-                                        {
-                                            predicate = predicate.Or(x => x.Code.ToLower().Contains(text)
-                                                    || x.Name.ToLower().Contains(text)
-                                                    || x.ProductFriendlyName.ToLower().Contains(text));
-                                        }
-                                    }
-                                    queries = queries.Where(predicate);
-                                }
-                                else queries = fullSearchTextResult;
-                            }
-                            break;
-                        }                        
-                }
-            }
-
-            return queries;
-        }
-
-        public static IQueryable<T> SortedProductsAdditionInfo<T>(this IQueryable<T> queries, SortingEnum sortBy) where T : ProductVariant
+        public static IQueryable<ProductVariant> SortedProductsAdditionInfo(this IQueryable<ProductVariant> queries, SortingEnum sortBy)
         {
             switch (sortBy)
             {
-                case SortingEnum.HeightToLow:
+                case SortingEnum.HeightoLow:
                     return queries.OrderByDescending(nameof(ProductVariant.Price));
-                case SortingEnum.LowToHeight:
+                case SortingEnum.LowtoHeigh:
                     return queries.OrderBy(nameof(ProductVariant.Price));
                 default: return queries;
             }
-        }
-
-        public static IQueryable<Product> SortedProducts(this IQueryable<Product> products, string sortBy)
-        {
-            switch (sortBy.ToLower())
-            {
-                case "default":
-                    return products.OrderByDescending(nameof(Product.CreatedDate));
-                case "oldest":
-                    return products.OrderBy(nameof(Product.CreatedDate));
-                case "name":
-                    return products.OrderBy(nameof(Product.Name));
-                case "recentupdate":
-                    return products.OrderByDescending(nameof(Product.ModifiedDate));
-                default: return products.OrderByDescending(nameof(Product.CreatedDate));
-            }
-        }
+        }        
 
         public static string GetFreeTextFilter(IEnumerable<FacetFilterItem>? filterItems)
         {
             if(filterItems == null || !filterItems.Any()) return string.Empty;
 
-            return filterItems.FirstOrDefault(x => x.Type == CommonConstant.FilterType.FreeText)?.Value ?? string.Empty;
+            return filterItems.FirstOrDefault(x => x.Type == FilterType.FreeText.ToString())?.Value ?? string.Empty;
         }
     }
 }

@@ -109,17 +109,18 @@ namespace RatioShop.Services.Implement
             return true;
         }
 
-        public IEnumerable<string> GetListCouponApplyByCartId(Guid cartId)
+        public IEnumerable<string> GetListCouponApplyByCartId(Guid cartId, bool includeInActiveStatus = false)
         {
             if (cartId == Guid.Empty) return Enumerable.Empty<string>();
-
-            return GetCartDiscounts().AsQueryable().Where(x => x.CartId == cartId)
+            var queries = GetCartDiscounts().AsQueryable().Where(x => x.CartId == cartId)
                 .Join(_discountService.GetDiscounts(),
                 x => x.DiscountId,
                 y => y.Id,
-                (x, y) => new { cartDiscount = x, discount = y })
-                .Where(x => x.discount.Status.Equals(CommonStatus.Discount.Active))
-                .Select(x => x.discount.Code);
+                (x, y) => new { cartDiscount = x, discount = y });
+
+            if (!includeInActiveStatus) queries = queries.Where(x => x.discount.Status.Equals(CommonStatus.Discount.Active));
+
+            return queries.Select(x => x.discount.Code);
         }
 
         public IEnumerable<Discount> GetDicountsByCouponsCode(List<string> coupons)

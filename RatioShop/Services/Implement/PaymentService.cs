@@ -49,7 +49,7 @@ namespace RatioShop.Services.Implement
 
         public async Task<bool> ProceedPayment(OrderViewModel order)
         {
-            var paymentMethod = order.Payment?.Type;
+            var paymentMethod = order.Order.Payment?.Type;
             if (paymentMethod == null) return false;
             if (paymentMethod == PaymentType.COD) return true;
 

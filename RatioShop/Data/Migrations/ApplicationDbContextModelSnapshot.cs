@@ -17,7 +17,7 @@ namespace RatioShop.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.18")
+                .HasAnnotation("ProductVersion", "6.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -262,31 +262,6 @@ namespace RatioShop.Data.Migrations
                     b.ToTable("CartDiscount");
                 });
 
-            modelBuilder.Entity("RatioShop.Data.Models.Catalog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Catalog");
-                });
-
             modelBuilder.Entity("RatioShop.Data.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -295,9 +270,6 @@ namespace RatioShop.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("CatalogId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -310,9 +282,12 @@ namespace RatioShop.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CatalogId");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("Category");
                 });
@@ -337,6 +312,9 @@ namespace RatioShop.Data.Migrations
 
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
@@ -516,6 +494,9 @@ namespace RatioShop.Data.Migrations
                     b.Property<double?>("DiscountRate")
                         .HasColumnType("float");
 
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
@@ -547,11 +528,17 @@ namespace RatioShop.Data.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<double?>("DiscountRate")
+                        .HasColumnType("float");
+
                     b.Property<bool>("IsReverted")
                         .HasColumnType("bit");
 
                     b.Property<int>("ItemNumber")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("ItemPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
@@ -827,13 +814,11 @@ namespace RatioShop.Data.Migrations
 
             modelBuilder.Entity("RatioShop.Data.Models.Category", b =>
                 {
-                    b.HasOne("RatioShop.Data.Models.Catalog", "Catalog")
-                        .WithMany()
-                        .HasForeignKey("CatalogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("RatioShop.Data.Models.Category", "ParentCategory")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId");
 
-                    b.Navigation("Catalog");
+                    b.Navigation("ParentCategory");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.Order", b =>
@@ -964,6 +949,11 @@ namespace RatioShop.Data.Migrations
                     b.Navigation("CartDiscounts");
 
                     b.Navigation("ProductVariantCarts");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.Category", b =>
+                {
+                    b.Navigation("Children");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.Discount", b =>

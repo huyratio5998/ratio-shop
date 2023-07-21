@@ -9,5 +9,8 @@ namespace RatioShop.Data.Repository.Abstract
         Task<Category> CreateCategory(Category category);
         bool UpdateCategory(Category category);        
         bool DeleteCategory(int id);
+
+        //
+        IQueryable<Category> GetCategoriesWithParentData();
     }
 }

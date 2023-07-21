@@ -19,7 +19,7 @@ namespace RatioShop.Features
         // GET: Discounts
         public async Task<IActionResult> Index()
         {
-            var discounts = _discountService.GetDiscounts();
+            var discounts = _discountService.GetDiscounts().OrderBy(x=>x.IsDelete).ThenBy(x=>x.Status).ThenBy(x=>x.DiscountType).ThenBy(x=>x.Value).ThenByDescending(x=>x.CreatedDate);
             return View(discounts);
         }
 
@@ -84,7 +84,7 @@ namespace RatioShop.Features
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,Code,Number,Value,DiscountType,StartDate,ExpiredDate,Status,Id,CreatedDate,ModifiedDate")] Discount discount)
+        public async Task<IActionResult> Edit(int id, [Bind("Name,Code,Number,Value,DiscountType,StartDate,ExpiredDate,Status,Id,CreatedDate,ModifiedDate,IsDelete")] Discount discount)
         {
             if (id != discount.Id)
             {
@@ -111,7 +111,7 @@ namespace RatioShop.Features
                 return RedirectToAction(nameof(Index));
             }
             return View(discount);
-        }
+        }       
 
         // GET: Discounts/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -131,11 +131,25 @@ namespace RatioShop.Features
         }
 
         // POST: Discounts/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("DeepDelete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var discount = _discountService.DeleteDiscount(id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TemporaryDelete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var discount = _discountService.TemporaryDeleteDiscount((int)id);
+
             return RedirectToAction(nameof(Index));
         }
 

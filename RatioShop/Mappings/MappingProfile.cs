@@ -17,8 +17,8 @@ namespace RatioShop.Mappings
         {
             CreateMap<CartDetailResponsViewModel, CartDetailViewModel>();
             CreateMap<Order, OrderViewModel>()
-                .ForMember(dest => dest.Order, opt => opt.MapFrom(x=>x));
-            CreateMap<OrderViewModel, Order>();
+                .ForMember(dest => dest.Order, opt => opt.MapFrom(x=>x));            
+
             CreateMap<UserViewModel, UserResponseViewModel>()                
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(x => x.User.Address))
                 .ForPath(dest => dest.Address.AddressDetail, opt => opt.MapFrom(x => x.DefaultShippingAddress))
@@ -41,6 +41,12 @@ namespace RatioShop.Mappings
 
             CreateMap<ProductSearchRequest, BaseSearchRequest>()
                 .ForMember(dest => dest.FilterItems, opt => opt.MapFrom(x => JsonConvert.DeserializeObject<IEnumerable<FacetFilterItem>>(x.FilterItems)));
+
+            CreateMap<BaseSearchArgs, BaseSearchRequest>()
+                .ForMember(dest => dest.FilterItems, opt => opt.MapFrom(x => JsonConvert.DeserializeObject<IEnumerable<FacetFilterItem>>(x.FilterItems)));
+
+            CreateMap<ListProductViewModel, ListProductResponseViewModel>();            
+
         }
     }
 }

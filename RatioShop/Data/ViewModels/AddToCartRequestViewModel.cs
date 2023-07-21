@@ -6,10 +6,13 @@ namespace RatioShop.Data.ViewModels
     {
         [JsonProperty("cartId")]
         public Guid? CartId { get; set; }
+
         [JsonProperty("userId")]
         public Guid? UserId { get; set; }
+
         [JsonProperty("variantId")]
         public Guid VariantId { get; set; }
+
         [JsonProperty("number")]
         public int Number { get; set; }       
     }

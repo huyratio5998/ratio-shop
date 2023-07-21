@@ -14,6 +14,7 @@ namespace RatioShop.Data.Models
         public DateTime StartDate { get; set; }
         public DateTime ExpiredDate { get; set; }
         public string Status { get; set; }
+        public bool IsDelete { get; set; }
 
         public List<CartDiscount>? CartDiscounts { get; set; }
     }

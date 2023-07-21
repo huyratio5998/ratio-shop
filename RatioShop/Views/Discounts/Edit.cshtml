@@ -21,9 +21,14 @@
             </div>
               <div class="form-group">
                 <label asp-for="Code" class="control-label"></label>
-                <input asp-for="Code" class="form-control" />
+                <input asp-for="Code" readonly class="form-control" />
                 <span asp-validation-for="Code" class="text-danger"></span>
             </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsDelete" /> @Html.DisplayNameFor(model => model.IsDelete)
+                </label>
+            </div>              
             <div class="form-group">
                 <label asp-for="Number" class="control-label"></label>
                 <input asp-for="Number" class="form-control" />
@@ -31,12 +36,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Value" class="control-label"></label>
-                <input asp-for="Value" class="form-control" />
+                <input asp-for="Value" readonly class="form-control" />
                 <span asp-validation-for="Value" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="DiscountType" class="control-label"></label>
-                <select class="form-control" asp-for="DiscountType" asp-items="Html.GetEnumSelectList<DiscountType>()"></select>                
+                <select class="form-control" readonly asp-for="DiscountType" asp-items="Html.GetEnumSelectList<DiscountType>()"></select>                
                 <span asp-validation-for="DiscountType" class="text-danger"></span>
             </div>
             <div class="form-group">

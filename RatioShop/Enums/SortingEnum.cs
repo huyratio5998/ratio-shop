@@ -6,7 +6,7 @@
         Oldest,
         RecentUpdate,
         Name,
-        LowToHeight,
-        HeightToLow
+        LowtoHeigh,
+        HeightoLow
     }
 }

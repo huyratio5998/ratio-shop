@@ -5,10 +5,12 @@ using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
 using RatioShop.Data.ViewModels.SearchViewModel;
+using RatioShop.Enums;
 using RatioShop.Helpers;
 using RatioShop.Helpers.FileHelpers;
 using RatioShop.Helpers.QueryableHelpers;
 using RatioShop.Services.Abstract;
+using RatioShop.Services.Implement;
 
 namespace RatioShop.Features
 {
@@ -21,11 +23,14 @@ namespace RatioShop.Features
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IProductVariantStockService _productVariantStockService;
 
+        private readonly ICommonService _commonService;        
+
         private const int pageSizeDefault = 5;
         private const int pageSizeClientDesktopDefault = 8;
         private const int pageSizeClientMobileDefault = 3;
+        private const int maxRelatedNumber = 8;
 
-        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService)
+        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService)
         {
             this._productService = productService;
             _hostingEnvironment = hostingEnvironment;
@@ -33,6 +38,7 @@ namespace RatioShop.Features
             _productCategoryService = productCategoryService;
             _categoryService = categoryService;
             _productVariantStockService = productVariantStockService;
+            _commonService = commonService;
         }
 
         // GET: Products
@@ -43,9 +49,16 @@ namespace RatioShop.Features
             request.PageSize = pageSize;
             request.IsSelectPreviousItems = true;
 
-            var listProductViewModel = _productService.GetListProducts(request);
+            ListProductViewModel listProductViewModel = _productService.GetListProducts(request);
+            listProductViewModel.FilterSettings = new FilterSettings
+            {
+                PriceRangeFilter = _productService.GetProductPriceFilter(5000000, 5),
+                CategoryFilter = SiteSettings.CategoriesFilter
+            };
 
+            // for share value of search on header partial
             ViewBag.Search = QueryableHelpers.GetFreeTextFilter(listProductViewModel?.FilterItems);
+            ViewBag.SortType = request.SortType;
 
             return View(listProductViewModel);
         }
@@ -53,19 +66,19 @@ namespace RatioShop.Features
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public IActionResult Search(string search = "", int page = 1)
+        public IActionResult Search(string search = "", string sortType = "default", int page = 1)
         {
             var filterItems = JsonConvert.SerializeObject(
                     new List<FacetFilterItem>() {
                         new FacetFilterItem
                         {
-                            FieldName = "",
-                            Type = CommonConstant.FilterType.FreeText,
+                            FieldName = FieldNameFilter.Name.ToString(),
+                            Type = FilterType.FreeText.ToString(),
                             Value = search
                         }
                     });
 
-            return RedirectToAction("Index", new { filterItems = filterItems, page = page });
+            return RedirectToAction("Index", new { filterItems = filterItems, sortType = sortType, page = page });
         }
 
         [AllowAnonymous]
@@ -74,6 +87,8 @@ namespace RatioShop.Features
             if (id == null) return NotFound();
 
             var product = _productService.GetProduct((Guid)id);
+            product.RelatedProducts = _productService.GetRelatedProducts(product, maxRelatedNumber);
+            product.BreadCrumbs = _commonService.GetBreadCrumbsByProductId((Guid)id);
 
             if (product == null) return NotFound();
 

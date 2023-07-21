@@ -11,6 +11,8 @@ namespace RatioShop.Services.Abstract
         bool DeleteDiscount(int id);
 
         Discount? GetDiscountByCode(string code);
+        bool TemporaryDeleteDiscount(int id);
+
 
     }
 }

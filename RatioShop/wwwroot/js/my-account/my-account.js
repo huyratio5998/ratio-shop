@@ -33,7 +33,9 @@ const GetOrderHistoryApi = async () => {
 };
 
 const GetOrderDetailApi = async (id) => {
-  const result = await fetch(`${baseApiUrl}/order/detail?id=${id}`);
+  const result = await fetch(
+    `${baseApiUrl}/order/detail?id=${id}&getLatestVariantPrice=false&isIncludeInActiveDiscount=true`
+  );
   if (result.ok) {
     return await result.json();
   }
@@ -53,25 +55,32 @@ const BuildTableItems = (data) => {
                       <th class="column-5">Total</th>
                   </tr>`;
   cartItems.forEach((el) => {
+    const priceDisplay = el.discountRate
+      ? `${VNDong.format(el.discountPrice)} <span class="ratio-origional-price">
+      ${VNDong.format(el.price)}</span>`
+      : VNDong.format(el.price);
     const itemImage = el.image
       ? `/images/products/${el.image}`
       : "/images/default-placeholder.jpg";
     const itemRow = `<tr class="table_row">
                         <td class="column-1">
-                            <div class="how-itemcart1" data-variant-id="${
-                              el.variantId
-                            }">
-                                <img src="${itemImage}" alt="${el.name} ${
-      el.variableName
-    }">
+                            <div class="how-itemcart1" data-variant-id="
+                            ${el.variantId}">
+                                <img src="${itemImage}" alt="
+                                ${el.name} ${el.variableName}">
                             </div>
                         </td>
-                        <td class="column-2"><a href="/products/productdetail/${
-                          el.variantId
-                        }" class="header-cart-item-name m-b-18 hov-cl1 trans-04">${
-      el.name
-    } - ${el.variableName}</a></td>
-                        <td class="column-3">${VNDong.format(el.price)}</td>
+                        <td class="column-2">
+                        <div class="m-b-18">
+                          <a href="/products/productdetail/${
+                            el.variantId
+                          }" class="header-cart-item-name hov-cl1 trans-04">
+                              ${el.name} - ${el.variableName}
+                          </a>
+                          <p class="text-secondary">${el.productCode}</p>    
+                        </div>                        
+                        </td>
+                        <td class="column-3">${priceDisplay}</td>
                         <td class="column-4">
                             <div class="wrap-num-product flex-w m-l-auto m-r-0" data-variant-id="${
                               el.variantId
@@ -89,7 +98,7 @@ const BuildTableItems = (data) => {
                             </div>
                         </td>
                         <td class="column-5">${VNDong.format(
-                          +el.price * +el.number
+                          +el.discountPrice * +el.number
                         )}</td>
                     </tr>`;
     itemsHtml += itemRow;

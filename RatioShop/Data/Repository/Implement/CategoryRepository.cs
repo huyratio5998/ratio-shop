@@ -1,4 +1,5 @@
-﻿using RatioShop.Data.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 
 namespace RatioShop.Data.Repository.Implement
@@ -24,9 +25,17 @@ namespace RatioShop.Data.Repository.Implement
             return GetAll();
         }
 
+        public IQueryable<Category> GetCategoriesWithParentData()
+        {
+            return _context.Category.AsNoTracking().Include(x => x.ParentCategory).AsQueryable();
+        }
+
         public Category? GetCategory(int id)
         {
-            return GetById(id);
+            var category = GetById(id);   
+            if(category != null && category.ParentId != null) category.ParentCategory = GetById((int)category.ParentId);
+
+            return category;
         }
 
         public bool UpdateCategory(Category category)

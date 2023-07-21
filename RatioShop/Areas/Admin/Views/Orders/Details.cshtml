@@ -1,0 +1,222 @@
+﻿@using RatioShop.Data.ViewModels.OrdersViewModel
+@using RatioShop.Helpers
+
+@model OrderResponseViewModel
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+
+    var orderStatusBadgeClass = CommonHelper.GetStatusBadgeClass(Model.Status, 5);
+    var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(Model.ShipmentStatus, 5);
+    var createdDateUTCFormat = Model.CreatedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+    var modifiedDateUTCFormat = Model.ModifiedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Order</h4>
+    <hr />
+    <div class="row">
+        <div class="col-6">
+            <a class="btn btn-outline-dark" asp-action="Index">Back to List</a>
+        </div>
+        <div class="col-6 row">
+            <a class="col-6 btn btn-outline-danger" asp-action="Index">Cancel Order</a>
+            <a class="col-6 btn btn-outline-success" asp-action="Index">Complete order</a>
+        </div>        
+    </div>
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.OrderNumber)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.OrderNumber)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-9">
+            <span class="badge rounded-pill @orderStatusBadgeClass">
+                @Html.DisplayFor(model => model.Status)
+            </span>
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.IsRefund)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.IsRefund)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ShipmentStatus)
+        </dt>
+        <dd class="col-sm-9">
+            <span class="badge rounded-pill @shipmentStatusBadgeClass">
+                @Html.DisplayFor(model => model.ShipmentStatus)
+            </span>
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Payment)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Payment.DisplayName)
+        </dd>
+        <dt class="col-sm-3">
+            Coupons
+        </dt>
+        <dd class="col-sm-9">
+            @if (Model.CartDetail != null && Model.CartDetail.CouponCodes != null && Model.CartDetail.CouponCodes.Any())
+            {
+                foreach (var item in Model.CartDetail.CouponCodes)
+                {
+                    <span class="badge rounded-pill bg-light text-dark">
+                        @item
+                    </span>
+
+                    <span>, </span>
+                }
+            }
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.CreatedDate)
+        </dt>
+        <dd class="col-sm-9 js_date-format-local" data-date-value="@createdDateUTCFormat">
+            @Html.DisplayFor(model => model.CreatedDate)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ModifiedDate)
+        </dt>
+        <dd class="col-sm-9 js_date-format-local" data-date-value="@modifiedDateUTCFormat">
+            @Html.DisplayFor(model => model.ModifiedDate)
+        </dd>
+    </dl>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Image
+                </th>
+                <th>
+                    Product Code
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Number
+                </th>
+                <th>
+                    Discount Rate
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    Final Price
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.CartDetail?.CartItems != null && Model.CartDetail.CartItems.Any())
+            {
+                @foreach (var item in Model.CartDetail?.CartItems)
+                {
+                    <tr>
+                        @if (string.IsNullOrEmpty(item.Image))
+                        {
+                            <td>
+                                <img src="~/images/default-placeholder.jpg" style="height:50px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img src="~/images/products/@item.Image" style="height:50px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ProductCode)
+                        </td>
+                        <td>
+                            @item.Name - @item.VariableName
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Number)
+                        </td>
+                        <td>
+                            @($"{item.DiscountRate}%")
+                        </td>
+                        <td>
+                            @CommonHelper.CurrencyFormat(item.Price, language)
+                        </td>
+                        <td>
+                            @CommonHelper.CurrencyFormat(item.DiscountPrice, language)
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@{
+    var totalItemPriceOrigional = Model.CartDetail?.CartItems?.Sum(x => x.Price * x.Number);
+    var totalItemDiscount = totalItemPriceOrigional - Model.CartDetail?.TotalPrice;
+    var totalCouponsDiscount = Model.CartDetail?.TotalPrice + Model.CartDetail?.ShippingFee - Model.CartDetail?.TotalFinalPrice;
+    var totalDiscount = totalItemDiscount + totalCouponsDiscount;
+}
+<dl class="row">
+    <dt class="col-sm-3">
+        Total item
+    </dt>
+    <dd class="col-sm-9">
+        @Model.CartDetail?.TotalItems
+    </dd>
+    <dt class="col-sm-3">
+        Total item price
+    </dt>
+    <dd class="col-sm-9">
+        @CommonHelper.CurrencyFormat(Model.CartDetail?.TotalPrice, language)
+    </dd>
+    <dt class="col-sm-3">
+        @Html.DisplayNameFor(model => model.ShipmentFee)
+    </dt>
+    <dd class="col-sm-9">
+        @CommonHelper.CurrencyFormat(Model.ShipmentFee, language)
+    </dd>
+    <dt class="col-sm-3">
+        Total Items Discount
+    </dt>
+    <dd class="col-sm-9 text-danger">
+        -@CommonHelper.CurrencyFormat(totalItemDiscount, language)
+    </dd>
+    <dt class="col-sm-3">
+        Total Coupons Discount
+    </dt>
+    <dd class="col-sm-9 text-danger">
+        -@CommonHelper.CurrencyFormat(totalCouponsDiscount, language)
+    </dd>
+    <dt class="col-sm-3">
+        Total Discount
+    </dt>
+    <dd class="col-sm-9 text-danger">
+        <b>
+            -@CommonHelper.CurrencyFormat(totalDiscount, language)
+        </b>
+    </dd>
+    <dt class="col-sm-3">
+        @Html.DisplayNameFor(model => model.TotalMoney)
+    </dt>
+    <dd class="col-sm-9">
+        <b>
+            @CommonHelper.CurrencyFormat(Model.TotalMoney, language)
+        </b>
+        <span> <s> @CommonHelper.CurrencyFormat(totalItemPriceOrigional + Model.ShipmentFee, language)</s></span>
+    </dd>
+</dl>

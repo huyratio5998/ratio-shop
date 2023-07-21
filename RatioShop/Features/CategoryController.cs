@@ -7,31 +7,24 @@ namespace RatioShop.Features
 {
     public class CategoryController : Controller
     {
-        private readonly ICategoryService _categoryService;
-        private readonly ICatalogService _catalogService;
+        private readonly ICategoryService _categoryService;        
 
-        public CategoryController(ICategoryService categoryService, ICatalogService catalogService)
+        public CategoryController(ICategoryService categoryService)
         {
-            _categoryService = categoryService;
-            _catalogService = catalogService;
+            _categoryService = categoryService;            
         }
 
         // GET: CategoryController
         public ActionResult Index()
         {
-            var categories = _categoryService.GetCategories().ToList();
-            foreach (var item in categories)
-            {
-                item.Catalog = _catalogService.GetCatalog(item.CatalogId);
-            }
+            var categories = _categoryService.GetCategoriesWithParentData().OrderBy(x=>x.ParentId).ToList();            
             return View(categories);
         }
 
         // GET: CategoryController/Details/5
         public ActionResult Details(int id)
         {
-            var category = _categoryService.GetCategory(id);
-            category.Catalog = _catalogService.GetCatalog(category.CatalogId);
+            var category = _categoryService.GetCategory(id);            
 
             return View(category);
         }
@@ -40,7 +33,7 @@ namespace RatioShop.Features
         public ActionResult Create()
         {
             var model = new CategoryViewModel();
-            model.AvailableCatalogs = _catalogService.GetCatalogs().ToDictionary(x => x.Id.ToString(), y => y.DisplayName);
+            model.AvailableCategory = _categoryService.GetCategories().ToDictionary(x => x.Id.ToString(), x => x.DisplayName);
             return View(model);
         }
 
@@ -70,7 +63,7 @@ namespace RatioShop.Features
 
             var model = new CategoryViewModel();
             model.Category = category;
-            model.AvailableCatalogs = _catalogService.GetCatalogs().ToDictionary(x => x.Id.ToString(), y => y.DisplayName);
+            model.AvailableCategory = _categoryService.GetCategories().Where(x=>x.Id != id).OrderBy(x=>x.ParentId).ToDictionary(x => x.Id.ToString(), x => x.DisplayName);
 
             return View(model);
         }
@@ -99,7 +92,6 @@ namespace RatioShop.Features
         public ActionResult Delete(int id)
         {
             var category = _categoryService.GetCategory(id);
-            category.Catalog = _catalogService.GetCatalog(category.CatalogId);
 
             return category == null ? View() : View(category);
         }

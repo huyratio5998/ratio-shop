@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RatioShop.Data.ViewModels;
 using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Services.Abstract;
 
@@ -11,10 +13,12 @@ namespace RatioShop.Apis
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IMapper _mapper;        
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IMapper mapper)
         {
             _productService = productService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -22,17 +26,17 @@ namespace RatioShop.Apis
         public IActionResult GetProducts([FromQuery] ProductSearchRequest request)
         {
             if (ModelState.IsValid)
-            {
-                var sortBy = "default";
+            {                
                 var products = _productService.GetListProducts(request);
+                var responseResult = _mapper.Map<ListProductResponseViewModel>(products);
 
-                return Ok(products);
+                return Ok(responseResult);
             }
             else
             {
                 return BadRequest();
             }
-        }        
+        }
 
         [HttpGet]
         [Route("detail/{productId:guid}")]
@@ -40,7 +44,8 @@ namespace RatioShop.Apis
         {
             if (productId == Guid.Empty) return NotFound();
 
-            var product = _productService.GetProduct(productId);
+            var product = _productService.GetProduct(productId);            
+
             return Ok(product);
         }
     }
