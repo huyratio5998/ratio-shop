@@ -73,10 +73,16 @@
             @Html.DisplayFor(model => model.ModifiedDate)
         </dd>
     </dl>
-    
+    <div>
+        <h3>Note*: </h3><span>Please becareful, Deep delete coupon has ability make impact to order history of client / or order viewer detail</span>
+    </div>
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Delete" class="btn btn-danger" /> |                
     </form>
+    <form asp-action="DeepDelete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="DeepDelete" class="btn btn-danger" /> |                
+    </form>
+    <a asp-action="Index">Back to List</a>
 </div>

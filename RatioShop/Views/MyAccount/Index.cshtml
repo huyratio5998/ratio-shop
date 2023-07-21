@@ -208,18 +208,18 @@
                                             {
                                                 foreach (var item in Model.OrderHistory.Orders)
                                                 {
-                                                    var orderStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.Status);
-                                                    var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.ShipmentStatus);
-                                                    var shipmentStatusDisplay = item.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Pending) ? "In Progress" : item.ShipmentStatus;
+                                                    var orderStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.Order.Status);
+                                                    var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.Order.ShipmentStatus);
+                                                    var shipmentStatusDisplay = item.Order.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Pending) ? "In Progress" : item.Order.ShipmentStatus;
 
                                                     <tr class="table_row ratio-table-td" data-order-id="@item.Order?.Id">
-                                                        <td class="column-1"><a href="#" class="js_myaccount-order-detail">@item.OrderNumber</a></td>
+                                                        <td class="column-1"><a href="#" class="js_myaccount-order-detail">@item.Order.OrderNumber</a></td>
                                                         <td>@item.TotalItems</td>
-                                                        <td class="ratio-table-td-nowrap">@CommonHelper.CurrencyFormat(item.TotalMoney, language)</td>
-                                                        <td class="ratio-table-td-nowrap">@item.Order?.CreatedDate?.ToString("dd-MM-yyyy")</td>
+                                                        <td class="ratio-table-td-nowrap">@CommonHelper.CurrencyFormat(item.Order.TotalMoney, language)</td>
+                                                        <td class="ratio-table-td-nowrap js_date-format-local" data-date-value="@item.Order?.CreatedDate?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")">@item.Order?.CreatedDate?.ToString("dd/MM/yyyy")</td>
                                                         <td>
                                                             <div class="badge badge-pill @orderStatusBadgeClass flex-c-m stext-107 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-                                                                @item.Status
+                                                                @item.Order.Status
                                                             </div>
                                                         </td>
                                                         <td>
@@ -254,7 +254,7 @@
                             <div class="container">
                                 <div class="bg0 p-t-60 p-b-30 p-lr-15-lg how-pos3-parent">
                                     <button class="how-pos3 hov3 trans-04 js_hideOrderDetailPopup">
-                                        <img src="images/icons/icon-close.png" alt="CLOSE">
+                                        <img src="/images/icons/icon-close.png" alt="CLOSE">
                                     </button>
 
                                     <div class="js_orderDetailContentArea">

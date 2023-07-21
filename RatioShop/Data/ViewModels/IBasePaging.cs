@@ -6,5 +6,6 @@
         int PageSize { get; set; }
         int TotalCount { get; set; }
         int TotalPage { get; set; }
+        bool IsSelectPreviousItems { get; set; }
     }
 }

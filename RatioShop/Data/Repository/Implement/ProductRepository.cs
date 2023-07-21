@@ -1,7 +1,6 @@
 ﻿using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels;
-using RatioShop.Enums;
 using RatioShop.Helpers.QueryableHelpers;
 
 namespace RatioShop.Data.Repository.Implement

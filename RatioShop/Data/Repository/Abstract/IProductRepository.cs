@@ -12,6 +12,6 @@ namespace RatioShop.Data.Repository.Abstract
         public IQueryable<ProductViewModel> GetAllProductsByPageNumber(string sortBy, int pageNumber, int pageSize);        
         public Task<bool> AddProduct(Product product);
         public bool UpdateProduct(Product product);
-        public bool DeleteProduct(Guid productId);
+        public bool DeleteProduct(Guid productId);                
     }
 }

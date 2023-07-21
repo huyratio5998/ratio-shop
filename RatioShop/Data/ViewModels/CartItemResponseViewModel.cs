@@ -19,10 +19,20 @@ namespace RatioShop.Data.ViewModels
         [JsonProperty("variableName")]
         public string? VariableName { get; set; }
         [JsonProperty("price")]
-        public decimal? Price { get; set; }  
-        
+        public decimal? Price { get; set; }
+
+        [JsonProperty("discountPrice")]
+        public decimal? DiscountPrice { get; set; }
+
+        [JsonProperty("discountRate")]
+        public double? DiscountRate { get; set; }
+
         [JsonProperty("name")]
         public string? Name { get; set; }
+
+        [JsonProperty("productCode")]
+        public string? ProductCode { get; set; }
+
         [JsonProperty("image")]
         public string? Image { get; set; }
 

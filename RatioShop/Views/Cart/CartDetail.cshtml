@@ -54,7 +54,12 @@
                                             </div>
                                         </td>
                                         <td class="column-2">@item.VariableName</td>
-                                        <td class="column-3">@CommonHelper.CurrencyFormat(item.Price, language)</td>
+                                        <td class="column-3">@CommonHelper.CurrencyFormat(item.DiscountPrice, language)
+                                            @if(item.DiscountRate != null && item.DiscountRate != 0)
+                                            {
+                                                <span class="ratio-origional-price">@CommonHelper.CurrencyFormat(item.Price, language)</span>
+                                            }
+                                        </td>
                                         <td class="column-4">
                                             <div class="wrap-num-product flex-w m-l-auto m-r-0" data-variant-id="@item.VariantId">
                                                 <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">

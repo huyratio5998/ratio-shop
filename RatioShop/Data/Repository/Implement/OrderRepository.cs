@@ -19,12 +19,12 @@ namespace RatioShop.Data.Repository.Implement
             return Delete(id);
         }
 
-        public IEnumerable<Order> GetOrders()
-        {
+        public IQueryable<Order> GetOrders()
+        {            
             return GetAll();
         }
 
-        public IEnumerable<Order> GetOrders(int pageIndex, int pageSize)
+        public IQueryable<Order> GetOrders(int pageIndex, int pageSize)
         {
             return GetAll(pageIndex, pageSize);
         }

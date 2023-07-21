@@ -26,9 +26,9 @@ namespace RatioShop.Services.Implement
             return _productVariantRepository.CreateProductVariant(ProductVariant);
         }
 
-        public bool DeleteProductVariant(string id)
+        public bool DeleteProductVariant(string id, bool isDeepDelete = false)
         {
-            return _productVariantRepository.DeleteProductVariant(id);
+            return _productVariantRepository.DeleteProductVariant(id, isDeepDelete);
         }
 
         public IEnumerable<ProductVariant> GetProductVariants()
@@ -36,11 +36,21 @@ namespace RatioShop.Services.Implement
             return _productVariantRepository.GetProductVariants();
         }
 
-        public IEnumerable<ProductVariant> GetProductVariantsByProductId(Guid productId)
+        public IEnumerable<ProductVariant> GetProductVariantsByProductId(Guid productId, bool isIncludeDeletedVariant = false)
         {
-            if(productId == null || productId == Guid.Empty) return Enumerable.Empty<ProductVariant>();
+            if (productId == null || productId == Guid.Empty) return Enumerable.Empty<ProductVariant>();
 
-            return _productVariantRepository.GetProductVariantsByProductId(productId);
+            var productVariants = _productVariantRepository.GetProductVariantsByProductId(productId, isIncludeDeletedVariant).ToList();
+
+            if (productVariants != null && productVariants.Any())
+            {
+                foreach (var item in productVariants)
+                {
+                    var productVariantStocks = _productVariantStockService.GetProductVariantStocksByVariantId(item.Id).ToList();
+                    item.ProductVariantStocks = productVariantStocks;
+                }
+            }
+            return productVariants;
         }
 
         public ProductVariant? GetProductVariant(string id)

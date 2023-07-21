@@ -24,23 +24,20 @@
                 <span asp-validation-for="Category.DisplayName" class="text-danger"></span>
             </div>
 
-             <div class="form-group">
-                <label asp-for="Category.CatalogId" class="control-label"></label>
-                <select name="Category.CatalogId" id="Category_CatalogId" class="form-control">
-                @foreach (var item in Model.AvailableCatalogs)
-                {
-                    if (item.Key.ToString().Equals(Model.Category.CatalogId.ToString(), StringComparison.OrdinalIgnoreCase))
+            <div class="form-group">
+                <label asp-for="Category.ParentCategory.Name" class="control-label"></label>
+                <select asp-for="Category.ParentId" id="Category_ParentId" class="form-control">
+                    <option value="">Set as Catalog</option>
+                    @if (Model.AvailableCategory != null && Model.AvailableCategory.Any())
                     {
-                        <option value="@item.Key" selected>@item.Value</option>
+                        foreach (var item in Model.AvailableCategory)
+                        {
+                            <option value="@item.Key">@item.Value</option>
+                        }
                     }
-                    else
-                    {
-                        <option value="@item.Key">@item.Value</option>
-                    }
-                }
-            </select>                
-                <span asp-validation-for="Category.CatalogId" class="text-danger"></span>
-            </div>  
+                </select>
+                <span asp-validation-for="Category.ParentId" class="text-danger"></span>
+            </div>
 
             <input type="hidden" asp-for="Category.Id" />
             <input type="hidden" asp-for="Category.CreatedDate" />

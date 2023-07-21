@@ -4,9 +4,13 @@
     {
         public string? StockItems { get; set; }
         public bool TrackUpdated { get; set; }
-        public int ItemNumber { get; set; }
+        public int ItemNumber { get; set; }        
+        public decimal? ItemPrice { get; set; }
+        public double? DiscountRate { get; set; }
         public string? StockTrackingStatus { get; set; }
         public bool IsReverted { get; set; }
+
+
         public Guid ProductVariantId { get; set; }
         public ProductVariant? ProductVariant { get; set; }
         public Guid CartId { get; set; }

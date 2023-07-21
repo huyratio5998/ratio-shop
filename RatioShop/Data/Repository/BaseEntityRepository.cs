@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RatioShop.Data.Models;
+using RatioShop.Helpers;
 
 namespace RatioShop.Data.Repository
 {
@@ -34,15 +35,23 @@ namespace RatioShop.Data.Repository
         public override T? GetById(string id)
         {
             if (string.IsNullOrEmpty(id)) return null;
+            var result = _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id.ToString().ToLower().Equals(id.ToLower()));
+            if(result == null) return null;
 
-            return _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id.ToString().Equals(id, StringComparison.OrdinalIgnoreCase));
+            result.CreatedDate = result.CreatedDate.GetCorrectUTC();
+            result.ModifiedDate = result.ModifiedDate.GetCorrectUTC();            
+            return result;
         }
 
         public override T? GetById(int id)
         {
             if (id == 0) return null;
+            var result = _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id == id);
+            if (result == null) return null;
 
-            return _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id == id);
+            result.CreatedDate = result.CreatedDate.GetCorrectUTC();
+            result.ModifiedDate = result.ModifiedDate.GetCorrectUTC();            
+            return result;
         }
     }
 }

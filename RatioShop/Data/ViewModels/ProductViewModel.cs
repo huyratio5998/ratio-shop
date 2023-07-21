@@ -20,5 +20,9 @@ namespace RatioShop.Data.ViewModels
         public IDictionary<int,string>? AvailableStocks { get; set; }
         public bool IsSoldOnline { get { return (Product != null && Product.Variants != null && Product.Variants.Any(x => x.Price != null && x.Price != decimal.Zero)); } }
         public ProductVariant? SelectedVariant { get; set; }
+
+        // product detail
+        public IEnumerable<ProductViewModel>? RelatedProducts { get; set; }
+        public IEnumerable<BreadcrumbItemViewModel>? BreadCrumbs { get; set; }
     }
 }

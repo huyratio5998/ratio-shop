@@ -2,6 +2,7 @@
 using RatioShop.Data.ViewModels;
 using RatioShop.Data.ViewModels.MyAccountViewModel;
 using RatioShop.Data.ViewModels.OrdersViewModel;
+using RatioShop.Data.ViewModels.SearchViewModel;
 
 namespace RatioShop.Services.Abstract
 {
@@ -22,6 +23,7 @@ namespace RatioShop.Services.Abstract
         ListOrderViewModel? GetOrderHistoryByUserId(string userId, int pageIndex = 1, int pageSize = 5);
         ListOrderViewModel? GetOrderHistoryByUserId(string userId, string orderNumber, int pageIndex = 1, int pageSize = 5);
         int GetTotalOrderByUserId(string userId);
-        OrderResponseViewModel? GetOrderDetailResponse(string id);
+        OrderResponseViewModel? GetOrderDetailResponse(string id, bool getLatestItemVariantPrice = true, bool isIncludeInActiveDiscount = false);
+        ListOrderViewModel GetOrders(BaseSearchRequest args);
     }
 }

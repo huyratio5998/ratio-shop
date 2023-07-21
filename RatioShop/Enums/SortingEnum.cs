@@ -5,6 +5,8 @@
         Default,        
         Oldest,
         RecentUpdate,
-        Name
+        Name,
+        LowtoHeigh,
+        HeightoLow
     }
 }

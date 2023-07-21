@@ -150,10 +150,7 @@
             <tr>
                 <th>
                     Category
-                </th>
-                <th>
-                    Catalog
-                </th>
+                </th>                
                 <th></th>
             </tr>
         </thead>
@@ -166,10 +163,7 @@
                     <tr>
                         <td>
                             @Html.DisplayFor(modelItem => item.DisplayName)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Catalog.DisplayName)
-                        </td>
+                        </td>                        
                         <td data-productCategoryId="@item.Id" data-index="@count">
                             <a class="productCategory-edit mouse-hover" data-bs-toggle="modal" data-bs-target="#productCategoryModal">Edit</a> |
                             <a class="productCategory-delete mouse-hover">Delete</a>
@@ -207,11 +201,11 @@
                         </div>
                         <div class="form-group">
                             <label for="variant-price" class="control-label">Variant Price</label>
-                            <input type="number" id="variant-price" class="form-control" />
+                            <input type="number" required id="variant-price" class="form-control" />
                         </div>
                         <div class="form-group">
                             <label for="variant-discountRate" class="control-label">Variant Discount Rate</label>
-                            <input type="number" id="variant-discountRate" class="form-control" />
+                            <input type="number" required id="variant-discountRate" class="form-control" />
                         </div>
                         <div class="form-group">
                             <br />
@@ -264,11 +258,7 @@
                                     {
                                         <option value="@item.Id">@item.DisplayName</option>
                                     }
-                                </select>
-                                <div class="form-group">
-                                    <label for="productCategory-catalog" class="control-label">Catalog</label>
-                                    <input type="text" id="productCategory-catalog" disabled value="@Model.AvailableCategories.FirstOrDefault().Catalog?.DisplayName" class="form-control" />
-                                </div>
+                                </select>                                
                             }
                         </div>
 

@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
+using RatioShop.Data.ViewModels.SearchViewModel;
+using RatioShop.Enums;
 using RatioShop.Helpers;
 using RatioShop.Helpers.FileHelpers;
+using RatioShop.Helpers.QueryableHelpers;
 using RatioShop.Services.Abstract;
+using RatioShop.Services.Implement;
 
 namespace RatioShop.Features
 {
@@ -17,12 +22,15 @@ namespace RatioShop.Features
         private readonly ICategoryService _categoryService;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IProductVariantStockService _productVariantStockService;
-        
+
+        private readonly ICommonService _commonService;        
+
         private const int pageSizeDefault = 5;
         private const int pageSizeClientDesktopDefault = 8;
         private const int pageSizeClientMobileDefault = 3;
+        private const int maxRelatedNumber = 8;
 
-        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService)
+        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService)
         {
             this._productService = productService;
             _hostingEnvironment = hostingEnvironment;
@@ -30,30 +38,47 @@ namespace RatioShop.Features
             _productCategoryService = productCategoryService;
             _categoryService = categoryService;
             _productVariantStockService = productVariantStockService;
+            _commonService = commonService;
         }
 
         // GET: Products
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string sortBy = "default", int page = 1)
+        public async Task<IActionResult> Index(ProductSearchRequest request)
         {
-            
-            var listProductViewModel = new ListProductViewModel();
             var pageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
-            var listProducts = _productService.GetAllProductsByPageNumber(sortBy, page, pageSize).ToList();
-            listProducts = _productService.GetProductsRelatedInformation(listProducts);
+            request.PageSize = pageSize;
+            request.IsSelectPreviousItems = true;
 
-            listProductViewModel.Products = listProducts;
-            
-            //paging information
-            listProductViewModel.PageIndex = page;
-            listProductViewModel.PageSize = pageSize;
-            listProductViewModel.TotalCount = _productService.GetProducts().Count();
-            listProductViewModel.TotalPage = listProductViewModel.TotalCount == 0 ? 1 : (int)Math.Ceiling((double)listProductViewModel.TotalCount / pageSize);
-            //
-            ViewBag.SortBy = sortBy;
-            ViewBag.Page = page;
+            ListProductViewModel listProductViewModel = _productService.GetListProducts(request);
+            listProductViewModel.FilterSettings = new FilterSettings
+            {
+                PriceRangeFilter = _productService.GetProductPriceFilter(5000000, 5),
+                CategoryFilter = SiteSettings.CategoriesFilter
+            };
+
+            // for share value of search on header partial
+            ViewBag.Search = QueryableHelpers.GetFreeTextFilter(listProductViewModel?.FilterItems);
+            ViewBag.SortType = request.SortType;
 
             return View(listProductViewModel);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public IActionResult Search(string search = "", string sortType = "default", int page = 1)
+        {
+            var filterItems = JsonConvert.SerializeObject(
+                    new List<FacetFilterItem>() {
+                        new FacetFilterItem
+                        {
+                            FieldName = FieldNameFilter.Name.ToString(),
+                            Type = FilterType.FreeText.ToString(),
+                            Value = search
+                        }
+                    });
+
+            return RedirectToAction("Index", new { filterItems = filterItems, sortType = sortType, page = page });
         }
 
         [AllowAnonymous]
@@ -62,6 +87,8 @@ namespace RatioShop.Features
             if (id == null) return NotFound();
 
             var product = _productService.GetProduct((Guid)id);
+            product.RelatedProducts = _productService.GetRelatedProducts(product, maxRelatedNumber);
+            product.BreadCrumbs = _commonService.GetBreadCrumbsByProductId((Guid)id);
 
             if (product == null) return NotFound();
 
@@ -125,7 +152,7 @@ namespace RatioShop.Features
                 FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
                 productEntity.ProductImage = model.ProductImage?.FileName;
 
-                await _productService.AddProduct(productEntity);                
+                await _productService.AddProduct(productEntity);
 
                 return RedirectToAction(nameof(ProductSettings));
             }
@@ -137,7 +164,7 @@ namespace RatioShop.Features
         {
             if (id == null) return NotFound();
 
-            var product = _productService.GetProduct((Guid)id);                        
+            var product = _productService.GetProduct((Guid)id);
 
             if (product == null) return NotFound();
 
@@ -193,7 +220,7 @@ namespace RatioShop.Features
         }
 
         [HttpPost]
-        public async Task<string> UpdateProductAdditionalInformation([FromBody]UpdateProductAdditionalInformationRequest data)
+        public async Task<string> UpdateProductAdditionalInformation([FromBody] UpdateProductAdditionalInformationRequest data)
         {
             try
             {
@@ -225,21 +252,21 @@ namespace RatioShop.Features
                     {
                         await _productVariantService.CreateProductVariant(variant);
                         _productVariantStockService.CreateOrUpdateProductVariantStock(true, variant.Id, item.ProductVariantStocks);
-                    }                        
+                    }
                     else
                     {
                         variant.CreatedDate = productVariant.CreatedDate;
                         _productVariantService.UpdateProductVariant(variant);
                         _productVariantStockService.CreateOrUpdateProductVariantStock(false, variant.Id, item.ProductVariantStocks);
-                    }                        
+                    }
                 }
                 // add or update product categories
                 foreach (var item in data.ProductCategories)
                 {
                     var productCategory = new ProductCategory()
-                    {                                               
+                    {
                         ProductId = data.ProductId,
-                        CategoryId = item.Id                        
+                        CategoryId = item.Id
                     };
 
                     var productVariant = _productCategoryService.GetProductCategory(productCategory.CategoryId, productCategory.ProductId);
@@ -252,7 +279,7 @@ namespace RatioShop.Features
                 }
 
                 var response = new UpdateProductAdditionalInformationResponse(true, _productVariantService.GetProductVariantsByProductId(data.ProductId).ToList());
-                
+
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)

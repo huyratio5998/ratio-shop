@@ -13,6 +13,6 @@
         {
             public const string PersonalTab = "Personal";
             public const string OrderHistoryTab = "OrderHistory";
-        }
+        }        
     }
 }

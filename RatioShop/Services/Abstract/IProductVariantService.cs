@@ -6,11 +6,11 @@ namespace RatioShop.Services.Abstract
     public interface IProductVariantService
     {
         IEnumerable<ProductVariant> GetProductVariants();
-        IEnumerable<ProductVariant> GetProductVariantsByProductId(Guid productId);
+        IEnumerable<ProductVariant> GetProductVariantsByProductId(Guid productId, bool isIncludeDeletedVariant = false);
         ProductVariant? GetProductVariant(string id);
         Task<ProductVariant> CreateProductVariant(ProductVariant ProductVariant);
         bool UpdateProductVariant(ProductVariant ProductVariant);
-        bool DeleteProductVariant(string id);
+        bool DeleteProductVariant(string id, bool isDeepDelete = false);
 
         //Addition logic
         bool ReduceProductVariantNumber(Guid variantId, int reduceNumber, List<CartStockItem>? cartStockItems);

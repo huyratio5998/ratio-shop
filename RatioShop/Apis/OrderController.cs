@@ -29,14 +29,13 @@ namespace RatioShop.Apis
         }
 
         [Route("detail")]
-        public IActionResult GetOrderDetail([FromQuery] Guid id)
+        public IActionResult GetOrderDetail([FromQuery] Guid id, [FromQuery] bool getLatestVariantPrice = true, [FromQuery] bool isIncludeInActiveDiscount = false)
         {
             if (id == Guid.Empty) return BadRequest();
 
             // get order
-            var orderDetail = _orderService.GetOrderDetailResponse(id.ToString());
-            if (orderDetail == null) return NotFound();
-
+            var orderDetail = _orderService.GetOrderDetailResponse(id.ToString(), getLatestVariantPrice, isIncludeInActiveDiscount);
+            if (orderDetail == null) return NotFound();            
             return Ok(orderDetail);
         }
 

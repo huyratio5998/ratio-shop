@@ -5,17 +5,17 @@ namespace RatioShop.Data.Repository
 {
     public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        protected ApplicationDbContext _context;        
+        protected ApplicationDbContext _context;
         public BaseRepository(ApplicationDbContext context)
         {
-            _context = context;            
+            _context = context;
         }
         public async Task<T> Create(T entity)
         {
             await _context.AddAsync(entity);
             _context.SaveChanges();
             return entity;
-        }        
+        }
 
         public IQueryable<T> GetAll()
         {
@@ -26,10 +26,10 @@ namespace RatioShop.Data.Repository
         {
             return _context.Set<T>()
                 .AsQueryable()
-                .AsNoTracking()                
-                .Skip((pageIndex-1) * pageSize)
+                .AsNoTracking()
+                .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize);
-        }       
+        }
 
         public bool Update(T entity)
         {
@@ -39,9 +39,10 @@ namespace RatioShop.Data.Repository
                 _context.SaveChanges();
                 return true;
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                return false;    
+                return false;
             }
         }
 

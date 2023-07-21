@@ -48,9 +48,9 @@
             </th>
             <th>
                 DisplayName
-            </th>
+            </th>      
             <th>
-                Catalog
+                Parent Category
             </th>
             <th>
                 Created Date
@@ -74,10 +74,9 @@
                     @Html.DisplayFor(modelItem => item.DisplayName)
                 </td>
 
-                  <td>
-                    @Html.DisplayFor(modelItem => item.Catalog.DisplayName)
+                <td>
+                    @Html.DisplayFor(modelItem => item.ParentCategory.DisplayName)
                 </td>
-
                 <td>
                     @Html.DisplayFor(modelItem => item.CreatedDate)
                 </td>

@@ -27,7 +27,6 @@ const btnModalProductCategoriesClose = document.querySelector(
   "#btn-modalProductCategoryClose"
 );
 const btnCreateProductCategory = document.querySelector("#addProductCategory");
-const inputPopupCatalog = document.querySelector("#productCategory-catalog");
 
 const updateProductAdditionalInfor = async (data) => {
   try {
@@ -129,7 +128,6 @@ const resetVariantsPopupField = () => {
 };
 const resetProductCategoriesPopupField = () => {
   document.querySelector("#categoryId").value = availableCategories[0].Id;
-  inputPopupCatalog.value = getCatalogByCategoryId(availableCategories[0].Id);
   productCategoryEditIndex = undefined;
 };
 // Stock
@@ -250,9 +248,6 @@ const refreshProductCategoriesTableData = (tableId) => {
     productCategories.forEach((x, index) => {
       const newRow = tbodyRef.insertRow(-1);
       newRow.insertCell(0).appendChild(document.createTextNode(x.DisplayName));
-      newRow
-        .insertCell(1)
-        .appendChild(document.createTextNode(getCatalogByCategoryId(x.Id)));
       //
       const editNode = document.createElement("a");
       const deleteNode = document.createElement("a");
@@ -266,7 +261,7 @@ const refreshProductCategoriesTableData = (tableId) => {
       deleteNode.classList.add("mouse-hover");
       deleteNode.appendChild(document.createTextNode("Delete"));
 
-      let actionCell = newRow.insertCell(2);
+      let actionCell = newRow.insertCell(1);
       actionCell.setAttribute("data-productCategoryId", x.Id);
       actionCell.setAttribute("data-index", index);
       actionCell.appendChild(editNode);
@@ -398,9 +393,6 @@ const tableProductCategoriesEvent = () => {
       const index = e.currentTarget.parentNode.dataset.index;
       productCategoryEditIndex = index;
       document.querySelector("#categoryId").value = productCategories[index].Id;
-      inputPopupCatalog.value = getCatalogByCategoryId(
-        productCategories[index].Id
-      );
     });
   });
 
@@ -418,21 +410,6 @@ const tableProductCategoriesEvent = () => {
       }
     });
   });
-};
-
-const getCatalogWhenCategoryChange = () => {
-  document.querySelector("#categoryId").addEventListener("change", () => {
-    const categoryElement = document.querySelector("#categoryId");
-    const currentCategoryValue = categoryElement.value;
-    const selectedCatalog = getCatalogByCategoryId(currentCategoryValue);
-
-    inputPopupCatalog.value = selectedCatalog ? selectedCatalog : "";
-  });
-};
-
-const getCatalogByCategoryId = (catalogId) => {
-  return availableCategories.filter((x) => x.Id == catalogId)[0].Catalog
-    .DisplayName;
 };
 
 // Product stock event
@@ -467,7 +444,6 @@ const initEvent = () => {
   popupVariantsSubmitEvent();
   tableVariantsEvent();
   popupProductCategorySubmitEvent();
-  getCatalogWhenCategoryChange();
   tableProductCategoriesEvent();
   addProductStockEvent();
   //
