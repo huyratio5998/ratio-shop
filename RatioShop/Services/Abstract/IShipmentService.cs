@@ -1,4 +1,5 @@
 ﻿using RatioShop.Data.Models;
+using RatioShop.Data.ViewModels.User;
 
 namespace RatioShop.Services.Abstract
 {
@@ -8,6 +9,12 @@ namespace RatioShop.Services.Abstract
         Shipment? GetShipment(string id);
         Task<Shipment> CreateShipment(Shipment Shipment);
         bool UpdateShipment(Shipment Shipment);
-        bool DeleteShipment(string id);        
+        bool DeleteShipment(string id);
+
+        List<Guid>? GetInprogressOrderIdsByShipperId(string? shipperId);
+        List<Guid>? GetFinishedOrderIdsByShipperId(string? shipperId);
+        List<Guid>? GetAllUnAssignedOrderIds();
+        List<UserResponseViewModel> GetAvailableShippers();
+        string? GetShipperNameById(string shipperId);
     }
 }

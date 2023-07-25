@@ -22,6 +22,7 @@ namespace RatioShop.Services.Abstract
         bool UpdateCartStatus(string cartId, string status);
         bool UpdateCartItemPriceAndDiscountRate(CartDetailResponsViewModel cartDetail, Guid cartId);
         bool TrackingProductItemByCart(CartDetailResponsViewModel cartDetail, Guid cartId);
+        bool CompleteCartBeingRevertStock(Guid cartId);
         bool RevertTrackingProductItemByCart(Guid cartId);
         bool UpdateStoreItemsForCart(Guid cartId, ref CartDetailResponsViewModel? cartDetail);
         bool ValidateItemsOnCartWhenCheckout(CartDetailResponsViewModel? cartDetail);

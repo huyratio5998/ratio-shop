@@ -13,15 +13,26 @@ const IsNullOrEmptyString = (checkValue) => {
   return !checkValue || result;
 };
 
-const ConvertToLocalDate = (isShowDateTime = false) => {
+const ConvertToLocalDate = () => {
   const elements = document.querySelectorAll(".js_date-format-local");
   if (!elements) return;
 
   elements.forEach((el) => {
     const date = el.dataset.dateValue;
     if (date) {
-      if (isShowDateTime) el.innerHTML = new Date(date).toLocaleString("en-GB");
-      else el.innerHTML = new Date(date).toLocaleDateString("en-GB");
+      el.innerHTML = new Date(date).toLocaleDateString("en-GB");
+    }
+  });
+};
+
+const ConvertToLocalDateTime = () => {
+  const elements = document.querySelectorAll(".js_datetime-format-local");
+  if (!elements) return;
+
+  elements.forEach((el) => {
+    const date = el.dataset.dateValue;
+    if (date) {
+      el.innerHTML = new Date(date).toLocaleString("en-GB");
     }
   });
 };

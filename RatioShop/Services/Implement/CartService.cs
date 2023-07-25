@@ -217,6 +217,7 @@ namespace RatioShop.Services.Implement
 
             var cartDetail = new CartDetailResponsViewModel()
             {
+                CartId = id,
                 CartItems = cartItems,
                 TotalItems = cartItems?.Sum(x=>x.Number) ?? 0,
                 TotalPrice = totalItemPrice,
@@ -224,6 +225,8 @@ namespace RatioShop.Services.Implement
                 Status = currentCart?.Status ?? string.Empty,
                 ShippingAddressId = currentCart?.AddressId,
                 ShippingAddressDetail = currentCart?.AddressDetail,
+                ShippingAddress1 = shippingAddress?.Address1,
+                ShippingAddress2 = shippingAddress?.Address2,
                 FullShippingAddress = $"{currentCart?.AddressDetail} - {shippingAddress?.Address2} - {shippingAddress?.Address1}",
                 ShippingFee = shippingFee,
                 TotalFinalPrice = CalculateFinalPrice(totalItemPrice, couponCodes, shippingFee),
@@ -365,6 +368,28 @@ namespace RatioShop.Services.Implement
                 }
                 else return false;
             }
+            return true;
+        }
+
+        public bool CompleteCartBeingRevertStock(Guid cartId)
+        {
+            if (cartId == Guid.Empty) return false;
+
+            var variantCarts = _productVariantCartService.GetProductVariantCarts().Where(x => x.CartId == cartId && x.IsReverted && x.TrackUpdated && x.StockTrackingStatus == CommonStatus.Tracking.Active).ToList();
+            if (variantCarts != null && variantCarts.Any())
+            {
+                foreach (var item in variantCarts)
+                {
+                    var reduceStatus = _productVariant.ReduceProductVariantNumber(item.ProductVariantId, item.ItemNumber, JsonConvert.DeserializeObject<List<CartStockItem>>(item.StockItems));
+                    if (reduceStatus)
+                    {
+                        item.IsReverted = false;
+                        var updateVariantCartStatus = _productVariantCartService.UpdateProductVariantCart(item);
+                        if (!updateVariantCartStatus) return false;
+                    }
+                }
+            }
+
             return true;
         }
 

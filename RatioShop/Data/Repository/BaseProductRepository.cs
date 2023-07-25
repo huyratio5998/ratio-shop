@@ -26,11 +26,15 @@ namespace RatioShop.Data.Repository
             throw new NotImplementedException();
         }
 
-        public override T? GetById(string id)
+        public override T? GetById(string id, bool isTracking = false)
         {
             if(string.IsNullOrEmpty(id)) return null;
-            
-            var result = _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id.ToString().ToLower().Equals(id));
+
+            T? result = null;
+
+            if(isTracking) result = _context.Set<T>().FirstOrDefault(x => x.Id.ToString().ToLower().Equals(id));
+            else result = _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id.ToString().ToLower().Equals(id));
+
             if (result == null) return null;
 
             result.CreatedDate = result.CreatedDate.GetCorrectUTC();
@@ -38,7 +42,7 @@ namespace RatioShop.Data.Repository
             return result;
         }
 
-        public override T? GetById(int id)
+        public override T? GetById(int id, bool isTracking = false)
         {
             throw new NotImplementedException();
         }

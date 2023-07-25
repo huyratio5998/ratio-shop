@@ -1,0 +1,181 @@
+﻿@using RatioShop.Areas.Admin.Models
+@using RatioShop.Data.ViewModels.SearchViewModel
+@using RatioShop.Enums
+@using RatioShop.Helpers
+
+@model ListShipmentViewModel
+
+@{
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+    string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "MyShipment";
+    var isUnAssignOrdersView = detailParam.Equals("GetUnAssignedShipmentOrders");
+    var isMyFinishedOrdersView = detailParam.Equals("MyFinishedShipment");
+    string message = ViewBag.AssignMessage;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    @if (!isUnAssignOrdersView)
+    {
+        <span>
+            <a asp-action="GetUnAssignedShipmentOrders">Get more order</a>
+        </span>
+    }
+
+    @if (isUnAssignOrdersView && !string.IsNullOrWhiteSpace(message))
+    {
+        var parms = new Dictionary<string, string>();
+        var orderNumberParms = new List<FacetFilterItem> { new FacetFilterItem { FieldName = "OrderNumber", Type = FilterType.Text.ToString(), Value = message } };
+        parms.Add("FilterItems", orderNumberParms.FilterItemToJson());
+        <div>
+            <div class="toast align-items-center js_ratio-toast mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body text-success">
+                        Order: <a asp-action="MyShipment" asp-all-route-data="parms">@message</a> assigned successfully!
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+    <span>
+        <form asp-action="FilterOrder">
+            <div class="form-control">
+                <label for="orderNumber">Order Number:</label>
+                <input type="text" name="orderNumber" id="orderNumber" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("OrderNumber"))?.Value" />
+
+                <label for="orderStatus">Order Status:</label>
+                <input type="text" name="orderStatus" id="orderStatus" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("Status"))?.Value" />
+
+                <label for="paymentType">Payment:</label>
+                <input type="text" name="paymentType" id="paymentType" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("PaymentType"))?.Value" />
+            </div>
+
+            <div class="form-control">
+
+                <label for="shipmentStatus">Shipment Status:</label>
+                <input type="text" name="shipmentStatus" id="shipmentStatus" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("ShipmentStatus"))?.Value" />
+
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="actionRedirect" value="@detailParam" />
+                <input type="submit" value="Filter" />
+            </div>
+
+        </form>
+    </span>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Order Number
+                </th>
+                <th>
+                    City
+                </th>
+                <th>
+                    District
+                </th>
+                <th>
+                    Shipping Address
+                </th>
+                <th>
+                    Total Price
+                </th>
+                @if (isMyFinishedOrdersView)
+                {
+                    <th>
+                        Modified Date
+                    </th>
+                }
+                else
+                {
+                    <th>
+                        Created Date
+                    </th>
+                }
+                <th>
+                    Shipment Status
+                </th>
+                @if (isUnAssignOrdersView)
+                {
+                    <th></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.Orders != null && Model.Orders.Any())
+            {
+
+                @foreach (var order in Model.Orders)
+                {
+                    var item = order;
+                    var orderStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.Status, 5);
+                    var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.ShipmentStatus, 5);
+                    var createdDateUTCFormat = item.CreatedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                    var modifiedDateUTCFormat = item.ModifiedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+
+                    <tr>
+                        <td>
+                            @if (isUnAssignOrdersView)
+                            {
+                                @Html.DisplayFor(modelItem => item.OrderNumber)
+                            }
+                            else
+                            {
+                                <a asp-action="ShipmentDetail" asp-route-orderId="@item.OrderId" asp-route-detailView="@detailParam">
+                                    @Html.DisplayFor(modelItem => item.OrderNumber)
+                                </a>
+                            }
+                        </td>
+                        <td>
+                            @order.CartDetail?.ShippingAddress1
+                        </td>
+                        <td>
+                            @order.CartDetail?.ShippingAddress2
+                        </td>
+                        <td>
+                            @order.CartDetail?.FullShippingAddress
+                        </td>
+                        <td>
+                            @CommonHelper.CurrencyFormat(item.TotalMoney, language)
+                        </td>
+                        @if (isMyFinishedOrdersView)
+                        {
+                            <td class="js_date-format-local" data-date-value="@modifiedDateUTCFormat">
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="js_date-format-local" data-date-value="@createdDateUTCFormat">
+                            </td>
+                        }
+                        <td>
+                            <div class="badge rounded-pill @shipmentStatusBadgeClass">
+                                @Html.DisplayFor(modelItem => item.ShipmentStatus)
+                            </div>
+                        </td>
+                        @if (isUnAssignOrdersView)
+                        {
+                            <td>
+                                <a asp-action="AssignOrderShipmentToShipper" asp-route-orderId="@item.OrderId" asp-route-orderNumber="@item.OrderNumber" class="btn btn-outline-primary">
+                                    Add to MyShipment
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@if (isUnAssignOrdersView && !string.IsNullOrEmpty(message))
+{    
+    <script defer src="@Url.Content("~/js/administrator/shipment/shipment-action.js")"></script>
+}
+<partial name="_AdminGridPaging" model="Model" />

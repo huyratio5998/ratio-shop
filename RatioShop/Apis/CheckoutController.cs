@@ -114,7 +114,9 @@ namespace RatioShop.Apis
             {
                 ShipmentStatus = CommonStatus.ShipmentStatus.Pending,
                 Reasons = "Create shipment",
+                SystemMessage = "Create shipment",
                 OrderId = order.Id,
+                UpdateStatus = true
             });
 
             // update cart status

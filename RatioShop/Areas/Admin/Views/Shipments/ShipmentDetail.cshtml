@@ -1,0 +1,214 @@
+﻿@using RatioShop.Constants
+@using RatioShop.Data.ViewModels.OrdersViewModel
+@using RatioShop.Helpers
+
+@model OrderResponseViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+    string detailAction = ViewBag.DetailView;
+}
+
+@if (Model == null)
+{
+    <h1>Shipment Detail</h1>
+    <h3>Can't load this page</h3>
+    <p>
+        <a class="btn btn-outline-dark" asp-action="@detailAction" asp-controller="Shipment">Back to list orders</a>
+    </p>
+}
+else
+{
+    var currentStatusBadge = CommonHelper.GetStatusBadgeClass(Model.ShipmentStatus, 5);
+    var failTimes = Model.ShipmentHistory?.Shipments.Count(x => x.UpdateStatus == true && x.ShipmentStatus == CommonStatus.ShipmentStatus.Failure) ?? 0;
+    <div>
+        <h1>Shipment Detail</h1>
+        <div>
+            <span>Order number: </span>
+            <h3>
+                <i>
+                    @Model.OrderNumber
+                </i>
+            </h3>
+        </div>
+    </div>
+
+    <p>
+        <a class="btn btn-outline-dark" asp-action="@detailAction" asp-controller="Shipments">Back to shipments</a>
+    </p>
+
+    @*information*@
+    <dl class="row">
+        <dt class="col-sm-3">
+            Reciever
+        </dt>
+        <dd class="col-sm-3">
+            @Model.CartDetail?.FullName
+        </dd>
+        <dt class="col-sm-3">
+            Phone Number
+        </dt>
+        <dd class="col-sm-3">
+            @Model.CartDetail?.PhoneNumber
+        </dd>
+        <dt class="col-sm-3">
+            Shipping Address
+        </dt>
+        <dd class="col-sm-9">
+            @Model.CartDetail?.FullShippingAddress
+        </dd>
+        <dt class="col-sm-3">
+            Total Price
+        </dt>
+        <dd class="col-sm-9">
+            <b>
+                @CommonHelper.CurrencyFormat(Model?.TotalMoney, language)
+            </b>
+        </dd>
+        <dt class="col-sm-3">
+            Current Status
+        </dt>
+        <dd class="col-sm-9">
+            <span class="badge rounded-pill @currentStatusBadge">
+                @Html.DisplayFor(model => model.ShipmentStatus)
+            </span>
+        </dd>
+    </dl>
+
+    @if (Model?.ShipmentStatus != CommonStatus.ShipmentStatus.Closed && Model?.ShipmentStatus != CommonStatus.ShipmentStatus.Returned && Model?.ShipmentStatus != CommonStatus.ShipmentStatus.Expired)
+    {
+        @*Shipments tracking action*@
+        <div class="mb-4">
+            <div class="mb-2">
+                <h3>Shipment tracking</h3>
+                <button type="button" data-bs-toggle="collapse" data-bs-target="#collapseTracking" aria-expanded="false" aria-controls="collapseTracking" class="btn btn-primary">Update Status</button>
+            </div>
+            <div class="form-control collapse" id="collapseTracking">
+                <form asp-action="shipmentTracking" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="OrderId" value="@Model.OrderId" />
+                    <input type="hidden" name="ShipperId" value="@ViewBag.ShipperId" />
+                    <input type="hidden" name="OrderNumber" value="@Model.OrderNumber" />
+                    <div class="form-group mb-2">
+                        <label for="Reasons" class="control-label">Reasons: </label>
+                        <input id="Reasons" name="Reasons" class="form-control" />
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="control-label js_img_changeTarget mb-2">
+                            <span>Images: </span>
+                            <img src="/images/default-placeholder.jpg" style="height:250px;width:auto" alt="shipment image" class="js_img_changeTarget" />
+                        </label>
+
+                        <input type="file" name="FileImage" class="form-control js_img_changeEvent" />
+                    </div>
+                    <div class="form-group">
+                        @if (Model.ShipmentStatus == CommonStatus.ShipmentStatus.Pending || Model.ShipmentStatus == CommonStatus.ShipmentStatus.Returning || Model.ShipmentStatus == CommonStatus.ShipmentStatus.Canceled)
+                        {
+                            <input type="submit" class="btn btn-outline-info" name="Status" value="Delivering" />
+                        }
+                        @if (Model.ShipmentStatus == CommonStatus.ShipmentStatus.Delivering || Model.ShipmentStatus == CommonStatus.ShipmentStatus.Failure)
+                        {
+                            @if (failTimes > 0)
+                            {
+                                <button type="submit" class="btn btn-outline-danger position-relative me-2" name="Status" value="Failure">
+                                    Failure
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        @failTimes
+                                    </span>
+                                </button>
+                            }
+                            else
+                            {
+                                <input type="submit" class="btn btn-outline-danger" name="Status" value="Failure" />
+                            }
+                        }
+                        @if (Model.ShipmentStatus == CommonStatus.ShipmentStatus.Pending || Model.ShipmentStatus == CommonStatus.ShipmentStatus.Delivering || Model.ShipmentStatus == CommonStatus.ShipmentStatus.Failure)
+                        {
+                            <input type="submit" class="btn btn-outline-secondary" name="Status" value="Canceled" />
+                        }
+                        @if (Model.ShipmentStatus == CommonStatus.ShipmentStatus.Canceled || Model.ShipmentStatus == CommonStatus.ShipmentStatus.Delivered)
+                        {
+                            <input type="submit" class="btn btn-outline-warning" name="Status" value="Returning" />
+                        }
+                        @if (Model.ShipmentStatus == CommonStatus.ShipmentStatus.Canceled)
+                        {
+                            <input type="submit" class="btn btn-dark" name="Status" value="Closed" />
+                        }
+                        @if (Model.ShipmentStatus == CommonStatus.ShipmentStatus.Returning)
+                        {
+                            <input type="submit" class="btn btn-warning" name="Status" value="Returned" />
+                        }
+                        @if (Model.ShipmentStatus == CommonStatus.ShipmentStatus.Delivering || Model.ShipmentStatus == CommonStatus.ShipmentStatus.Failure)
+                        {
+                            <input type="submit" class="btn btn-success" name="Status" value="Delivered" />
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    @*Shipments history*@
+    <div>
+        <h3>Shipment History</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            Date
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Reasons
+                        </th>
+                        <th>
+                            Images
+                        </th>
+                        <th>
+                            Shipper
+                        </th>
+                        <th>
+                            PhoneNumber
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model?.ShipmentHistory?.Shipments != null && Model.ShipmentHistory.Shipments.Any())
+                    {
+                        @foreach (var item in Model.ShipmentHistory.Shipments)
+                        {
+                            var createdDateUTCFormat = item.CreatedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"); ;
+                            var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.ShipmentStatus, 5);
+
+                            <tr>
+                                <td class="js_date-format-local" data-date-value="@createdDateUTCFormat">
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill @shipmentStatusBadgeClass">
+                                        @Html.DisplayFor(model => item.ShipmentStatus)
+                                    </span>
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Reasons)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Images)
+                                </td>
+                                <td>
+                                    @item.Shipper?.FullName
+                                </td>
+                                <td>
+                                    @item.Shipper?.PhoneNumber
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

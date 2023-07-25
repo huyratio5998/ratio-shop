@@ -1,5 +1,6 @@
 const storeNameElement = document.querySelector(".js_store-name");
 
+// Helpers
 const ImageChangeAction = (images) => {
   for (const image of images) {
     const elements = image.parentElement.children;
@@ -22,6 +23,18 @@ const ImageChangeAction = (images) => {
   }
 };
 
+const OpenImageInNewTab = () => {
+  const images = document.querySelectorAll(".js_open-image-newTab");
+  if (!images) return;
+
+  images.forEach((el) => {
+    el.addEventListener("click", () => {
+      const url = el.getAttribute("src");
+      window.open(url, "Image");
+    });
+  });
+};
+
 // Write your JavaScript code.
 let images = document.querySelectorAll(".js_img_changeEvent");
 ImageChangeAction(images);
@@ -32,4 +45,5 @@ tinymce.init({
 });
 
 //
-ConvertToLocalDate(true);
+ConvertToLocalDate();
+ConvertToLocalDateTime();

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using RatioShop.Constants;
 using RatioShop.Data.ViewModels;
 using RatioShop.Services.Abstract;
+using System.Security.Claims;
 
 namespace RatioShop.Apis
 {
@@ -11,158 +11,78 @@ namespace RatioShop.Apis
     [ApiController]
     public class ShipmentController : ControllerBase
     {
-        private readonly IShipmentService _shipmentService;
         private readonly IOrderService _orderService;
+        private readonly IShipmentService _shipmentService;
 
-        public ShipmentController(IShipmentService shipmentService, IOrderService orderService)
+        public ShipmentController(IOrderService orderService, IShipmentService shipmentService)
         {
-            _shipmentService = shipmentService;
             _orderService = orderService;
+            _shipmentService = shipmentService;
         }
 
         [HttpPost]
-        [Route("track")]
-        [AllowAnonymous]
+        [Route("track")]        
         public async Task<IActionResult> ShipmentTracking([FromBody] ShipmentTrackingRequestViewModel request)
         {
             if (request == null) return BadRequest();
 
-            var allowUpdateShipment = true;
-            var allowUpdateShipmentOnOrder = true;
-            var order = _orderService.GetOrder(request.OrderId.ToString());
+            var result = await _orderService.ShipmentTracking(request);
 
-            if (order == null) return NotFound();
+            return Ok(result);
+        }
 
-            // validate shipment status update
-            var latestShipment = _shipmentService.GetShipments()
-                .Where(x => (x.UpdateStatus != null && (bool)x.UpdateStatus))
-                .Where(x => x.OrderId == request.OrderId)
-                .OrderByDescending(x => x.CreatedDate)
-                .FirstOrDefault();
+        [Route("assignShipperToOrder")]
+        public IActionResult AssignShipperToOrder(Guid orderId, Guid shipperId)
+        {
+            if (orderId == Guid.Empty || shipperId == Guid.Empty) return BadRequest();
+            // validate user
+            if (User == null || !User.Identity.IsAuthenticated) return NotFound();
+            var userId = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return NotFound();
+
+            // assign logic
+            var latestShipment = _shipmentService.GetShipments().Where(x => x.OrderId == orderId && x.UpdateStatus == true).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
 
             if (latestShipment != null
-                && !string.IsNullOrEmpty(latestShipment.ShipmentStatus)
-                && ((latestShipment.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Delivered) && !request.Status.Equals(CommonStatus.ShipmentStatus.Returning))
-                    || latestShipment.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Returned)
-                    || latestShipment.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Expired)
-                    || latestShipment.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Closed))) allowUpdateShipment = false;
+                && (latestShipment.ShipmentStatus == CommonStatus.ShipmentStatus.Closed
+                    || latestShipment.ShipmentStatus == CommonStatus.ShipmentStatus.Expired
+                    || latestShipment.ShipmentStatus == CommonStatus.ShipmentStatus.Returned
+                )) return Ok(false);
 
-            // update orderStatus compatible with shippingStatus
-            var orderStatus = CommonStatus.OrderStatus.Created;
-            switch (request.Status)
+            if (latestShipment == null
+                || latestShipment.ShipmentStatus != CommonStatus.ShipmentStatus.Pending
+                || (latestShipment.ShipmentStatus == CommonStatus.ShipmentStatus.Pending
+                    && !string.IsNullOrEmpty(latestShipment.ShipperId)))
             {
-                case CommonStatus.ShipmentStatus.Returning:
-                    orderStatus = CommonStatus.OrderStatus.Canceled;
-                    break;
-                case CommonStatus.ShipmentStatus.Delivering:
-                    orderStatus = CommonStatus.OrderStatus.Delivering;
-                    break;
-                case CommonStatus.ShipmentStatus.Failure:
-                    {
-                        var latestShipmentStatusBeingFail = _shipmentService.GetShipments()
-                        .Where(x => (x.UpdateStatus != null && (bool)x.UpdateStatus))
-                        .Where(x => x.OrderId == request.OrderId)
-                        .OrderByDescending(x => x.CreatedDate)
-                        .FirstOrDefault(x=>x.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Delivering) || x.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Returning))
-                        .ShipmentStatus;
-
-                        if(latestShipmentStatusBeingFail.Equals(CommonStatus.ShipmentStatus.Delivering)) orderStatus = CommonStatus.OrderStatus.Delivering;
-                        else orderStatus = CommonStatus.OrderStatus.Canceled;
-                        break;
-                    }                    
-                case CommonStatus.ShipmentStatus.Canceled:
-                    orderStatus = CommonStatus.OrderStatus.Canceled;
-                    break;
-                case CommonStatus.ShipmentStatus.Delivered:
-                    orderStatus = CommonStatus.OrderStatus.Complete;
-                    break;
-                case CommonStatus.ShipmentStatus.Returned:
-                    orderStatus = CommonStatus.OrderStatus.Closed;
-                    break;                
-                case CommonStatus.ShipmentStatus.Closed:
-                    orderStatus = CommonStatus.OrderStatus.Closed;
-                    break;                                
-                case CommonStatus.ShipmentStatus.Expired:
-                    orderStatus = CommonStatus.OrderStatus.Closed;
-                    break;
-                default:
-                    break;
-            }
-
-            // add shipment record for each time shipping.
-            var shipment = new Data.Models.Shipment()
-            {
-                Request = JsonConvert.SerializeObject(request),
-                ShipmentStatus = request.Status,
-                Reasons = request.Reasons,
-                Images = request.Images,
-                ShipperId = request.ShipperId.ToString(),
-                OrderId = request.OrderId,
-            };
-
-            if (allowUpdateShipment) shipment.UpdateStatus = true;
-            else
-            {
-                shipment.UpdateStatus = false;
-                allowUpdateShipmentOnOrder = false;
-            }
-            // update shipment to expire while fail to much times.
-            var failShipmentsCheck1 = _shipmentService.GetShipments()
-                .Where(x => (x.UpdateStatus != null && (bool)x.UpdateStatus))
-                .Count(x => x.OrderId == request.OrderId && x.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Failure));
-            if (failShipmentsCheck1 >= CommonConstant.MaxShippingRetry)
-            {
-                shipment.UpdateStatus = false;
-                allowUpdateShipmentOnOrder = false;
-            }
-            // still save because need save all request send track api
-            await _shipmentService.CreateShipment(shipment);
-            order.ShipmentStatus = shipment.ShipmentStatus;
-
-            // update shipment to expire while fail to much times.
-            var failShipmentsCheck2 = _shipmentService.GetShipments()
-                .Where(x => (x.UpdateStatus != null && (bool)x.UpdateStatus))
-                .Count(x => x.OrderId == request.OrderId && x.ShipmentStatus.Equals(CommonStatus.ShipmentStatus.Failure));
-
-            if (failShipmentsCheck2 == CommonConstant.MaxShippingRetry && allowUpdateShipment)
-            {
-                request.Status = CommonStatus.ShipmentStatus.Expired;
-                request.Reasons = "Over maximum retry shipping time";
-                var expireShipment = new Data.Models.Shipment()
+                var newShipment = new Data.Models.Shipment
                 {
-                    Request = JsonConvert.SerializeObject(request),
-                    ShipmentStatus = request.Status,
-                    Reasons = request.Reasons,
-                    Images = String.Empty,
-                    ShipperId = request.ShipperId.ToString(),
-                    OrderId = request.OrderId,
-                    UpdateStatus = true
+                    ShipmentStatus = latestShipment == null ? CommonStatus.ShipmentStatus.Pending : latestShipment.ShipmentStatus,
+                    SystemMessage = $"Assign shipment. Updated by {userId}",
+                    OrderId = orderId,
+                    UpdateStatus = true,
+                    ShipperId = shipperId.ToString()
                 };
-
-                await _shipmentService.CreateShipment(expireShipment);
-
-                // update order status
-                order.ShipmentStatus = expireShipment.ShipmentStatus;
-                orderStatus = CommonStatus.OrderStatus.Closed;
-                allowUpdateShipmentOnOrder = true;
+                _shipmentService.CreateShipment(newShipment);
+                return Ok(true);
+            }
+            else if (latestShipment.ShipmentStatus == CommonStatus.ShipmentStatus.Pending)
+            {
+                latestShipment.ShipperId = shipperId.ToString();
+                var updateStatus = _shipmentService.UpdateShipment(latestShipment);
+                return Ok(updateStatus);
             }
 
-            if (!allowUpdateShipmentOnOrder) return Ok(new
-            {
-                allowUpdateShipment = allowUpdateShipment,
-                allowUpdateShipmentOnOrder = allowUpdateShipmentOnOrder,
-                status = false
-            });
+            return Ok(false);
+        }
 
-            // save
-            var saveOrderStatus = _orderService.UpdateOrder(order, orderStatus);
+        [Route("shipmentHistoryDetail")]
+        public IActionResult ShipmentHistoryDetail(Guid id)
+        {
+            if (id == Guid.Empty) return BadRequest();
 
-            return Ok(new
-            {
-                allowUpdateShipment = allowUpdateShipment,
-                allowUpdateShipmentOnOrder = allowUpdateShipmentOnOrder,
-                status = saveOrderStatus
-            });
+            var shipmentRecord = _shipmentService.GetShipment(id.ToString());
+
+            return Ok(shipmentRecord);
         }
     }
 }

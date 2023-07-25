@@ -35,7 +35,7 @@ namespace RatioShop.Apis
 
             // get order
             var orderDetail = _orderService.GetOrderDetailResponse(id.ToString(), getLatestVariantPrice, isIncludeInActiveDiscount);
-            if (orderDetail == null) return NotFound();            
+            if (orderDetail == null) return NotFound();
             return Ok(orderDetail);
         }
 
@@ -57,16 +57,30 @@ namespace RatioShop.Apis
             return Ok(result);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> UpdateOrderStatus([FromHeader] Guid orderId, [FromHeader] string status)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("updateOrderStatus")]
+        public async Task<IActionResult> UpdateOrderStatus([FromQuery] Guid orderId, [FromQuery] string status)
         {
+            if (User == null || !User.Identity.IsAuthenticated) return NotFound();
+
+            var userId = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return NotFound();
+
             if (orderId == Guid.Empty || string.IsNullOrEmpty(status)) return BadRequest(status);
 
-            //status: complete / cancel / close /             
-            // ++ success => update order status , update shipment status
-            // ++ cancel => COD: cancel || Visa: refund. , update shipment status.
+            var updateOrderStatus = await _orderService.UpdateOrderStatusAndRelatedTable(orderId, status, userId);
+            if (!updateOrderStatus) return Ok(new
+            {
+                status = false,
+                message = "Some thing when wrong, can't update order",
+            });
 
-            return Ok();
+            return Ok(new
+            {
+                status = true,
+                message = "Order has been updated sucecssfully!",
+            });
         }
 
         [HttpGet]

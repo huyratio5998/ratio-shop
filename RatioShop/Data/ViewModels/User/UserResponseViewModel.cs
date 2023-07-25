@@ -11,6 +11,9 @@ namespace RatioShop.Data.ViewModels.User
         public string? PhoneNumber { get; set; }        
 
         [JsonProperty("address")]
-        public AddressResponseViewModel? Address { get; set; }        
+        public AddressResponseViewModel? Address { get; set; }
+
+        public Guid ShipperId { get; set; }
+        public int TotalAssignedOrders { get; set; }
     }
 }

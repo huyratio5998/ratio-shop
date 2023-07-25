@@ -17,8 +17,10 @@ namespace RatioShop.Data.Repository
             return entity;
         }
 
-        public IQueryable<T> GetAll()
+        public IQueryable<T> GetAll(bool isTracking = false)
         {
+            if (isTracking)
+                return _context.Set<T>().AsQueryable();
             return _context.Set<T>().AsQueryable().AsNoTracking();
         }
 
@@ -31,11 +33,11 @@ namespace RatioShop.Data.Repository
                 .Take(pageSize);
         }
 
-        public bool Update(T entity)
+        public bool Update(T entity, bool isTracking = false)
         {
             try
             {
-                _context.Set<T>().Update(entity);
+                if (!isTracking) _context.Set<T>().Update(entity);
                 _context.SaveChanges();
                 return true;
 
@@ -48,8 +50,8 @@ namespace RatioShop.Data.Repository
 
         public abstract bool Delete(string id);
         public abstract bool Delete(int id);
-        public abstract T? GetById(int id);
-        public abstract T? GetById(string id);
+        public abstract T? GetById(int id, bool isTracking = false);
+        public abstract T? GetById(string id, bool isTracking = false);
 
         public IQueryable<T> Find(Expression<Func<T, bool>> condition)
         {

@@ -3,9 +3,14 @@
 
 @model BaseListingPageViewModel
 
+@if (Model == null || Model.TotalPage <= 1) return;
+
 @{
     // params pass
     var parms = new Dictionary<string, string>();
+    var area = ViewBag.Area;
+    var controller = ViewBag.Controller;
+    var action = ViewBag.Action;
 
     var filterItems = Model.FilterItems.FilterItemToJson();
     var sortType = Model.SortType;
@@ -27,10 +32,10 @@
     <ul class="pagination">
         <li class="page-item @disablePrevious">
             @{
-                if (Model.PageIndex - 1 == 1) parms.Remove("page");
+                if (Model.PageIndex - 1 <= 1) parms.Remove("page");
                 else parms["page"] = (Model.PageIndex - 1).ToString();
             }
-            <a asp-action="Index" asp-all-route-data="parms" class="page-link" aria-label="Previous">
+            <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
@@ -53,7 +58,7 @@
                     else if ((Model.PageIndex - stepEachGap <= i && i <= Model.PageIndex + stepEachGap) || (Model.PageIndex + 2 < rangeLimit && i <= rangeLimit) || (Model.PageIndex - 2 > Model.TotalPage - rangeLimit && i > Model.TotalPage - rangeLimit))
                     {
                         <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                            <a asp-action="Index" asp-all-route-data="parms" class="page-link">@i</a>
+                            <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
                         </li>
                     }
                     else if (!generateDotAfter && Model.PageIndex + 2 < i && i < Model.TotalPage - 1)
@@ -69,14 +74,14 @@
                     generateDotBefore = false;
                     generateDotAfter = false;
                     <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                        <a asp-action="Index" asp-all-route-data="parms" class="page-link">@i</a>
+                        <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
                     </li>
                 }
             }
             else
             {
                 <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                    <a asp-action="Index" asp-all-route-data="parms" class="page-link">@i</a>
+                    <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
                 </li>
             }
         }
@@ -84,7 +89,7 @@
             @{
                 parms["page"] = (Model.PageIndex + 1).ToString();
             }
-            <a asp-action="Index" asp-all-route-data="parms" class="page-link" aria-label="Next">
+            <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
