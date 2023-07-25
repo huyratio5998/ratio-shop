@@ -4,6 +4,9 @@ namespace RatioShop.Data.ViewModels.CartViewModel
 {
     public class CartDetailResponsViewModel
     {
+        [JsonProperty("cartId")]
+        public Guid CartId { get; set; }
+
         [JsonProperty("cartItems")]
         public List<CartItemResponseViewModel> CartItems { get; set; }
 
@@ -39,6 +42,12 @@ namespace RatioShop.Data.ViewModels.CartViewModel
 
         [JsonProperty("shippingAddressId")]
         public int? ShippingAddressId { get; set; }
+
+        [JsonProperty("shippingAddress1")]
+        public string? ShippingAddress1 { get; set; }
+
+        [JsonProperty("shippingAddress2")]
+        public string? ShippingAddress2 { get; set; }
 
         [JsonProperty("fullShippingAddress")]
         public string? FullShippingAddress { get; set; }

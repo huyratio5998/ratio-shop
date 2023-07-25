@@ -10,6 +10,7 @@
         public string? ShipperId { get; set; }
         public ShopUser? Shipper { get; set; }
 
+        public string? SystemMessage { get; set; }
         public Guid OrderId { get; set; }
         public Order Order { get; set; }
     }

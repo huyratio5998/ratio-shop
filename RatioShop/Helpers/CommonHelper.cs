@@ -69,12 +69,12 @@ namespace RatioShop.Helpers
             session.SetString(key, JsonSerializer.Serialize(value));
         }
 
-        public static string GetStatusBadgeClass(string status, int bootstrapVersion = 4)
+        public static string GetStatusBadgeClass(string? status, int bootstrapVersion = 4)
         {
             var badgeClass = "";
             string BadgeSuccess = bootstrapVersion == 4 ? "badge-success" : "bg-success";
             string BadgeLight = bootstrapVersion == 4 ? "badge-light" : "bg-light text-dark";
-            string BadgeInfo = bootstrapVersion == 4 ? "badge-info" : "bg-light text-dark";
+            string BadgeInfo = bootstrapVersion == 4 ? "badge-info" : "bg-info text-dark";
             string BadgeDanger = bootstrapVersion == 4 ? "badge-danger" : "bg-danger";
             string BadgeWarning = bootstrapVersion == 4 ? "badge-warning" : "bg-warning text-dark";            
 

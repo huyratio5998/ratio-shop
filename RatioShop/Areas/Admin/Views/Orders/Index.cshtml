@@ -13,9 +13,9 @@
 <h1>Order Viewer</h1>
 
 <p>
-    <span>
+    @*<span>
         <a asp-action="Create">Manual create order</a>
-    </span>
+    </span>*@
     <span>
         <form asp-action="FilterOrder">
             <div class="form-control">
@@ -49,7 +49,7 @@
                     }
                 </select>
 
-                <input type="hidden" name="page" value="@Model.PageIndex" />
+                <input type="hidden" name="page" value="1" />
                 <input type="submit" value="Filter" />
             </div>
 
@@ -121,14 +121,26 @@
                             @CommonHelper.CurrencyFormat(item.ShipmentFee, language)
                         </td>
                         <td>
-                            <div class="badge rounded-pill @shipmentStatusBadgeClass">
-                                @Html.DisplayFor(modelItem => item.ShipmentStatus)
+                            <div class="row" style="min-width:100px">
+                                <div class="col-8">
+                                    <div class="badge rounded-pill @shipmentStatusBadgeClass">
+                                        @Html.DisplayFor(modelItem => item.ShipmentStatus)
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    @if (order.AssignedShipper)
+                                    {
+                                        <a href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="@order.ShipperName">
+                                            <img src="~/images/icons/icon-shipper.png" style="height:20px" alt="shipper icon">
+                                        </a>
+                                    }
+                                </div>
                             </div>
                         </td>
-                        <td class="js_date-format-local" data-date-value="@createdDateUTCFormat">
+                        <td class="js_datetime-format-local" data-date-value="@createdDateUTCFormat">
                             @Html.DisplayFor(modelItem => item.CreatedDate)
                         </td>
-                        <td class="js_date-format-local" data-date-value="@modifiedDateUTCFormat">
+                        <td class="js_datetime-format-local" data-date-value="@modifiedDateUTCFormat">
                             @Html.DisplayFor(modelItem => item.ModifiedDate)
                         </td>
                     </tr>
@@ -139,3 +151,9 @@
 </div>
 
 <partial name="_AdminGridPaging" model="Model" />
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>

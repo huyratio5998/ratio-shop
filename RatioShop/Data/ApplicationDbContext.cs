@@ -31,6 +31,7 @@ namespace RatioShop.Data
         public DbSet<RatioShop.Data.Models.ProductVariantStock>? ProductVariantStock { get; set; }
         public DbSet<RatioShop.Data.Models.Discount>? Discount { get; set; }        
         public DbSet<RatioShop.Data.Models.Category> Category { get; set; }
+        public DbSet<RatioShop.Data.Models.Shipment>? Shipment { get; set; }
 
     }
 }

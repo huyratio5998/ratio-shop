@@ -7,7 +7,7 @@ namespace RatioShop.Services.Abstract
     {
         IEnumerable<ProductVariant> GetProductVariants();
         IEnumerable<ProductVariant> GetProductVariantsByProductId(Guid productId, bool isIncludeDeletedVariant = false);
-        ProductVariant? GetProductVariant(string id);
+        ProductVariant? GetProductVariant(string id, bool includeProduct = true);
         Task<ProductVariant> CreateProductVariant(ProductVariant ProductVariant);
         bool UpdateProductVariant(ProductVariant ProductVariant);
         bool DeleteProductVariant(string id, bool isDeepDelete = false);

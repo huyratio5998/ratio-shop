@@ -5,6 +5,7 @@ using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Enums;
 using RatioShop.Helpers;
 using RatioShop.Services.Abstract;
+using System.Security.Claims;
 
 namespace RatioShop.Areas.Admin.Controllers
 {
@@ -12,14 +13,16 @@ namespace RatioShop.Areas.Admin.Controllers
     public class OrdersController : Controller
     {
         private readonly IOrderService _orderService;
+        private readonly IShipmentService _shipmentService;
         private readonly IMapper _mapper;
 
         private const int pageSizeClientDesktopDefault = 12;
-        private const int pageSizeClientMobileDefault = 8;        
-        public OrdersController(IOrderService orderService, IMapper mapper)
+        private const int pageSizeClientMobileDefault = 8;
+        public OrdersController(IOrderService orderService, IMapper mapper, IShipmentService shipmentService)
         {
             _orderService = orderService;
             _mapper = mapper;
+            _shipmentService = shipmentService;
         }
 
         [HttpPost]
@@ -42,154 +45,54 @@ namespace RatioShop.Areas.Admin.Controllers
             return RedirectToAction("Index", new { filterItems = listFilterItems.FilterItemToJson(), sortType = sortType, page = page });
         }
 
-        // GET: Admin/Orders
         public async Task<IActionResult> Index(BaseSearchArgs requestArgs)
         {
             // filter request            
+            ViewBag.Area = "Admin";
+            ViewBag.Controller = "Orders";
+            ViewBag.Action = "Index";
+
             var request = _mapper.Map<BaseSearchRequest>(requestArgs);
             request.IsSelectPreviousItems = false;
-            request.PageSize = CommonHelper.GetClientDevice(Request) == DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;            
+            request.PageSize = CommonHelper.GetClientDevice(Request) == DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
 
             ListOrderViewModel orders = _orderService.GetOrders(request);
+
+            // get shipper info.
+            if (orders.Orders != null && orders.Orders.Any())
+            {
+                foreach (var item in orders.Orders)
+                {
+                    if (item.Order == null) continue;
+
+                    var currentShipper = _shipmentService.GetShipments()
+                        .Where(x => x.OrderId == item.Order.Id && x.UpdateStatus == true && !string.IsNullOrEmpty(x.ShipperId))
+                        .OrderByDescending(x => x.CreatedDate)
+                        .FirstOrDefault();
+                    item.AssignedShipper = currentShipper != null;
+                    if (currentShipper != null) item.ShipperName = _shipmentService.GetShipperNameById(currentShipper.ShipperId);
+                }
+            }
 
             return View(orders);
         }
 
-        // GET: Admin/Orders/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null || id == Guid.Empty)
             {
                 return NotFound();
             }
-            var orderDetail = _orderService.GetOrderDetailResponse(id.ToString(), false, true);            
+            var orderDetail = _orderService.GetOrderDetailResponse(id.ToString(), false, true);
 
             if (orderDetail == null)
             {
                 return NotFound();
             }
 
+            if(orderDetail.ShipmentHistory != null) orderDetail.ShipmentHistory.AvailableShippers = _shipmentService.GetAvailableShippers();
+
             return View(orderDetail);
-        }
-
-        //// GET: Admin/Orders/Create
-        //public IActionResult Create()
-        //{            
-        //    return View();
-        //}
-
-        //// POST: Admin/Orders/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("OrderNumber,Status,TotalMoney,IsRefund,ShipmentStatus,ShipmentFee,CartId,PaymentId,Id,CreatedDate,ModifiedDate")] Order order)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        order.Id = Guid.NewGuid();
-        //        _context.Add(order);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["PaymentId"] = new SelectList(_context.Payment, "Id", "Id", order.PaymentId);
-        //    return View(order);
-        //}
-
-        //// GET: Admin/Orders/Edit/5
-        //public async Task<IActionResult> Edit(Guid? id)
-        //{
-        //    if (id == null || _context.Order == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var order = await _context.Order.FindAsync(id);
-        //    if (order == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    ViewData["PaymentId"] = new SelectList(_context.Payment, "Id", "Id", order.PaymentId);
-        //    return View(order);
-        //}
-
-        //// POST: Admin/Orders/Edit/5
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(Guid id, [Bind("OrderNumber,Status,TotalMoney,IsRefund,ShipmentStatus,ShipmentFee,CartId,PaymentId,Id,CreatedDate,ModifiedDate")] Order order)
-        //{
-        //    if (id != order.Id)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            _context.Update(order);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!OrderExists(order.Id))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["PaymentId"] = new SelectList(_context.Payment, "Id", "Id", order.PaymentId);
-        //    return View(order);
-        //}
-
-        //// GET: Admin/Orders/Delete/5
-        //public async Task<IActionResult> Delete(Guid? id)
-        //{
-        //    if (id == null || _context.Order == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var order = await _context.Order
-        //        .Include(o => o.Payment)
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-        //    if (order == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(order);
-        //}
-
-        //// POST: Admin/Orders/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeleteConfirmed(Guid id)
-        //{
-        //    if (_context.Order == null)
-        //    {
-        //        return Problem("Entity set 'ApplicationDbContext.Order'  is null.");
-        //    }
-        //    var order = await _context.Order.FindAsync(id);
-        //    if (order != null)
-        //    {
-        //        _context.Order.Remove(order);
-        //    }
-
-        //    await _context.SaveChangesAsync();
-        //    return RedirectToAction(nameof(Index));
-        //}
-
-        //private bool OrderExists(Guid id)
-        //{
-        //  return (_context.Order?.Any(e => e.Id == id)).GetValueOrDefault();
-        //}
+        }                
     }
 }

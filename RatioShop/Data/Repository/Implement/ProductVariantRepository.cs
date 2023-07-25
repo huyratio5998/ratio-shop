@@ -45,9 +45,9 @@ namespace RatioShop.Data.Repository.Implement
             return GetById(id);
         }
 
-        public bool UpdateProductVariant(ProductVariant ProductVariant)
+        public bool UpdateProductVariant(ProductVariant productVariant)
         {
-            return Update(ProductVariant);
+            return Update(productVariant);
         }
     }
 }

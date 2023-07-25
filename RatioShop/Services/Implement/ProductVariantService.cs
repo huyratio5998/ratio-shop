@@ -53,20 +53,21 @@ namespace RatioShop.Services.Implement
             return productVariants;
         }
 
-        public ProductVariant? GetProductVariant(string id)
+        public ProductVariant? GetProductVariant(string id, bool includeProduct = true)
         {
             var productVariant = _productVariantRepository.GetProductVariant(id);
             if(productVariant == null) return null;
 
-            productVariant.Product = _productRepository.GetProduct(productVariant.ProductId).Product;
+            if (includeProduct)
+                productVariant.Product = _productRepository.GetProduct(productVariant.ProductId).Product;
 
             return productVariant;
         }
 
-        public bool UpdateProductVariant(ProductVariant ProductVariant)
+        public bool UpdateProductVariant(ProductVariant productVariant)
         {
-            ProductVariant.ModifiedDate = DateTime.UtcNow;
-            return _productVariantRepository.UpdateProductVariant(ProductVariant);
+            productVariant.ModifiedDate = DateTime.UtcNow;
+            return _productVariantRepository.UpdateProductVariant(productVariant);
         }
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace RatioShop.Services.Implement
             if(variantId == Guid.Empty) return false;
 
             var inStockNumber = _productVariantStockService.GetProductVariantStocksByVariantId(variantId).Sum(x=>x.ProductNumber);
-            var productVariant = GetProductVariant(variantId.ToString());
+            var productVariant = GetProductVariant(variantId.ToString(), false);
             if(productVariant == null) return false;
 
             productVariant.Number = inStockNumber;
