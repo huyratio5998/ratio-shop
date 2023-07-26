@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RatioShop.Data.ViewModels.MyAccountViewModel;
 using RatioShop.Data.ViewModels.SearchViewModel;
@@ -10,6 +11,7 @@ using System.Security.Claims;
 namespace RatioShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin,Manager,SuperAdmin")]
     public class OrdersController : Controller
     {
         private readonly IOrderService _orderService;
