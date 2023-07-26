@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RatioShop.Areas.Admin.Models;
 using RatioShop.Constants;
@@ -13,6 +14,7 @@ using System.Security.Claims;
 namespace RatioShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin,Manager,SuperAdmin,Shipper")]
     public class ShipmentsController : Controller
     {
         private readonly IShipmentService _shipmentService;

@@ -39,7 +39,7 @@ namespace RatioShop.Data.Repository.Implement
 
         public IEnumerable<ShopUser> GetShopUsers()
         {
-            return _context.Set<ShopUser>().AsNoTracking();
+            return _context.Set<ShopUser>().AsNoTracking().Include(x=>x.Address);
         }
 
         public IEnumerable<ShopUser> GetShopUsers(int pageIndex, int pageSize)
