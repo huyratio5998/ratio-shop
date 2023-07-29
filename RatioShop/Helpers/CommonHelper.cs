@@ -112,10 +112,10 @@ namespace RatioShop.Helpers
         }
 
         public static DateTime? GetCorrectUTC(this DateTime? dateTime)
-        {            
-            var isParseSuccess = DateTime.TryParse(dateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"), out var dateTimeUTC);            
-            if(isParseSuccess) return dateTimeUTC.ToUniversalTime();
-            return dateTime;            
+        {
+            var isParseSuccess = DateTime.TryParse(dateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"), out var dateTimeUTC);
+            if (isParseSuccess) return dateTimeUTC.ToUniversalTime();
+            return dateTime;
         }
 
         public static IEnumerable<FacetFilterItem>? CleanDefaultFilter(this IEnumerable<FacetFilterItem>? filters)
@@ -138,6 +138,26 @@ namespace RatioShop.Helpers
             filters = filters.Where(x => x != null);
 
             return JsonSerializer.Serialize(filters);
+        }
+
+        public static List<string> ResolveProductImages(this string variantImages)
+        {
+            var baseUrl = "/images/products";
+            if (string.IsNullOrEmpty(variantImages)) return new List<string> { "/images/default-placeholder.jpg" };
+
+            var listImages = variantImages.Trim().Split(',');
+
+            var result = new List<string>();
+            if (listImages != null && listImages.Any())
+            {
+                foreach (var item in listImages)
+                {
+                    if (string.IsNullOrWhiteSpace(item)) continue;
+                    result.Add($"{baseUrl}/{item.Trim()}");
+                }
+            }
+
+            return result;
         }
     }
 }

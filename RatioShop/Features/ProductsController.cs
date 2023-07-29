@@ -220,6 +220,14 @@ namespace RatioShop.Features
         }
 
         [HttpPost]
+        public bool SubmitVariantImages(List<IFormFile>? variantImages)
+        {
+            if(variantImages == null || !variantImages.Any()) return false;
+
+            return FileHelpers.UploadFiles(variantImages, _hostingEnvironment, "images", "products");
+        }
+
+        [HttpPost]
         public async Task<string> UpdateProductAdditionalInformation([FromBody] UpdateProductAdditionalInformationRequest data)
         {
             try
@@ -244,8 +252,10 @@ namespace RatioShop.Features
                         Number = item.Number,
                         Price = item.Price,
                         DiscountRate = item.DiscountRate,
-                        ProductId = data.ProductId
-                    };
+                        ProductId = data.ProductId,  
+                        Images = item.Images,
+                        Type = item.Type
+                    };                    
 
                     var productVariant = _productVariantService.GetProductVariant(variant.Id.ToString());
                     if (productVariant == null)

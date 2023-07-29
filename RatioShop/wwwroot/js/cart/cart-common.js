@@ -126,7 +126,7 @@ const BuildHeaderCartItem = (item) => {
   )} ${discountPrice}`;
   let headerCartItem = `<li class="header-cart-item flex-w flex-t m-b-12">
                       <div class="header-cart-item-img js_remove-cart-item" data-variant-id="${item.variantId}">
-                          <img src="/images/products/${item.image}" alt="${item.name}">
+                          <img src="${item.image}" alt="${item.name}">
                       </div>
                       <div class="header-cart-item-txt p-t-8">
                           <a href="/products/productdetail/${item.variantId}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
@@ -241,7 +241,7 @@ const BuildCartItemDetail = (item) => {
     : VNDong.format(item.price);
   const productNameDisplay = `${item.name} - ${item.variableName}`;
   const itemImage = item.image
-    ? `/images/products/${item.image}`
+    ? `${item.image}`
     : "/images/default-placeholder.jpg";
   let cartItemDetail = ` <tr class="table_row">
                                         <td class="column-1">

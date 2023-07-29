@@ -54,23 +54,31 @@ const DropListSelectVariantsAction = (
 };
 
 const BuildPreviewGallaryImages = (data) => {
-  const productImage = data.productImageName
-    ? `/images/products/${data.productImageName}`
-    : `/images/default-placeholder.jpg`;
+  const selectedVariantImages = data.selectedVariantImages;
+  if(!selectedVariantImages || selectedVariantImages.length == 0) return '';
 
-  const imageItem = `<div class="item-slick3" data-thumb="${productImage}">
-  <div class="wrap-pic-w pos-relative">      
-      <img src="${productImage}" alt="${data.product.productFriendlyName}" class="js-productImages" style="max-height: 750px;">
-      <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="${productImage}">
-          <i class="fa fa-expand"></i>
-      </a>
-  </div>
-</div>`;
+  let imageItems = ``;
+  selectedVariantImages.forEach(el =>{
+    const productImage = el.productImageName
+      ? `${el.productImageName}`
+      : `/images/default-placeholder.jpg`;
+  
+    const imageItem = `<div class="item-slick3" data-thumb="${productImage}">
+    <div class="wrap-pic-w pos-relative">      
+        <img src="${productImage}" alt="${el.product.productFriendlyName}" class="js-productImages" style="max-height: 750px;">
+        <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="${productImage}">
+            <i class="fa fa-expand"></i>
+        </a>
+    </div>
+  </div>`;
+
+  imageItems += imageItem;
+  })
 
   const result = `<div class="wrap-slick3-dots"></div>
   <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
   <div class="slick3 gallery-lb">
-     ${imageItem}
+     ${imageItems}
   </div>`;
 
   return result;
@@ -150,7 +158,7 @@ const BuildProductPreviewModal = (data) => {
 
 const BuildProductCartItem = (item, modalClass) => {
   const productImage = item.productImageName
-    ? `<img src="/images/products/${item.productImageName}" alt="${item.product?.name}">`
+    ? `<img src="${item.productImageName}" alt="${item.product?.name}">`
     : `<img src="/images/default-placeholder.jpg" alt="${item.product?.name}">`;
 
   const discountPrice =
