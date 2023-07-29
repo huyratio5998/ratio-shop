@@ -60,7 +60,7 @@ const BuildTableItems = (data) => {
       ${VNDong.format(el.price)}</span>`
       : VNDong.format(el.price);
     const itemImage = el.image
-      ? `/images/products/${el.image}`
+      ? `${el.image}`
       : "/images/default-placeholder.jpg";
     const itemRow = `<tr class="table_row">
                         <td class="column-1">

@@ -62,6 +62,7 @@ namespace RatioShop.Services.Implement
                     productId = productVariant.ProductId;
                     product = _productRepository.GetProduct(productId);
                     product.SelectedVariant = productVariant;
+                    product.SelectedVariantImages = productVariant.Images?.ResolveProductImages();
                 }
             }
 
@@ -180,7 +181,7 @@ namespace RatioShop.Services.Implement
                 PageSize = searchRequest.PageSize,
                 TotalCount = totalMatch,
                 TotalPage = totalMatch == 0 ? 1 : (int)Math.Ceiling((double)totalMatch / searchRequest.PageSize),
-                Products = GetProductsRelatedInformation(searchProducts.Select(x => new ProductViewModel() { Product = x, ProductImageName = x.ProductImage }).ToList()),
+                Products = GetProductsRelatedInformation(searchProducts.Select(x => new ProductViewModel() { Product = x, ProductDefaultImage = x.ProductImage.ResolveProductImages().FirstOrDefault() }).ToList()),
                 FilterItems = searchRequest.FilterItems,
                 SortType = searchRequest.SortType
             };

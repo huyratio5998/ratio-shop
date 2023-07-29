@@ -191,7 +191,7 @@ namespace RatioShop.Services.Implement
                     {
                         item.ProductCode = productDetail.Product.Code;
                         item.Name = productDetail.Product.ProductFriendlyName;
-                        item.Image = productDetail.ProductImageName;
+                        item.Image = productDetail.ProductDefaultImage;
                         item.EnableStockTracking = productDetail.Product.EnableStockTracking;
                     }
                 }

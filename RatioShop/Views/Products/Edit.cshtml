@@ -1,4 +1,5 @@
 ﻿@using Newtonsoft.Json;
+@using RatioShop.Enums;
 @model RatioShop.Data.ViewModels.ProductViewModel
 
 @{
@@ -63,7 +64,7 @@
                     }
                     else
                     {
-                        <img src="~/images/products/@Model.Product.ProductImage" style="height:250px;width:auto" alt="product image" class="js_img_changeTarget" />
+                        <img src="@Model.Product.ProductImage" style="height:250px;width:auto" alt="product image" class="js_img_changeTarget" />
                     }
                 </label>
 
@@ -106,6 +107,9 @@
                 <th>
                     DiscountRate
                 </th>
+                <th>
+                    Type
+                </th>
                 <th></th>
             </tr>
         </thead>
@@ -127,6 +131,9 @@
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.DiscountRate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Type.ToString())
                         </td>
                         <td data-variantId="@item.Id" data-index="@count">
                             <a class="variant-edit mouse-hover" data-bs-toggle="modal" data-bs-target="#variantModal">Edit</a> |
@@ -206,6 +213,16 @@
                         <div class="form-group">
                             <label for="variant-discountRate" class="control-label">Variant Discount Rate</label>
                             <input type="number" required id="variant-discountRate" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="variant-type" class="control-label">Variant Type</label>
+                            <select id="variant-type" asp-items="@Html.GetEnumSelectList<VariantType>()">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="variant-images" class="control-label">Variant Images</label>                            
+                            <input type="file" id="variant-images" class="form-control" />
+                            <input type="hidden" id="variant-images-string" />
                         </div>
                         <div class="form-group">
                             <br />

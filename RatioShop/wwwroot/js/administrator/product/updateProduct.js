@@ -283,7 +283,7 @@ const refreshProductCategoriesTableData = (tableId) => {
 
 // Event
 const popupVariantsSubmitEvent = () => {
-  formVariant.addEventListener("submit", (e) => {
+  formVariant.addEventListener("submit", async (e) => {
     e.preventDefault();
     const variantCode = document.querySelector("#variant-code").value;
     const newVariantValue = {
@@ -291,9 +291,32 @@ const popupVariantsSubmitEvent = () => {
       Number: document.querySelector("#variant-number").value,
       Price: document.querySelector("#variant-price").value,
       DiscountRate: document.querySelector("#variant-discountRate").value,
+      Images: document.querySelector("#variant-images-string").value,
+      Type: document.querySelector("#variant-type").value,
     };
 
+    // post images
+    let variantImagesString = [];
+    const variantImages = document.querySelector("#variant-images").files;
+    if (variantImages && variantImages.length > 0) {
+      var data = new FormData();
+      for (const file of variantImages) {
+        variantImagesString.push(file.name);
+        data.append("variantImages", file);
+      }
+
+      const response = await fetch("/products/SubmitVariantImages", {
+        method: "POST",
+        body: data,
+      });
+      const result = await response.json();
+      if (result) newVariantValue.Images = variantImagesString.join();
+    }
+
+    // update data in variable
     if (variantEditIndex) {
+      productVariants[variantEditIndex].Images = newVariantValue.Images;
+      productVariants[variantEditIndex].Type = newVariantValue.Type;
       productVariants[variantEditIndex].Code = newVariantValue.Code;
       productVariants[variantEditIndex].Number = Number.parseInt(
         newVariantValue.Number
@@ -304,6 +327,7 @@ const popupVariantsSubmitEvent = () => {
       productVariants[variantEditIndex].DiscountRate = Number.parseFloat(
         newVariantValue.DiscountRate
       );
+
       // update stockVariant variable
       productVariants[variantEditIndex].ProductVariantStocks =
         getVariantStockValue();
@@ -313,12 +337,12 @@ const popupVariantsSubmitEvent = () => {
       productVariants.push(newVariantValue);
     }
 
-    //data = { productId: currentProductId, variants: productVariants, removeVariants: RemoveVariants };
     refreshVariantsTableData("#variantTable");
     resetVariantsPopupField();
     hidePopup();
   });
 };
+
 const tableVariantsEvent = () => {
   btnEditVariants.forEach((element) => {
     element.addEventListener("click", (e) => {
@@ -332,7 +356,10 @@ const tableVariantsEvent = () => {
         productVariants[index].Price;
       document.querySelector("#variant-discountRate").value =
         productVariants[index].DiscountRate;
-
+      document.querySelector("#variant-images-string").value =
+        productVariants[index].Images;
+      document.querySelector("#variant-type").value =
+        productVariants[index].Type;
       // generate variant stock table
       refreshVariantStockTable(productVariants[index].ProductVariantStocks);
     });

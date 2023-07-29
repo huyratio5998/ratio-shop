@@ -1,6 +1,7 @@
 ﻿using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels;
+using RatioShop.Helpers;
 using RatioShop.Helpers.QueryableHelpers;
 
 namespace RatioShop.Data.Repository.Implement
@@ -28,7 +29,7 @@ namespace RatioShop.Data.Repository.Implement
 
             return sortedProducts
                 .Take(pageNumber * pageSize)
-                .Select(x => new ProductViewModel() { Product = x, ProductImageName = x.ProductImage });
+                .Select(x => new ProductViewModel() { Product = x, ProductDefaultImage = x.ProductImage.ResolveProductImages().FirstOrDefault() });
         }
 
         public ProductViewModel GetProduct(Guid productId)
@@ -37,19 +38,19 @@ namespace RatioShop.Data.Repository.Implement
             if (product == null) return new ProductViewModel();
 
             var result = new ProductViewModel(product);
-            result.ProductImageName = product.ProductImage;
+            result.ProductDefaultImage = product.ProductImage?.ResolveProductImages().FirstOrDefault();
 
             return result;
         }
 
         public IEnumerable<ProductViewModel> GetProducts()
         {
-            return GetAll().Select(x => new ProductViewModel() { Product = x, ProductImageName = x.ProductImage });
+            return GetAll().Select(x => new ProductViewModel() { Product = x, ProductDefaultImage = x.ProductImage.ResolveProductImages().FirstOrDefault() });
         }
 
         public IEnumerable<ProductViewModel> GetProducts(int pageNumber, int pageSize)
         {
-            return GetAll(pageNumber, pageSize).Select(x => new ProductViewModel() { Product = x, ProductImageName = x.ProductImage });
+            return GetAll(pageNumber, pageSize).Select(x => new ProductViewModel() { Product = x, ProductDefaultImage = x.ProductImage.ResolveProductImages().FirstOrDefault() });
         }
 
         public IQueryable<ProductViewModel> GetProducts(string sortBy, int pageNumber, int pageSize)
@@ -59,7 +60,7 @@ namespace RatioShop.Data.Repository.Implement
             return sortedProducts
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(x => new ProductViewModel() { Product = x, ProductImageName = x.ProductImage });
+                .Select(x => new ProductViewModel() { Product = x, ProductDefaultImage = x.ProductImage.ResolveProductImages().FirstOrDefault() });
         }
 
         public bool UpdateProduct(Product product)

@@ -71,7 +71,7 @@
                     @Html.DisplayFor(modelItem => item.Product.Code)
                 </td>
 
-                @if (string.IsNullOrEmpty(item.ProductImageName))
+                @if (string.IsNullOrEmpty(item.ProductDefaultImage))
                 {
                     <td>
                         <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Product.Name">
@@ -80,7 +80,7 @@
                 else
                 {
                     <td>
-                        <img src="~/images/products/@item.ProductImageName" style="height:150px;width:auto" alt="@item.Product.Name">
+                        <img src="@item.ProductDefaultImage" style="height:150px;width:auto" alt="@item.Product.Name">
                     </td>
                 }
                 <td>

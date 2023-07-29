@@ -5,9 +5,13 @@
 @{
     ViewData["Title"] = "Product Details";
     Layout = "~/Pages/Shared/_Layout.cshtml";
-    var productImage = !string.IsNullOrEmpty(Model.Product.ProductImage) ? $"/images/products/{Model.Product.ProductImage}" : "/images/default-placeholder.jpg";
+
+    var productImage = Model.ProductDefaultImage;
+    var variantImages = Model.SelectedVariantImages ?? new List<string>();
+    if (!string.IsNullOrEmpty(productImage)) variantImages.Insert(0, productImage);
+
     var language = "vi-VN";
-    var productTitle = !string.IsNullOrWhiteSpace(Model.SelectedVariant?.Code) ? $"{Model.Product?.ProductFriendlyName}({Model.SelectedVariant?.Code })" : Model.Product?.ProductFriendlyName;
+    var productTitle = !string.IsNullOrWhiteSpace(Model.SelectedVariant?.Code) ? $"{Model.Product?.ProductFriendlyName}({Model.SelectedVariant?.Code})" : Model.Product?.ProductFriendlyName;
 }
 <!-- breadcrumb -->
 <partial name="_Breadcrumbs" model="@Model.BreadCrumbs" />
@@ -23,15 +27,21 @@
                         <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
 
                         <div class="slick3 gallery-lb">
-                            <div class="item-slick3" data-thumb="@productImage">
-                                <div class="wrap-pic-w pos-relative">
-                                    <img src="@productImage" alt="IMG-PRODUCT" class="js-productImages">
+                            @if (variantImages != null && variantImages.Any())
+                            {
+                                foreach (var item in variantImages)
+                                {
+                                    <div class="item-slick3" data-thumb="@item">
+                                        <div class="wrap-pic-w pos-relative">
+                                            <img src="@item" alt="IMG-PRODUCT" class="js-productImages">
 
-                                    <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="@productImage">
-                                        <i class="fa fa-expand"></i>
-                                    </a>
-                                </div>
-                            </div>
+                                            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="@item">
+                                                <i class="fa fa-expand"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            }
                         </div>
                     </div>
                 </div>
@@ -79,7 +89,6 @@
                                             {
                                                 <option value="@item.Id">@item.Code</option>
                                             }
-
                                         }
                                     </select>
                                     <div class="dropDownSelect2"></div>
@@ -88,23 +97,23 @@
                         </div>
 
                         @*<div class="flex-w flex-r-m p-b-10">
-                            <div class="size-203 flex-c-m respon6">
-                            Color
-                            </div>
+                        <div class="size-203 flex-c-m respon6">
+                        Color
+                        </div>
 
-                            <div class="size-204 respon6-next">
-                            <div class="rs1-select2 bor8 bg0">
-                            <select class="js-select2" name="time">
-                            <option>Choose an option</option>
-                            <option>Red</option>
-                            <option>Blue</option>
-                            <option>White</option>
-                            <option>Grey</option>
-                            </select>
-                            <div class="dropDownSelect2"></div>
-                            </div>
-                            </div>
-                            </div>*@
+                        <div class="size-204 respon6-next">
+                        <div class="rs1-select2 bor8 bg0">
+                        <select class="js-select2" name="time">
+                        <option>Choose an option</option>
+                        <option>Red</option>
+                        <option>Blue</option>
+                        <option>White</option>
+                        <option>Grey</option>
+                        </select>
+                        <div class="dropDownSelect2"></div>
+                        </div>
+                        </div>
+                        </div>*@
 
                         <div class="flex-w flex-r-m p-b-10">
                             <div class="size-204 flex-w flex-m respon6-next">
@@ -341,7 +350,7 @@
 {
     <div class="js_quickViewAreaEvent">
         <!-- Related Products -->
-    <section class="sec-relate-product bg0 p-t-45 p-b-105">
+        <section class="sec-relate-product bg0 p-t-45 p-b-105">
             <div class="container">
                 <div class="p-b-45">
                     <h3 class="ltext-106 cl5 txt-center">
@@ -350,7 +359,7 @@
                 </div>
 
                 <!-- Slide2 -->
-            <div class="wrap-slick2">
+                <div class="wrap-slick2">
                     <div class="slick2">
                         @foreach (var item in Model.RelatedProducts)
                         {
@@ -364,7 +373,7 @@
         </section>
 
         <!-- Modal1 -->
-    <partial name="_ProductQuickView" />
+        <partial name="_ProductQuickView" />
     </div>
 }
 
