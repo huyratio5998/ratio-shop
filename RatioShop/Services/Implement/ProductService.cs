@@ -61,8 +61,7 @@ namespace RatioShop.Services.Implement
                 {
                     productId = productVariant.ProductId;
                     product = _productRepository.GetProduct(productId);
-                    product.SelectedVariant = productVariant;
-                    product.SelectedVariantImages = productVariant.Images?.ResolveProductImages();
+                    product.SelectedVariant = productVariant;                    
                 }
             }
 
@@ -70,6 +69,7 @@ namespace RatioShop.Services.Implement
 
             product.Product.Variants = productVariants;
             if (product.SelectedVariant == null) product.SelectedVariant = product.Product.Variants?.FirstOrDefault();
+            product.SelectedVariantImages = product.SelectedVariant?.Images?.ResolveProductImages();
 
             if (getAdditionInfo)
             {
