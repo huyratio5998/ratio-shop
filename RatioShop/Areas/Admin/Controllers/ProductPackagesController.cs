@@ -11,7 +11,7 @@ using RatioShop.Services.Abstract;
 namespace RatioShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class PackagesController : Controller
+    public class ProductPackagesController : Controller
     {
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IPackageService _packageService;
@@ -21,7 +21,7 @@ namespace RatioShop.Areas.Admin.Controllers
         private const int pageSizeClientDesktopDefault = 12;
         private const int pageSizeClientMobileDefault = 8;
 
-        public PackagesController(IPackageService packageService, IMapper mapper, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService)
+        public ProductPackagesController(IPackageService packageService, IMapper mapper, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService)
         {
             _packageService = packageService;
             _mapper = mapper;

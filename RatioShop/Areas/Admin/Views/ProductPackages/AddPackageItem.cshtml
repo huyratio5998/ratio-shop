@@ -1,0 +1,159 @@
+﻿@using RatioShop.Areas.Admin.Models;
+@using RatioShop.Data.ViewModels.MyAccountViewModel
+@using RatioShop.Data.ViewModels;
+@using RatioShop.Enums
+@using RatioShop.Helpers
+
+@model ListProductVariantViewModel
+
+@{
+    ViewData["Title"] = "Product variants";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+    string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "Index";
+    var parsePackageId = Guid.TryParse(ViewBag.PackageId, out Guid packageId);
+    string message = ViewBag.Message;
+}
+@if (parsePackageId && packageId != Guid.Empty)
+{
+    <h1>Product variants</h1>
+
+    <p>
+        <span>
+            <form asp-action="FilterProductVariant">
+                <div class="form-control">
+                    <label for="name">Name:</label>
+                    <input type="text" name="name" id="name" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("Name"))?.Value" />
+
+                    <label for="sortType">Sort: </label>
+                    <select id="sortType" name="sortType">
+                        @foreach (SortingEnum item in Enum.GetValues(typeof(SortingEnum)))
+                        {
+                            if (item == Model.SortType)
+                            {
+                                <option value="@item.ToString()" selected>@item.ToString()</option>
+                            }
+                            else
+                            {
+                                <option value="@item.ToString()">@item.ToString()</option>
+                            }
+                        }
+                    </select>
+
+                    <input type="hidden" name="actionRedirect" value="@detailParam" />
+                    <input type="hidden" name="page" value="1" />
+                    <input type="submit" value="Filter" />
+                </div>
+            </form>
+        </span>
+    </p>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="toast align-items-center js_ratio-toast mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @message
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Code
+                    </th>
+                    <th>
+                        Price
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @if (Model.ProductVariants != null && Model.ProductVariants.Any())
+                {
+                    @foreach (var productVariant in Model.ProductVariants)
+                    {
+                        var item = productVariant;
+
+                        <tr>
+                            @if (string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <td>
+                                    <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Name">
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <img src="@item.ImageUrl" style="height:150px;width:auto" alt="@item.Name">
+                                </td>
+                            }
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Code)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @CommonHelper.CurrencyFormat(item.PriceAfterDiscount, language)
+                            </td>
+                            <td>
+                                <a href="#" class="js_package-item-btn-add" data-item-id="@item.Id" data-bs-toggle="modal" data-bs-target="#addPackageItem">Add to package</a> |                                
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <div class="modal fade" id="addPackageItem" tabindex="-1" aria-labelledby="addPackageItemLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <form asp-action="AddPackageItem">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addPackageItemLabel">Package Item</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body row">
+                            <label>
+                                Number
+                                <input type="text" name="itemNumber" class="js_package-item-number" />
+                            </label>
+                            <input type="hidden" name="packageId" value="@parsePackageId" />
+                            <input type="hidden" name="variantId" class="js_package-item-id" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <partial name="_AdminGridPaging" model="Model" />
+
+    <script>
+        const toastDemo = document.querySelector(".js_ratio-toast");
+        if (toastDemo) {
+            const toast = new bootstrap.Toast(toastDemo);
+            if (toast) {
+                toast.show();
+            }
+        }
+    </script>
+
+    <script defer src="@Url.Content("~/js/administrator/package/add-package.js")"></script>
+}

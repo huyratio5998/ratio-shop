@@ -1,0 +1,125 @@
+﻿@using RatioShop.Areas.Admin.Models;
+@using RatioShop.Data.ViewModels.MyAccountViewModel
+@using RatioShop.Enums
+@using RatioShop.Helpers
+
+@model ListPackageViewModel
+
+@{
+    ViewData["Title"] = "Package";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+    string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "Index";
+}
+
+<h1>Packages</h1>
+
+<p>
+    <span>
+        <a asp-action="Create">Create package</a>
+    </span>
+    <span>
+        <form asp-action="FilterPackage">
+            <div class="form-control">
+                <label for="code">Code:</label>
+                <input type="text" name="code" id="code" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("Code"))?.Value" />
+
+                <label for="name">Name:</label>
+                <input type="text" name="name" id="name" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("Name"))?.Value" />
+
+                <label for="sortType">Sort: </label>
+                <select id="sortType" name="sortType">
+                    @foreach (SortingEnum item in Enum.GetValues(typeof(SortingEnum)))
+                    {
+                        if (item == Model.SortType)
+                        {
+                            <option value="@item.ToString()" selected>@item.ToString()</option>
+                        }
+                        else
+                        {
+                            <option value="@item.ToString()">@item.ToString()</option>
+                        }
+                    }
+                </select>
+
+                <input type="hidden" name="actionRedirect" value="@detailParam" />
+                <input type="hidden" name="page" value="1" />
+                <input type="submit" value="Filter" />
+            </div>
+        </form>
+    </span>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>
+                    Code
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    Is New
+                </th>
+                <th>
+                    Is Sold Online
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.Packages != null && Model.Packages.Any())
+            {
+                @foreach (var order in Model.Packages)
+                {
+                    var item = order;
+                    var createdDateUTCFormat = item.CreatedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                    var modifiedDateUTCFormat = item.ModifiedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+
+                    <tr>
+                        @if (string.IsNullOrEmpty(item.Image))
+                        {
+                            <td>
+                                <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img src="@item.Image" style="height:150px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Code)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @CommonHelper.CurrencyFormat(item.Price, language)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IsNew)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IsSoldOnline)
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<partial name="_AdminGridPaging" model="Model" />

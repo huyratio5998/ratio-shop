@@ -1,0 +1,150 @@
+﻿@using RatioShop.Data.ViewModels;
+@using RatioShop.Helpers;
+@model PackageViewModel
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Package</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Image)
+        </dt>
+        <dd class="col-sm-10">
+            @if (string.IsNullOrEmpty(Model.Image))
+            {
+                <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="package image" />
+            }
+            else
+            {
+                <img src="@Model.Image" style="height:250px;width:auto" alt="package image" class="js_img_changeTarget" />
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Code)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Code)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ProductFriendlyName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ProductFriendlyName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Image)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Image)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DiscountRate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DiscountRate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsDelete)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IsDelete)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsNew)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IsNew)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsSoldOnline)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IsSoldOnline)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreatedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreatedDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ModifiedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ModifiedDate)
+        </dd>
+    </dl>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Code
+                </th>
+                <th>
+                    Image
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    Number
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PackageItems != null && Model.PackageItems.Any())
+            {
+                @foreach (var item in Model.PackageItems)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Code)
+                        </td>
+                        @if (string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <td>
+                                <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Code">
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img src="@item.ImageUrl" style="height:150px;width:auto" alt="@item.Code">
+                            </td>
+                        }
+                        <td>
+                            @CommonHelper.CurrencyFormat(item.PriceAfterDiscount, language)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Number)
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
