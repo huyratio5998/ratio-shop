@@ -20,5 +20,6 @@ namespace RatioShop.Data.Models
         public Product? Product { get; set; }
         public List<ProductVariantStock>? ProductVariantStocks { get; set; }
         public List<ProductVariantCart>? ProductVariantCarts { get; set; }
+        public List<ProductVariantPackage>? ProductVariantPackage { get; set; }
     }
 }

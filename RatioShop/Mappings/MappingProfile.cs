@@ -10,6 +10,7 @@ using RatioShop.Data.ViewModels.OrdersViewModel;
 using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Data.ViewModels.ShipmentViewModel;
 using RatioShop.Data.ViewModels.User;
+using RatioShop.Helpers;
 
 namespace RatioShop.Mappings
 {
@@ -66,6 +67,10 @@ namespace RatioShop.Mappings
 
             // products
             CreateMap<ListProductViewModel, ListProductResponseViewModel>();
+
+            // package
+            CreateMap<PackageViewModel, Package>();
+            CreateMap<Package, PackageViewModel>();                
         }
     }
 }

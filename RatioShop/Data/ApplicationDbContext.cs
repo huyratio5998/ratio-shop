@@ -15,6 +15,7 @@ namespace RatioShop.Data
         {
             base.OnModelCreating(builder);
             builder.Entity<ProductCategory>().HasKey(x=> new {x.ProductId, x.CategoryId});
+            builder.Entity<ProductVariantPackage>().HasKey(x => new { x.ProductVariantId, x.PackageId });
             builder.Entity<ProductVariantStock>().HasKey(x => new { x.StockId, x.ProductVariantId });
             builder.Entity<Category>()
             .HasOne(j => j.ParentCategory)
@@ -32,6 +33,7 @@ namespace RatioShop.Data
         public DbSet<RatioShop.Data.Models.Discount>? Discount { get; set; }        
         public DbSet<RatioShop.Data.Models.Category> Category { get; set; }
         public DbSet<RatioShop.Data.Models.Shipment>? Shipment { get; set; }
+        public DbSet<RatioShop.Data.Models.Package>? Package { get; set; }
 
     }
 }
