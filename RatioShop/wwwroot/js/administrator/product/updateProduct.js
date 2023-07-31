@@ -121,6 +121,10 @@ const resetVariantsPopupField = () => {
   document.querySelector("#variant-number").value = "";
   document.querySelector("#variant-price").value = "";
   document.querySelector("#variant-discountRate").value = "";
+  document.querySelector("#variant-images-string").value = "";
+  document.querySelector("#variant-images-string-display").innerHTML = "";
+  document.querySelector("#variant-images").value = "";
+  document.querySelector("#variant-type").selectedIndex = 0;
   document
     .querySelector("#variantStocksTable")
     .getElementsByTagName("tbody")[0].innerHTML = "";
@@ -292,7 +296,7 @@ const popupVariantsSubmitEvent = () => {
       Price: document.querySelector("#variant-price").value,
       DiscountRate: document.querySelector("#variant-discountRate").value,
       Images: document.querySelector("#variant-images-string").value,
-      Type: document.querySelector("#variant-type").value,
+      Type: Number.parseInt(document.querySelector("#variant-type").value),
     };
 
     // post images
@@ -316,7 +320,9 @@ const popupVariantsSubmitEvent = () => {
     // update data in variable
     if (variantEditIndex) {
       productVariants[variantEditIndex].Images = newVariantValue.Images;
-      productVariants[variantEditIndex].Type = newVariantValue.Type;
+      productVariants[variantEditIndex].Type = Number.parseInt(
+        newVariantValue.Type
+      );
       productVariants[variantEditIndex].Code = newVariantValue.Code;
       productVariants[variantEditIndex].Number = Number.parseInt(
         newVariantValue.Number
@@ -357,6 +363,8 @@ const tableVariantsEvent = () => {
       document.querySelector("#variant-discountRate").value =
         productVariants[index].DiscountRate;
       document.querySelector("#variant-images-string").value =
+        productVariants[index].Images;
+      document.querySelector("#variant-images-string-display").innerHTML =
         productVariants[index].Images;
       document.querySelector("#variant-type").value =
         productVariants[index].Type;

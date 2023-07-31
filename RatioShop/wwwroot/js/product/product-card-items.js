@@ -9,6 +9,51 @@ const GetProductDetailById = async (productId) => {
 };
 
 // Helper function
+const InitSlick = (wrapClass = "wrap-slick3-ratio") => {
+  $(`.${wrapClass}`).each(function () {
+    $(this)
+      .find(".slick3")
+      .slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        fade: true,
+        infinite: true,
+        autoplay: false,
+        autoplaySpeed: 6000,
+        arrows: true,
+        appendArrows: $(this).find(".wrap-slick3-arrows"),
+        prevArrow:
+          '<button class="arrow-slick3 prev-slick3"><i class="fa fa-angle-left" aria-hidden="true"></i></button>',
+        nextArrow:
+          '<button class="arrow-slick3 next-slick3"><i class="fa fa-angle-right" aria-hidden="true"></i></button>',
+
+        dots: true,
+        appendDots: $(this).find(".wrap-slick3-dots"),
+        dotsClass: "slick3-dots",
+        customPaging: function (slick, index) {
+          var portrait = $(slick.$slides[index]).data("thumb");
+          return (
+            '<img src=" ' +
+            portrait +
+            ' "/><div class="slick3-dot-overlay"></div>'
+          );
+        },
+      });
+  });
+
+  $(".gallery-lb").each(function () {
+    // the containers for all your galleries
+    $(this).magnificPopup({
+      delegate: "a", // the selector for gallery item
+      type: "image",
+      gallery: {
+        enabled: true,
+      },
+      mainClass: "mfp-fade",
+    });
+  });
+};
+
 const DropListSelectVariantsAction = (
   data,
   parentElement,
@@ -20,6 +65,10 @@ const DropListSelectVariantsAction = (
   const priceDiscountDetail = parentElement.querySelector(".js_price-discount");
   const nameDetail = parentElement.querySelector(".js-name-detail");
   const selectedElement = parentElement.querySelector(".js-variants-select");
+  const detailImagesQuickview = parentElement.querySelector(
+    ".js-detail-images-quickview"
+  );
+  const detailImages = parentElement.querySelector(".js-detail-images");
 
   if (!selectedElement) return;
 
@@ -51,29 +100,68 @@ const DropListSelectVariantsAction = (
   if (selectedVariant?.discountRate && priceDiscountDetail)
     priceDiscountDetail.innerHTML = VNDong.format(selectedVariant?.price);
   else priceDiscountDetail.innerHTML = "";
+
+  if (detailImages) {
+    detailImages.innerHTML = BuildPreviewGallaryImages(data, selectedVariant);
+    InitSlick("wrap-slick3");
+  } else if (detailImagesQuickview) {
+    detailImagesQuickview.innerHTML = BuildPreviewGallaryImages(
+      data,
+      selectedVariant
+    );
+    InitSlick();
+  }
 };
 
-const BuildPreviewGallaryImages = (data) => {
-  const selectedVariantImages = data.selectedVariantImages;
-  if(!selectedVariantImages || selectedVariantImages.length == 0) return '';
+const GetProductImageUrl = (images) => {
+  if (!images) return;
 
-  let imageItems = ``;
-  selectedVariantImages.forEach(el =>{
-    const productImage = el.productImageName
-      ? `${el.productImageName}`
-      : `/images/default-placeholder.jpg`;
-  
-    const imageItem = `<div class="item-slick3" data-thumb="${productImage}">
-    <div class="wrap-pic-w pos-relative">      
-        <img src="${productImage}" alt="${el.product.productFriendlyName}" class="js-productImages" style="max-height: 750px;">
-        <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="${productImage}">
-            <i class="fa fa-expand"></i>
-        </a>
-    </div>
+  const baseProductImageUrl = "/images/products/";
+  let imagesArray = images.split(",");
+
+  for (const i in imagesArray) {
+    imagesArray[i] = baseProductImageUrl + imagesArray[i];
+  }
+
+  return imagesArray;
+};
+
+const BuildPreviewGallaryImages = (data, selectedVariant = null) => {
+  // default image from product
+  const productImageDefault = data.productDefaultImage
+    ? data.productDefaultImage
+    : "/images/default-placeholder.jpg";
+
+  let imageItems = `<div class="item-slick3" data-thumb="${productImageDefault}">
+  <div class="wrap-pic-w pos-relative">      
+  <img src="${productImageDefault}" alt="${data.product.productFriendlyName}" class="js-productImages" style="max-height: 750px;">
+  <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="${productImageDefault}">
+  <i class="fa fa-expand"></i>
+  </a>
+  </div>
   </div>`;
 
-  imageItems += imageItem;
-  })
+  const selectedVariantImages = selectedVariant
+    ? GetProductImageUrl(selectedVariant.images)
+    : data.selectedVariantImages;
+
+  if (selectedVariantImages && selectedVariantImages.length > 0) {
+    // addition image from variants
+    selectedVariantImages.forEach((el) => {
+      const productImage = el ? `${el}` : `/images/default-placeholder.jpg`;
+
+      const imageItem = `<div class="item-slick3" data-thumb="${productImage}">
+  <div class="wrap-pic-w pos-relative">      
+      <img src="${productImage}" alt="${data.product.productFriendlyName}" class="js-productImages" style="max-height: 750px;">
+      <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="${productImage}">
+          <i class="fa fa-expand"></i>
+      </a>
+  </div>
+</div>`;
+
+      imageItems += imageItem;
+    });
+  }
 
   const result = `<div class="wrap-slick3-dots"></div>
   <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
@@ -99,7 +187,9 @@ const BuildProductPreviewModal = (data) => {
   const descriptionDetail = modalQuickviewArea.querySelector(
     ".js-description-detail"
   );
-  const detailImages = modalQuickviewArea.querySelector(".js-detail-images");
+  const detailImagesQuickview = modalQuickviewArea.querySelector(
+    ".js-detail-images-quickview"
+  );
   const variantsElement = modalQuickviewArea.querySelector(
     ".js-variants-select"
   );
@@ -152,13 +242,15 @@ const BuildProductPreviewModal = (data) => {
     ? discountPrice
     : "";
   descriptionDetail.innerHTML = data.product.description;
-  detailImages.innerHTML = BuildPreviewGallaryImages(data);
+  detailImagesQuickview.innerHTML = BuildPreviewGallaryImages(data);
   numberDetail.value = 1;
+
+  InitSlick();
 };
 
 const BuildProductCartItem = (item, modalClass) => {
-  const productImage = item.productImageName
-    ? `<img src="${item.productImageName}" alt="${item.product?.name}">`
+  const productImage = item.productDefaultImage
+    ? `<img src="${item.productDefaultImage}" alt="${item.product?.name}">`
     : `<img src="/images/default-placeholder.jpg" alt="${item.product?.name}">`;
 
   const discountPrice =

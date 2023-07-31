@@ -45,7 +45,7 @@
                             {
                                 foreach (var item in Model.CartItems)
                                 {
-                                    string itemImage = string.IsNullOrEmpty(item.Image) ? @defaultPlaceholderImg : $"{productImageBaseUrl}/{item.Image}";
+                                    string itemImage = string.IsNullOrEmpty(item.Image) ? @defaultPlaceholderImg : item.Image;
 
                                     <tr class="table_row">
                                         <td class="column-1">
