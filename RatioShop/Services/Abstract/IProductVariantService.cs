@@ -1,5 +1,7 @@
 ﻿using RatioShop.Data.Models;
+using RatioShop.Data.ViewModels;
 using RatioShop.Data.ViewModels.CartViewModel;
+using RatioShop.Data.ViewModels.SearchViewModel;
 
 namespace RatioShop.Services.Abstract
 {
@@ -19,5 +21,6 @@ namespace RatioShop.Services.Abstract
         bool UpdateProductVariantNumber(ProductVariant productVariant);
         List<ProductVariantStock> GetVariantStocksByStockId(int stockId);
         List<ProductVariantStock> GetVariantStocksOrderByStocks(List<Stock> stocks);
+        ListProductVariantViewModel GetListVariants(BaseSearchRequest args);
     }
 }

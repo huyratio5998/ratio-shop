@@ -1,0 +1,226 @@
+﻿@using RatioShop.Data.ViewModels;
+@using RatioShop.Helpers;
+@model PackageViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+    string errorMessage = ViewBag.ErrorMessage;
+}
+
+<h1>Edit</h1>
+
+<h4>Package</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ImageFile" class="control-label js_img_changeTarget">
+                    <span>Image</span>
+                    @if (string.IsNullOrEmpty(Model.Image))
+                    {
+                        <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="package image" />
+                    }
+                    else
+                    {
+                        <img src="@Model.Image.ResolvePackageImages().FirstOrDefault()" style="height:250px;width:auto" alt="package image" class="js_img_changeTarget" />
+                    }
+                </label>
+
+                <input type="file" asp-for="ImageFile" class="form-control js_img_changeEvent" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Code" class="control-label"></label>
+                <input asp-for="Code" class="form-control" />
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+             <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductFriendlyName" class="control-label"></label>
+                <input asp-for="ProductFriendlyName" class="form-control" />
+                <span asp-validation-for="ProductFriendlyName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ManualPrice" class="control-label">Manual Price</label>
+                <input asp-for="ManualPrice" value="@Model.ManualPrice" class="form-control" />
+                <span asp-validation-for="ManualPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AutoCalculatedPrice" class="control-label">Automatic Price</label>
+                <p>@CommonHelper.CurrencyFormat(Model.AutoCalculatedPrice, language) </p>                
+                <span asp-validation-for="AutoCalculatedPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DiscountRate" class="control-label"></label>
+                <input asp-for="DiscountRate" class="form-control" />
+                <span asp-validation-for="DiscountRate" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsDelete" /> @Html.DisplayNameFor(model => model.IsDelete)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsNew" /> @Html.DisplayNameFor(model => model.IsNew)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsSoldOnline" /> @Html.DisplayNameFor(model => model.IsSoldOnline)
+                </label>
+            </div>
+
+            <input type="hidden" asp-for="CreatedDate" />
+            <input type="hidden" asp-for="ModifiedDate" />
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Image" />
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@*Package item*@
+<p>
+    <a asp-action="AddPackageItem" asp-route-parentId="@Model.Id">Add package item</a>
+</p>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="toast align-items-center js_ratio-toast mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body text-danger">
+                @errorMessage
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Code
+            </th>
+            <th>
+                Image
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Number
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.PackageItems != null && Model.PackageItems.Any())
+        {
+            @foreach (var item in Model.PackageItems)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="Details" asp-controller="Products" asp-area="" asp-route-id="@item.Id">
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Code)
+                    </td>
+                    @if (string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <td>
+                            <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Code">
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            <img src="@item.ImageUrl" style="height:150px;width:auto" alt="@item.Code">
+                        </td>
+                    }
+                    <td>
+                        @CommonHelper.CurrencyFormat(item.PriceAfterDiscount, language)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Number)
+                    </td>
+                    <td>
+                        <a href="#" class="js_package-item-btn-edit" data-item-id="@item.Id" data-number="@item.Number" data-bs-toggle="modal" data-bs-target="#editPackageItem">Edit</a> |
+                        <form asp-action="RemovePackageItem">
+                            <input type="hidden" name="variantId" value="@item.Id" />
+                            <input type="hidden" name="packageId" value="@Model.Id" />
+                            <input type="submit" value="Delete" />
+                        </form>
+                    </td>
+                </tr>
+            }
+
+        }
+    </tbody>
+</table>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<div>
+    <div class="modal fade" id="editPackageItem" tabindex="-1" aria-labelledby="editPackageItemLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <form asp-action="EditPackageItem">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editPackageItemLabel">Package Item</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body row">
+                        <input type="text" name="itemNumber" class="form-control js_package-item-number"/>
+                        <input type="hidden" name="packageId" value="@Model.Id" />
+                        <input type="hidden" name="variantId" class="js_package-item-id" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<script>
+    const toastDemo = document.querySelector(".js_ratio-toast");
+    if (toastDemo) {
+        const toast = new bootstrap.Toast(toastDemo);
+        if (toast) {
+            toast.show();
+        }
+    }
+</script>
+
+<script defer src="@Url.Content("~/js/administrator/package/edit-package.js")"></script>

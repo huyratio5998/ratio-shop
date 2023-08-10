@@ -1,0 +1,101 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+
+@model HeaderSettingViewModel
+
+@if (Model != null)
+{
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-2" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Header Setting
+            </button>
+        </h2>
+        <div id="panelsStayOpen-2" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.TopBioText)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.TopBioText)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-3" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Shop logo
+            </button>
+        </h2>
+        <div id="panelsStayOpen-3" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.ShopLogo.Icon.Icon)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @if (string.IsNullOrEmpty(Model.ShopLogo?.Icon?.ImageSrc))
+                        {
+                            <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="@Model.ShopLogo?.Icon?.ImageAlt" />
+                        }
+                        else
+                        {
+                            <img src="@Model.ShopLogo.Icon.ImageSrc" alt="@Model.ShopLogo.Icon.ImageAlt" class="js_img_changeTarget" />
+                        }
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.ShopLogo.Text)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.ShopLogo.Text)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.ShopLogo.Url)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.ShopLogo.Url)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-4" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Navigations
+            </button>
+        </h2>
+        <div id="panelsStayOpen-4" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Text
+                            </th>
+                            <th>
+                                Url
+                            </th>                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Navigations != null && Model.Navigations.Any())
+                        {
+                            foreach (var item in Model.Navigations)
+                            {
+                                <tr>
+                                    <td>@item.Text</td>
+                                    <td>@item.Url</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

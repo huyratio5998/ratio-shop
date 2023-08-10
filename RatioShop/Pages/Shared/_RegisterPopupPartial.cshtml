@@ -28,6 +28,7 @@
                                     <div class="mb-4 js_register-header-popup">
                                     </div>
                                     <form action="/" method="post" id="js_register-form">
+                                        @Html.AntiForgeryToken()
                                         <div class="form-group first">
                                             <label for="username">Username <span class="text-danger" title="this field is required">(*)</span></label>
                                             <input type="text" name="userName" class="form-control" id="username" />

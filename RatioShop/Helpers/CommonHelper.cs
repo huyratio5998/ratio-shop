@@ -76,7 +76,7 @@ namespace RatioShop.Helpers
             string BadgeLight = bootstrapVersion == 4 ? "badge-light" : "bg-light text-dark";
             string BadgeInfo = bootstrapVersion == 4 ? "badge-info" : "bg-info text-dark";
             string BadgeDanger = bootstrapVersion == 4 ? "badge-danger" : "bg-danger";
-            string BadgeWarning = bootstrapVersion == 4 ? "badge-warning" : "bg-warning text-dark";            
+            string BadgeWarning = bootstrapVersion == 4 ? "badge-warning" : "bg-warning text-dark";
 
             switch (status)
             {
@@ -142,7 +142,18 @@ namespace RatioShop.Helpers
 
         public static List<string> ResolveProductImages(this string variantImages)
         {
-            var baseUrl = "/images/products";
+            string baseUrl = "/images/products";
+            return ResolveImages(variantImages, baseUrl);
+        }
+
+        public static List<string> ResolvePackageImages(this string variantImages)
+        {
+            string baseUrl = "/images/packages";
+            return ResolveImages(variantImages, baseUrl);
+        }
+
+        private static List<string> ResolveImages(string variantImages, string baseUrl)
+        {
             if (string.IsNullOrEmpty(variantImages)) return new List<string> { "/images/default-placeholder.jpg" };
 
             var listImages = variantImages.Trim().Split(',');

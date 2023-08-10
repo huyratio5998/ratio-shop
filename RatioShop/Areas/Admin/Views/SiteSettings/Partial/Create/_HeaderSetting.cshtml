@@ -1,0 +1,98 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+@using Newtonsoft.Json
+@using RatioShop.Areas.Admin.Models.SiteSettings
+@using RatioShop.Enums
+
+@model HeaderSettingViewModel
+
+@{
+    var navigationItems = Model != null && Model.Navigations != null && Model.Navigations.Any() ? JsonConvert.SerializeObject(Model.Navigations) : null;
+}
+<h5>Header Information</h5>
+<div class="form-group">
+    <label asp-for="TopBioText" class="control-label"></label>
+    <input asp-for="TopBioText" class="form-control" />
+    <span asp-validation-for="TopBioText" class="text-danger"></span>
+</div>
+
+<h6>Shop logo settings</h6>
+<div class="form-group">
+    <label asp-for="ShopLogo.Text" class="control-label"></label>
+    <input asp-for="ShopLogo.Text" class="form-control" />
+    <span asp-validation-for="ShopLogo.Text" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="ShopLogo.Url" class="control-label"></label>
+    <input asp-for="ShopLogo.Url" class="form-control" />
+    <span asp-validation-for="ShopLogo.Url" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="ShopLogo.Icon.Icon" class="control-label js_img_changeTarget">
+        <span>Logo</span>
+        @if (string.IsNullOrEmpty(Model?.ShopLogo?.Icon?.ImageSrc))
+        {
+            <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="@Model?.ShopLogo?.Icon?.ImageAlt" />
+        }
+        else
+        {
+            <img src="@Model?.ShopLogo?.Icon?.ImageSrc" alt="@Model?.ShopLogo?.Icon?.ImageAlt" class="js_img_changeTarget" />
+        }
+    </label>
+    <input type="file" asp-for="ShopLogo.Icon.Icon" class="form-control js_img_changeEvent" />
+    <input type="text" hidden asp-for="ShopLogo.Icon.ImageSrc" />
+    <span asp-validation-for="ShopLogo.Icon.Icon" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="ShopLogo.Icon.ImageAlt" class="control-label"></label>
+    <input asp-for="ShopLogo.Icon.ImageAlt" class="form-control" />
+    <span asp-validation-for="ShopLogo.Icon.ImageAlt" class="text-danger"></span>
+</div>
+
+<h6>Navigation settings</h6>
+<input asp-for="NavigationsStringValue" type="hidden" id="list-navigation-input" value="@navigationItems" />
+<p>
+    <button id="addHeaderNavigation" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addHeaderNavigationModal">Add Navigation Item</button>
+</p>
+<table class="table" id="navigationTable">
+    <thead>
+        <tr>
+            <th>
+                Text
+            </th>
+            <th>
+                Url
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div class="modal fade" id="addHeaderNavigationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Navigation Item</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="btn-modalNavigationClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="variant-code" class="control-label">Text</label>
+                    <input type="text" id="navigation-text" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="variant-number" class="control-label">Url</label>
+                    <input type="text" id="navigation-url" class="form-control" />
+                </div>
+                <br />
+                <div class="form-group">
+                    <div id="navigation-save" class="btn btn-primary mouse-hover">Save</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script defer src="@Url.Content("~/js/administrator/siteSetting/update-header-setting.js")"></script>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using RatioShop.Apis.CustomizeApiAuthentication;
 using RatioShop.Data;
 using RatioShop.Data.HttpClientFactoryClientType.Payments;
 using RatioShop.Data.Models;
@@ -78,7 +79,12 @@ builder.Services.AddHttpClient<PaypalClient>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 // Inject layout model
-builder.Services.AddSingleton<ILayoutSettingsViewModel, LayoutSettingsViewModel>();
+builder.Services.AddScoped<ILayoutSettingsViewModel, LayoutSettingsViewModel>();
+
+// Inject api key filter
+builder.Services.AddSingleton<ApiKeyAuthorizationFilter>();
+builder.Services.AddSingleton<IApiKeyValidator, ApiKeyValidator>();
+
 // Inject repository
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -95,6 +101,9 @@ builder.Services.AddScoped<IShopUserRepository, ShopUserRepository>();
 builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
 builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<ICartDiscountRepository, CartDiscountRepository>();
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+builder.Services.AddScoped<IProductVariantPackageRepository, ProductVariantPackageRepository>();
+builder.Services.AddScoped<ISiteSettingRepository, SiteSettingRepository>();
 
 //Inject services
 
@@ -114,6 +123,9 @@ builder.Services.AddScoped<IShipmentService, ShipmentService>();
 builder.Services.AddScoped<IDiscountService, DiscountService>();
 builder.Services.AddScoped<ICartDiscountService, CartDiscountService>();
 builder.Services.AddScoped<ICommonService, CommonService>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IProductVariantPackageService, ProductVariantPackageService>();
+builder.Services.AddScoped<ISiteSettingService, SiteSettingService>();
 
 var app = builder.Build();
 

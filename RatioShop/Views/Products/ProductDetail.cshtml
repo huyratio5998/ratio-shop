@@ -7,8 +7,7 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 
     var productImage = Model.ProductDefaultImage;
-    var variantImages = Model.SelectedVariantImages ?? new List<string>();
-    if (!string.IsNullOrEmpty(productImage)) variantImages.Insert(0, productImage);
+    var variantImages = Model.SelectedVariantImages ?? new List<string>();    
 
     var language = "vi-VN";
     var productTitle = !string.IsNullOrWhiteSpace(Model.SelectedVariant?.Code) ? $"{Model.Product?.ProductFriendlyName}({Model.SelectedVariant?.Code})" : Model.Product?.ProductFriendlyName;
@@ -27,6 +26,18 @@
                         <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
 
                         <div class="slick3 gallery-lb">
+                            @if (!string.IsNullOrEmpty(productImage))
+                            {
+                                <div class="item-slick3" data-thumb="@productImage">
+                                        <div class="wrap-pic-w pos-relative">
+                                            <img src="@productImage" alt="IMG-PRODUCT" class="js-productImages">
+
+                                            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="@productImage">
+                                                <i class="fa fa-expand"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                            }
                             @if (variantImages != null && variantImages.Any())
                             {
                                 foreach (var item in variantImages)

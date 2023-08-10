@@ -1,0 +1,84 @@
+﻿@using RatioShop.Data.ViewModels;
+@model PackageViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Package</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ImageFile" class="control-label js_img_changeTarget">
+                    <span>ProductImage</span>
+                    <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="package image" />
+                </label>
+                <input type="file" asp-for="ImageFile" class="form-control js_img_changeEvent" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Code" class="control-label"></label>
+                <input asp-for="Code" class="form-control" />
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+             <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductFriendlyName" class="control-label"></label>
+                <input asp-for="ProductFriendlyName" class="form-control" />
+                <span asp-validation-for="ProductFriendlyName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ManualPrice" class="control-label"></label>
+                <input asp-for="ManualPrice" class="form-control" />
+                <span asp-validation-for="ManualPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DiscountRate" class="control-label"></label>
+                <input asp-for="DiscountRate" class="form-control" />
+                <span asp-validation-for="DiscountRate" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsDelete" /> @Html.DisplayNameFor(model => model.IsDelete)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsNew" /> @Html.DisplayNameFor(model => model.IsNew)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsSoldOnline" /> @Html.DisplayNameFor(model => model.IsSoldOnline)
+                </label>
+            </div>
+           
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

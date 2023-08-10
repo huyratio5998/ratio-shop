@@ -1,0 +1,152 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+
+@model FooterSettingViewModel
+
+@if (Model != null)
+{
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-2" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Footer Setting
+            </button>
+        </h2>
+        <div id="panelsStayOpen-2" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.Coppyright)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.Coppyright)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-3" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Footer Info
+            </button>
+        </h2>
+        <div id="panelsStayOpen-3" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Text
+                                </th>
+                                <th>
+                                    Description
+                                </th>
+                                <th>
+                                    Item Display Inline
+                                </th>
+                                <th>
+                                    Items
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.FooterInfos != null && Model.FooterInfos.Any())
+                            {
+                                foreach (var item in Model.FooterInfos)
+                                {
+                                    <tr>
+                                        <td>@item.Title</td>
+                                        <td>@item.Description</td>
+                                        <td>@item.ItemDisplayInline.ToString()</td>
+                                        <td>
+                                            @if (item.Items != null && item.Items.Any())
+                                            {
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>
+                                                                Text
+                                                            </th>
+                                                            <th>
+                                                                Link
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                        @for (var i = 0; i < item.Items.Count; i++)
+                                                        {
+                                                            <tr>
+                                                                <td class="col-1">
+                                                                    @(i + 1)
+                                                                </td>
+                                                                <td class="col-5">@item.Items[i].Text</td>
+                                                                <td>@item.Items[i].Url</td>
+                                                            </tr>
+                                                        }
+
+                                                    </tbody>
+                                                </table>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-4" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Footer Payment Support
+            </button>
+        </h2>
+        <div id="panelsStayOpen-4" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Image
+                                </th>
+                                <th>
+                                    Link
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PaymentSupports != null && Model.PaymentSupports.Any())
+                            {
+                                foreach (var item in Model.PaymentSupports)
+                                {
+                                    <tr>
+                                        @if (string.IsNullOrEmpty(item.Icon?.ImageSrc))
+                                        {
+                                            <td>
+                                                <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Icon?.ImageAlt">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <img src="@item.Icon?.ImageSrc" style="max-height:150px;width:auto" alt="@item.Icon?.ImageAlt">
+                                            </td>
+                                        }
+                                        <td>@item.Url</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}

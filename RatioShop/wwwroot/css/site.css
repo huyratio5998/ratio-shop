@@ -28,3 +28,7 @@ body {
 .hidden {
   display: none;
 }
+
+.setting-hover:hover {
+  background-color: #ededed;
+}

@@ -47,7 +47,7 @@ namespace RatioShop.Features
             
             if (cartId == Guid.Empty) return View("~/Views/Cart/CartDetail.cshtml", result);
 
-            var cartDetail = _cartService.GetCartDetail(cartId);
+            var cartDetail = _cartService.GetCartDetail(cartId, true, false, true);
             if (cartDetail == null) return View();
 
             result = _mapper.Map<CartDetailViewModel>(cartDetail);

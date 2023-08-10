@@ -2,7 +2,7 @@
 {
     public static class FileHelpers
     {
-        public static bool UploadFile(IFormFile file, IWebHostEnvironment environment, string folderName1 = "", string folderName2 = "", string folderName3 = "", string folderName4 = "")
+        public static async Task<bool> UploadFile(IFormFile file, IWebHostEnvironment environment, string folderName1 = "", string folderName2 = "", string folderName3 = "", string folderName4 = "")
         {
             try
             {
@@ -18,9 +18,9 @@
                 }
 
                 var path = Path.Combine(pathFolder, file.FileName);
-                if (File.Exists(path)) return false;
+                if (File.Exists(path)) return true;
 
-                file.CopyTo(new FileStream(path, FileMode.Create));
+                await file.CopyToAsync(new FileStream(path, FileMode.Create));
 
                 return true;
             }
@@ -29,8 +29,8 @@
                 return false;
             }
         }
-        
-        public static bool UploadFiles(List<IFormFile> files, IWebHostEnvironment environment, string folderName1 = "", string folderName2 = "", string folderName3 = "", string folderName4 = "")
+
+        public static async Task<bool> UploadFiles(List<IFormFile> files, IWebHostEnvironment environment, string folderName1 = "", string folderName2 = "", string folderName3 = "", string folderName4 = "")
         {
             try
             {
@@ -50,7 +50,7 @@
                     var path = Path.Combine(pathFolder, file.FileName);
                     if (File.Exists(path)) continue;
 
-                    file.CopyTo(new FileStream(path, FileMode.Create));
+                    await file.CopyToAsync(new FileStream(path, FileMode.Create));
                 }
                 return true;
             }

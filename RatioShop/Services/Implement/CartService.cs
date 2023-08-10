@@ -20,10 +20,13 @@ namespace RatioShop.Services.Implement
         private readonly ICartDiscountService _cartDiscountService;
         private readonly IShopUserService _shopUserService;
         private readonly IStockService _stockService;
+        private readonly IProductVariantPackageService _productVariantPackageService;
+        private readonly IPackageService _packageService;
+
 
         private readonly Guid _anonymousUserID = Guid.Parse(UserTest.UserAnonymousID);
 
-        public CartService(ICartRepository CartRepository, IProductService productService, IProductVariantService productVariant, IProductVariantCartService productVariantCartService, IAddressService addressService, ICartDiscountService cartDiscountService, IShopUserService shopUserService, IStockService stockService)
+        public CartService(ICartRepository CartRepository, IProductService productService, IProductVariantService productVariant, IProductVariantCartService productVariantCartService, IAddressService addressService, ICartDiscountService cartDiscountService, IShopUserService shopUserService, IStockService stockService, IProductVariantPackageService productVariantPackageService, IPackageService packageService)
         {
             _cartRepository = CartRepository;
             _productService = productService;
@@ -33,6 +36,8 @@ namespace RatioShop.Services.Implement
             _cartDiscountService = cartDiscountService;
             _shopUserService = shopUserService;
             _stockService = stockService;
+            _productVariantPackageService = productVariantPackageService;
+            _packageService = packageService;
         }
 
         public Task<Cart> CreateCart(Cart Cart)
@@ -65,15 +70,41 @@ namespace RatioShop.Services.Implement
 
         public async Task<AddToCartResponsetViewModel> AddToCart(AddToCartRequestViewModel request)
         {
-            if (request == null || request.VariantId == Guid.Empty || request.Number <= 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
-            // validate product
-            var variant = _productVariant.GetProductVariant(request.VariantId.ToString());
-            if (variant == null || variant.Number <= 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+            if (request == null || (request.VariantId == Guid.Empty && request.PackageId == Guid.Empty) || request.Number <= 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+            ProductVariant? variant = null;
+            ProductVariantCart? cartDetail = null;
+            IEnumerable<ProductVariantPackage> packageItems = null;
+            bool isAddPackage = false;
 
-            var cartDetail = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == request.CartId && x.ProductVariantId == request.VariantId);
-            if (variant.Number < request.Number
-                || (cartDetail != null && variant.Number < (cartDetail.ItemNumber + request.Number)))
-                return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, $"Out of stock. Product remains: {variant.Number}");
+            // validate packages
+            if (request.PackageId != null && request.PackageId != Guid.Empty)
+            {
+                isAddPackage = true;
+                packageItems = _productVariantPackageService.GetProductVariantPackages().Where(x => x.PackageId == request.PackageId).ToList();
+                if (packageItems == null || !packageItems.Any()) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+                foreach (var item in packageItems)
+                {
+                    var packageItem = _productVariant.GetProductVariant(item.ProductVariantId.ToString());
+                    if (packageItem == null || packageItem.Number <= 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+
+                    var packageCartDetail = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == request.CartId && x.ProductVariantId == item.ProductVariantId && x.PackageId == request.PackageId && x.ItemType == CartItemType.PackageItem);
+                    if (packageItem.Number < (request.Number * item.ItemNumber)
+                        || (packageCartDetail != null && packageItem.Number < (packageCartDetail.ItemNumber + (request.Number * item.ItemNumber))))
+                        return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, $"Product in Packages out of stock. Product {packageItem.Product?.ProductFriendlyName} ({packageItem.Code}) remains: {packageItem.Number}");
+                }
+            }
+            else
+            {
+                // validate product            
+                if (request.VariantId == null || request.VariantId == Guid.Empty) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+                variant = _productVariant.GetProductVariant(request.VariantId.ToString());
+                if (variant == null || variant.Number <= 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+
+                cartDetail = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == request.CartId && x.ProductVariantId == request.VariantId && x.ItemType == CartItemType.Product);
+                if (variant.Number < request.Number
+                    || (cartDetail != null && variant.Number < (cartDetail.ItemNumber + request.Number)))
+                    return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, $"Out of stock. Product remains: {variant.Number}");
+            }
 
             // save to DB
             //save cart
@@ -127,36 +158,84 @@ namespace RatioShop.Services.Implement
 
                 if (isChange) UpdateCart(cart);
             }
+
             //save productVariantCart
-            var cartItem = cartDetail;
-            if (cartItem != null)
+            if (isAddPackage)
             {
-                // update
-                cartItem.ItemNumber += request.Number;
-                cartItem.ItemPrice = variant.Price;
-                cartItem.DiscountRate = variant.DiscountRate;
-                _productVariantCartService.UpdateProductVariantCart(cartItem);
+                foreach (var item in packageItems)
+                {
+                    var packageCartDetail = _productVariantCartService.GetProductVariantCarts()
+                        .FirstOrDefault(x => x.CartId == request.CartId
+                            && x.ProductVariantId == item.ProductVariantId
+                            && x.PackageId == request.PackageId
+                            && x.ItemType == CartItemType.PackageItem);
+
+                    var packageItem = _productVariant.GetProductVariant(item.ProductVariantId.ToString());
+                    var cartItem = packageCartDetail;
+                    if (cartItem != null)
+                    {
+                        // update
+                        cartItem.ItemNumber += (request.Number * item.ItemNumber);
+                        cartItem.PackageNumber += request.Number;
+                        cartItem.ItemPrice = packageItem?.Price;
+                        cartItem.DiscountRate = packageItem?.DiscountRate ?? 0;
+                        _productVariantCartService.UpdateProductVariantCart(cartItem);
+                    }
+                    else
+                    {
+                        //create
+                        var itemAdd = new ProductVariantCart()
+                        {
+                            ItemNumber = request.Number * item.ItemNumber,
+                            PackageNumber = request.Number,
+                            ProductVariantId = item.ProductVariantId,
+                            PackageId = item.PackageId,
+                            CartId = cart.Id,
+                            ItemPrice = packageItem?.Price,
+                            DiscountRate = packageItem?.DiscountRate ?? 0,
+                            ItemType = CartItemType.PackageItem
+                        };
+                        await _productVariantCartService.CreateProductVariantCart(itemAdd);
+                    }
+                }
+                // build response
+                var result = new AddToCartResponsetViewModel(cart.Id, CommonStatus.Success, "Add to cart success!");
+
+                return result;
             }
             else
             {
-                //create
-                var item = new ProductVariantCart()
+                var cartItem = cartDetail;
+                if (cartItem != null)
                 {
-                    ItemNumber = request.Number,
-                    ProductVariantId = request.VariantId,
-                    CartId = cart.Id,
-                    ItemPrice = variant.Price,
-                    DiscountRate = variant.DiscountRate,
-                };
-                await _productVariantCartService.CreateProductVariantCart(item);
-            }
-            // build response
-            var result = new AddToCartResponsetViewModel(cart.Id, CommonStatus.Success, "Add to cart success!");
+                    // update
+                    cartItem.ItemNumber += request.Number;
+                    cartItem.ItemPrice = variant.Price;
+                    cartItem.DiscountRate = variant.DiscountRate;
+                    _productVariantCartService.UpdateProductVariantCart(cartItem);
+                }
+                else
+                {
+                    //create
+                    var item = new ProductVariantCart()
+                    {
+                        ItemNumber = request.Number,
+                        ProductVariantId = (Guid)request.VariantId,
+                        CartId = cart.Id,
+                        ItemPrice = variant.Price,
+                        DiscountRate = variant.DiscountRate,
+                        ItemType = CartItemType.Product
+                    };
+                    await _productVariantCartService.CreateProductVariantCart(item);
+                }
+                // build response
+                var result = new AddToCartResponsetViewModel(cart.Id, CommonStatus.Success, "Add to cart success!");
 
-            return result;
+                return result;
+            }
         }
 
-        public CartDetailResponsViewModel? GetCartDetail(Guid id, bool getLatestVariantPrice = true, bool includeInActiveDiscount = false)
+        public CartDetailResponsViewModel? GetCartDetail(Guid id, bool getLatestVariantPrice = true, bool includeInActiveDiscount = false, bool isMergePackageItem = false)
         {
             if (id == Guid.Empty) return null;
 
@@ -169,10 +248,13 @@ namespace RatioShop.Services.Implement
                 .Select(cartDetail => new CartItemResponseViewModel()
                 {
                     VariantId = cartDetail.variantCart.ProductVariantId,
+                    PackageId = cartDetail.variantCart.PackageId,
+                    ItemType = cartDetail.variantCart.PackageId != null ? CartItemType.PackageItem : CartItemType.Product,
                     Number = cartDetail.variantCart.ItemNumber,
+                    PackageNumber = cartDetail.variantCart.PackageNumber,
                     Price = cartDetail.variantCart.ItemPrice,
                     DiscountRate = cartDetail.variantCart.DiscountRate,
-                    StockItems = string.IsNullOrWhiteSpace(cartDetail.variantCart.StockItems) ? null: JsonConvert.DeserializeObject<List<CartStockItem>>(cartDetail.variantCart.StockItems),
+                    StockItems = string.IsNullOrWhiteSpace(cartDetail.variantCart.StockItems) ? null : JsonConvert.DeserializeObject<List<CartStockItem>>(cartDetail.variantCart.StockItems),
 
                 }).ToList();
 
@@ -194,6 +276,40 @@ namespace RatioShop.Services.Implement
                         item.Image = productDetail.ProductDefaultImage;
                         item.EnableStockTracking = productDetail.Product.EnableStockTracking;
                     }
+                }
+            }
+
+            // merge package item into 1
+            if (isMergePackageItem)
+            {
+                var cartPackageItem = cartItems.Where(x => x.ItemType == CartItemType.PackageItem).ToList();
+                foreach (var item in cartPackageItem)
+                {
+                    var isExist = cartItems.FirstOrDefault(x => x.ItemType == CartItemType.Package && x.PackageId == item.PackageId);
+                    if (isExist == null)
+                    {
+                        if (item.PackageId == null) continue;
+                        var packageInfo = _packageService.GetPackageViewModel((Guid)item.PackageId);
+                        if (packageInfo == null) continue;
+
+                        cartItems.Add(new CartItemResponseViewModel
+                        {
+                            PackageId = item.PackageId,
+                            ItemType = CartItemType.Package,
+                            Number = item.PackageNumber,
+                            PackageNumber = item.PackageNumber,
+                            Price = packageInfo.ManualPrice != null ? packageInfo.ManualPrice : packageInfo.AutoCalculatedPrice,
+                            DiscountPrice = packageInfo.ManualPrice != null ? packageInfo.ManualPrice : packageInfo.AutoCalculatedPrice,
+                            DiscountRate = packageInfo.ManualPrice == null ? (packageInfo.DiscountRate ?? 0) : 0,
+                            Name = packageInfo.Name,
+                            ProductCode = packageInfo.Code,
+                            Image = packageInfo.ImageUrl,
+                            Description = packageInfo.PackageItems != null && packageInfo.PackageItems.Any()
+                                        ? String.Join(", ", packageInfo.PackageItems.Select(x => $"{x.Name} x {x.Number}"))
+                                        : ""
+                        });
+                    }
+                    cartItems.Remove(item);
                 }
             }
 
@@ -219,7 +335,7 @@ namespace RatioShop.Services.Implement
             {
                 CartId = id,
                 CartItems = cartItems,
-                TotalItems = cartItems?.Sum(x=>x.Number) ?? 0,
+                TotalItems = cartItems?.Sum(x => x.Number) ?? 0,
                 TotalPrice = totalItemPrice,
                 CouponCodes = couponCodes,
                 Status = currentCart?.Status ?? string.Empty,
@@ -251,33 +367,92 @@ namespace RatioShop.Services.Implement
 
         public AddToCartResponsetViewModel ChangeCartItem(AddToCartRequestViewModel request)
         {
-            if (request == null || request.VariantId == Guid.Empty || request.Number < 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request. Can not change cart item!");
-            // validate product
-            var variant = _productVariant.GetProductVariant(request.VariantId.ToString());
-            if (variant == null || variant.Number < 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request. Can not change cart item!");
-            if (variant.Number < request.Number) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, $"Too much products. Product remains: {variant.Number}!");
+            if (request == null || (request.VariantId == Guid.Empty && request.PackageId == Guid.Empty) || request.Number < 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+            ProductVariant? variant = null;
+            ProductVariantCart? cartDetail = null;
+            IEnumerable<ProductVariantPackage> packageItems = null;
+            bool isAddPackage = false;
+
+            // validate packages
+            if (request.PackageId != null && request.PackageId != Guid.Empty)
+            {
+                isAddPackage = true;
+                packageItems = _productVariantPackageService.GetProductVariantPackages().Where(x => x.PackageId == request.PackageId).ToList();
+                if (packageItems == null || !packageItems.Any()) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+                foreach (var item in packageItems)
+                {
+                    var packageItem = _productVariant.GetProductVariant(item.ProductVariantId.ToString());
+                    if (packageItem == null || packageItem.Number < 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
+
+                    if (packageItem.Number < (request.Number * item.ItemNumber))
+                        return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, $"Product in Packages out of stock. Product {packageItem.Product?.ProductFriendlyName} ({packageItem.Code}) remains: {packageItem.Number}");
+                }
+            }
+            else
+            {
+                // validate product            
+                if (request == null || request.VariantId == null || request.VariantId == Guid.Empty || request.Number < 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request. Can not change cart item!");
+                variant = _productVariant.GetProductVariant(request.VariantId.ToString());
+                if (variant == null || variant.Number < 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request. Can not change cart item!");
+                if (variant.Number < request.Number) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, $"Too much products. Product remains: {variant.Number}!");
+            }
 
             // save to DB
             //save cart
             var cart = GetCart(request.CartId.ToString());
             if (cart == null) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Cart empty!");
 
-            //save productVariantCart
-            var cartItem = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == cart.Id && x.ProductVariantId == request.VariantId);
-            if (cartItem != null)
+            if (isAddPackage)
             {
-                // update
-                cartItem.ItemNumber = request.Number;
-                cartItem.ItemPrice = variant.Price;
-                cartItem.DiscountRate = variant.DiscountRate;
-                if (cartItem.ItemNumber == 0) _productVariantCartService.DeleteProductVariantCart(cartItem.Id.ToString());
-                else _productVariantCartService.UpdateProductVariantCart(cartItem);
+                foreach (var item in packageItems)
+                {
+                    var packageCartDetail = _productVariantCartService.GetProductVariantCarts()
+                        .FirstOrDefault(x => x.CartId == request.CartId
+                            && x.ProductVariantId == item.ProductVariantId
+                            && x.PackageId == request.PackageId
+                            && x.ItemType == CartItemType.PackageItem);
+
+                    var packageItem = _productVariant.GetProductVariant(item.ProductVariantId.ToString());
+                    var cartItem = packageCartDetail;
+                    if (cartItem != null)
+                    {
+                        if (request.Number == 0) _productVariantCartService.DeleteProductVariantCart(cartItem.Id.ToString());
+                        else
+                        {
+                            cartItem.ItemNumber = (request.Number * item.ItemNumber);
+                            cartItem.PackageNumber = request.Number;
+                            cartItem.ItemPrice = packageItem?.Price;
+                            cartItem.DiscountRate = packageItem?.DiscountRate ?? 0;
+                            _productVariantCartService.UpdateProductVariantCart(cartItem);
+                        }
+                    }
+                }
+
+                var result = new AddToCartResponsetViewModel(cart.Id, CommonStatus.Success, "Add to cart success!");
+
+                return result;
             }
+            else
+            {
+                //save productVariantCart
+                var cartItem = _productVariantCartService.GetProductVariantCarts()
+                    .FirstOrDefault(x => x.CartId == cart.Id
+                    && x.ProductVariantId == request.VariantId && x.ItemType == CartItemType.Product);
+                if (cartItem != null)
+                {
+                    // update
+                    cartItem.ItemNumber = request.Number;
+                    cartItem.ItemPrice = variant.Price;
+                    cartItem.DiscountRate = variant.DiscountRate;
+                    if (cartItem.ItemNumber == 0) _productVariantCartService.DeleteProductVariantCart(cartItem.Id.ToString());
+                    else _productVariantCartService.UpdateProductVariantCart(cartItem);
+                }
 
-            // build response
-            var result = new AddToCartResponsetViewModel(cart.Id, CommonStatus.Success, "Add to cart success!");
+                // build response
+                var result = new AddToCartResponsetViewModel(cart.Id, CommonStatus.Success, "Add to cart success!");
 
-            return result;
+                return result;
+            }
         }
         private decimal CalculateFinalPrice(decimal totalPrice, List<string> coupons, decimal? shippingFee)
         {
@@ -344,17 +519,17 @@ namespace RatioShop.Services.Implement
         }
 
         public bool TrackingProductItemByCart(CartDetailResponsViewModel? cartDetail, Guid cartId)
-        {            
+        {
             if (cartId == Guid.Empty || cartDetail == null || cartDetail.CartItems == null || !cartDetail.CartItems.Any()) return true;
 
             foreach (var item in cartDetail.CartItems)
             {
-                if(!item.EnableStockTracking) continue;
+                if (!item.EnableStockTracking) continue;
                 // should reduce 
                 var reduceStatus = _productVariant.ReduceProductVariantNumber(item.VariantId, item.Number, item.StockItems);
                 if (reduceStatus)
                 {
-                    var cartItem = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == cartId && x.ProductVariantId == item.VariantId);
+                    var cartItem = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == cartId && x.ProductVariantId == item.VariantId && x.PackageId == item.PackageId);
                     if (cartItem != null)
                     {
                         // update reduce status
@@ -402,7 +577,7 @@ namespace RatioShop.Services.Implement
 
             foreach (var item in trackUpdatedItems)
             {
-                if(string.IsNullOrWhiteSpace(item.StockItems)) continue;
+                if (string.IsNullOrWhiteSpace(item.StockItems)) continue;
 
                 var cartStockItems = JsonConvert.DeserializeObject<List<CartStockItem>>(item.StockItems);
                 var revertStatus = _productVariant.RevertProductVariantNumber(item.ProductVariantId, cartStockItems);
@@ -425,7 +600,7 @@ namespace RatioShop.Services.Implement
         /// <param name="cartId"></param>
         /// <returns></returns>
         public bool UpdateStoreItemsForCart(Guid cartId, ref CartDetailResponsViewModel? cartDetail)
-        {            
+        {
             if (cartId == Guid.Empty) return false;
             if (cartDetail == null) return true;
 
@@ -439,7 +614,7 @@ namespace RatioShop.Services.Implement
                 .Join(_addressService.GetAddresses(),
                 x => x.AddressId,
                 y => y.Id, (x, y) => new { Stocks = x, Address1 = y.Address1, Address2 = y.Address2 })
-                .Where(x => x.Stocks.IsActive)                
+                .Where(x => x.Stocks.IsActive)
                 .OrderByDescending(x => x.Address1 == shippingAddress.Address1)
                 .ThenBy(x => x.Address1)
                 .Select(x => x.Stocks)
@@ -453,18 +628,22 @@ namespace RatioShop.Services.Implement
             // => has value => update stockitems to each item in cart.
             // if empty => find all nearest stock has much item as posible
             // => foreach => add stockitems to each item in cart.
-            
+
             if (cartDetail.CartItems == null || !cartDetail.CartItems.Any()) return false;
 
+            var cartItemsReduced = new List<CartItemResponseViewModel>();
             foreach (var cartItem in cartDetail.CartItems)
             {
                 if (!cartItem.EnableStockTracking) continue;
+                if (cartItemsReduced.Select(x => x.VariantId).Contains(cartItem.VariantId)) continue;
 
-                var cartItemNumber = cartItem.Number;
+                var cartItemNumber = cartDetail.CartItems.Where(x => x.VariantId == cartItem.VariantId).Sum(x => x.Number);
+                cartItemsReduced.Add(cartItem);
+
                 var currentStockItems = new List<CartStockItem>();
                 var itemInStocks = variantStocksSorted.Where(x => x.ProductVariantId == cartItem.VariantId);
                 foreach (var variantStockItem in itemInStocks)
-                {                    
+                {
                     if (cartItemNumber <= variantStockItem.ProductNumber)
                     {
                         currentStockItems.Add(new CartStockItem { ItemNumber = cartItemNumber, StockId = variantStockItem.StockId });
@@ -487,18 +666,21 @@ namespace RatioShop.Services.Implement
             if (cartDetail == null || cartDetail.TotalItems == 0 || cartDetail.CartItems == null || !cartDetail.CartItems.Any()) return false;
 
             foreach (var item in cartDetail.CartItems)
-            {                
+            {
                 var productVariant = _productVariant.GetProductVariant(item.VariantId.ToString());
+                var totalProductNumber = cartDetail.CartItems.Where(x => x.VariantId == item.VariantId).Sum(x => x.Number);
+
                 if (productVariant == null) return false;
 
-                if (item.Number > productVariant.Number) return false;
+                if (totalProductNumber > productVariant.Number) return false;
             }
+
             return true;
         }
 
         public IEnumerable<Cart> GetAllCartByUserId(string userId)
         {
-            if(userId == null) return Enumerable.Empty<Cart>();
+            if (userId == null) return Enumerable.Empty<Cart>();
 
             return GetCarts().Where(x => x.ShopUserId.Equals(userId));
         }
@@ -509,7 +691,7 @@ namespace RatioShop.Services.Implement
 
             foreach (var item in cartDetail.CartItems)
             {
-                var cartItem = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == cartId && x.ProductVariantId == item.VariantId);
+                var cartItem = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == cartId && x.ProductVariantId == item.VariantId && x.PackageId == item.PackageId);
                 if (cartItem != null)
                 {
                     if (cartItem.DiscountRate == item.DiscountRate && cartItem.ItemPrice == item.Price) continue;

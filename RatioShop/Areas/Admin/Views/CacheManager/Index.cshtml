@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var message = ViewBag.Message;
+}
+
+<h1>Cache Management</h1>
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="toast align-items-center js_ratio-toast mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                @message
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+}
+<div>
+    <form asp-action="ClearCache" id="clearCacheForm">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            Cache location
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="js_choose-item">
+                        <td>
+                            <label for="site-setting">
+                                Site Setting
+                                <input type="checkbox" id="site-setting" name="cache-setting" value="site-setting" />
+                            </label>
+                        </td>
+                    </tr>
+                    <tr class="js_choose-item">
+                        <td>
+                            <label for="admin-site-setting">
+                                Admin Site Setting
+                                <input type="checkbox" id="admin-site-setting" name="cache-setting" value="admin-site-setting" />
+                            </label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>        
+        <input type="submit" value="Clear cache" class="btn btn-primary" />
+    </form>
+</div>
+
+<script>
+    const toastDemo = document.querySelector(".js_ratio-toast");
+    if (toastDemo) {
+        const toast = new bootstrap.Toast(toastDemo);
+        if (toast) {
+            toast.show();
+        }
+    }
+</script>
+
+<script defer src="@Url.Content("~/js/administrator/cacheManager/cache-manager.js")"></script>

@@ -12,6 +12,7 @@
     var language = "vi-VN";
     var currentCategoryFilter = Model.FilterItems?.FirstOrDefault(x => x.Type == FilterType.Text.ToString() && x.FieldName == FieldNameFilter.Category.ToString());
     var currentPriceRangeFilter = Model.FilterItems?.FirstOrDefault(x => x.Type == FilterType.NumberRange.ToString() && x.FieldName == FieldNameFilter.Price.ToString());
+    var isProductPackageView = Model.FilterSettings.IsPackageView;
 }
 
 <!-- Product -->
@@ -32,6 +33,10 @@
             </div>
 
             <div class="flex-w flex-c-m m-tb-10">
+                <div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 @(isProductPackageView ? "how-active1" : "") js_toggle-package-view" data-is-package-view="@isProductPackageView">                    
+                    Packages
+                </div>
+
                 <div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
                     <i class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"></i>
                     <i class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
@@ -113,13 +118,36 @@
         </div>
 
         <div class="row isotope-grid js-listProducts">
-            @if (Model.Products != null && Model.Products.Any())
+            @if (isProductPackageView)
             {
-                foreach (var item in Model.Products)
+                if (Model.Packages != null && Model.Packages.Any())
                 {
-                    <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
-                        <partial name="_ProductCardItem" model="@(new ProductItemViewModel{Product = item, Language = language})" />
-                    </div>
+                    foreach (var item in Model.Packages)
+                    {
+                        <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
+                            <partial name="_ProductPackageCardItem" model="@(new ProductItemViewModel{Package = item, Language = language})" />
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="container mtext-110 cl2 p-b-12">Packages have not found!</div>
+                }
+            }
+            else
+            {
+                if (Model.Products != null && Model.Products.Any())
+                {
+                    foreach (var item in Model.Products)
+                    {
+                        <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
+                            <partial name="_ProductCardItem" model="@(new ProductItemViewModel{Product = item, Language = language})" />
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="container mtext-110 cl2 p-b-12">Products have not found!</div>
                 }
             }
         </div>
@@ -129,7 +157,7 @@
             @if (Model.PageIndex < Model.TotalPage)
             {
                 <div class="flex-c-m flex-w w-full p-t-45">
-                    <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04" id="btn-loadMore" data-next-page=@(++Model.PageIndex) data-page-size=@Model.PageSize data-total-page=@Model.TotalPage>
+                    <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04" id="btn-loadMore" data-next-page=@(Model.PageIndex + 1) data-page-size=@Model.PageSize data-total-page=@Model.TotalPage>
                         Load More
                     </a>
                 </div>

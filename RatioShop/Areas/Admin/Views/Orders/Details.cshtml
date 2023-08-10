@@ -178,7 +178,15 @@
                             @Html.DisplayFor(modelItem => item.ProductCode)
                         </td>
                         <td>
-                            @item.Name - @item.VariableName
+                            @(string.IsNullOrWhiteSpace(item.VariableName) ? item.Name : $"{item.Name} - {@item.VariableName}")
+                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                            {
+                                <div>
+                                    <i>
+                                        @($" {item.Description}")
+                                    </i>
+                                </div>
+                            }
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Number)
@@ -271,21 +279,21 @@
                         <input type="hidden" name="currentOrderId" value="@Model.OrderId" />
                         foreach (var item in Model.ShipmentHistory.AvailableShippers)
                         {
-                                <div class="col js_shipperChooseArea">
-                                    <div class="p-3 border">
-                                        <input type="radio" name="assignedShipper" value="@item.ShipperId" />
-                                        <p>Name: @item.FullName</p>
-                                        <p>Phone number: @item.PhoneNumber</p>
-                                        <p>Total orders shipping: @item.TotalAssignedOrders</p>
-                                    </div>
-                                </div>                            
+                            <div class="col js_shipperChooseArea">
+                                <div class="p-3 border">
+                                    <input type="radio" name="assignedShipper" value="@item.ShipperId" />
+                                    <p>Name: @item.FullName</p>
+                                    <p>Phone number: @item.PhoneNumber</p>
+                                    <p>Total orders shipping: @item.TotalAssignedOrders</p>
+                                </div>
+                            </div>
                         }
                     }
                     else
                     {
                         <div>
                             There're no available shippers.
-                            </div>
+                        </div>
                     }
                 </div>
                 <div class="modal-footer">

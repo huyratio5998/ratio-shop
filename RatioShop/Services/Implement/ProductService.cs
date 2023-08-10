@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using RatioShop.Areas.Admin.Models;
 using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels;
@@ -18,9 +19,10 @@ namespace RatioShop.Services.Implement
         private readonly IProductCategoryService _productCategoryService;
         private readonly IProductVariantStockService _productVariantStockService;
         private readonly IStockService _stockService;
+        private readonly IPackageService _packageService;
 
         private readonly IMapper _mapper;
-        public ProductService(IProductRepository productRepository, IProductVariantService productVariantService, ICategoryService categoryService, IProductCategoryService productCategoryService, IProductVariantStockService productVariantStockService, IStockService stockService, IMapper mapper)
+        public ProductService(IProductRepository productRepository, IProductVariantService productVariantService, ICategoryService categoryService, IProductCategoryService productCategoryService, IProductVariantStockService productVariantStockService, IStockService stockService, IMapper mapper, IPackageService packageService)
         {
             _productRepository = productRepository;
             _productVariantService = productVariantService;
@@ -29,6 +31,7 @@ namespace RatioShop.Services.Implement
             _productVariantStockService = productVariantStockService;
             _stockService = stockService;
             _mapper = mapper;
+            _packageService = packageService;
         }
 
         public async Task<bool> AddProduct(Product product)
@@ -158,14 +161,21 @@ namespace RatioShop.Services.Implement
             product.ModifiedDate = DateTime.UtcNow;
 
             return _productRepository.UpdateProduct(product);
-        }
+        }        
 
         public ListProductViewModel GetListProducts(ProductSearchRequest request)
         {
             if (request == null) return new ListProductViewModel();
-
+            
             var searchRequest = _mapper.Map<BaseSearchRequest>(request);
 
+            if (request.IsGetPackages)
+            {                
+                var packages = _packageService.GetPackages(searchRequest);
+                return _mapper.Map<ListProductViewModel>(packages);
+            }
+
+            // get products
             var searchProducts = _productRepository.GetAll().Where(x => !x.IsDelete);
             searchProducts = BuildProductFilter(searchProducts, searchRequest);
 
