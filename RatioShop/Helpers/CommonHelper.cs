@@ -1,4 +1,5 @@
-﻿using RatioShop.Constants;
+﻿using RatioShop.Areas.Admin.Models.SiteSettings.SettingItem;
+using RatioShop.Constants;
 using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Enums;
 using System.Globalization;
@@ -169,6 +170,13 @@ namespace RatioShop.Helpers
             }
 
             return result;
+        }
+
+        public static List<LinkItemViewModel>? GetChildItems(this LinkItemViewModel item, List<LinkItemViewModel> items)
+        {
+            if(item == null || items == null || !items.Any()) return null;
+
+            return items.Where(x=>x.ParentId == item.Id).ToList();
         }
     }
 }

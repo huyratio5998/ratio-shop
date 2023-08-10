@@ -23,6 +23,7 @@ namespace RatioShop.Services.Implement
         private readonly IMapper _mapper;
         private readonly IMemoryCache _memoryCache;
         private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim semaphoreSlim2 = new SemaphoreSlim(1, 1);
 
         public SiteSettingService(ISiteSettingRepository siteSettingRepository, IMapper mapper, IMemoryCache memoryCache)
         {
@@ -149,8 +150,14 @@ namespace RatioShop.Services.Implement
             switch (result.SettingTemplate)
             {
                 case SiteSettings.SettingTemplates.Header:
-                    result.HeaderSetting = JsonConvert.DeserializeObject<HeaderSettingViewModel>(settingValue);
-                    break;
+                    {
+                        var headerSettings = JsonConvert.DeserializeObject<HeaderSettingViewModel>(settingValue);
+                        if (headerSettings != null && headerSettings.Navigations != null && headerSettings.Navigations.Any())
+                            headerSettings.Navigations = headerSettings?.Navigations?.OrderBy(x => x.Id).ToList();
+
+                        result.HeaderSetting = headerSettings;
+                        break;
+                    }
                 case SiteSettings.SettingTemplates.Footer:
                     result.FooterSetting = JsonConvert.DeserializeObject<FooterSettingViewModel>(settingValue);
                     break;
@@ -173,8 +180,14 @@ namespace RatioShop.Services.Implement
                     result.AdminGeneralSetting = JsonConvert.DeserializeObject<AdminGeneralSettingViewModel>(settingValue);
                     break;
                 case SiteSettings.SettingTemplates.AdminHeader:
-                    result.HeaderSetting = JsonConvert.DeserializeObject<HeaderSettingViewModel>(settingValue);
-                    break;
+                    {
+                        var headerSettings = JsonConvert.DeserializeObject<HeaderSettingViewModel>(settingValue);
+                        if (headerSettings != null && headerSettings.Navigations != null && headerSettings.Navigations.Any())
+                            headerSettings.Navigations = headerSettings?.Navigations?.OrderBy(x => x.Id).ToList();
+
+                        result.HeaderSetting = headerSettings;
+                        break;
+                    }
                 case SiteSettings.SettingTemplates.AdminFooter:
                     result.FooterSetting = JsonConvert.DeserializeObject<FooterSettingViewModel>(settingValue);
                     break;
@@ -187,21 +200,45 @@ namespace RatioShop.Services.Implement
 
         public async Task<SiteSettingDetailViewModel>? GetSetting(string settingKey)
         {
-            if (string.IsNullOrEmpty(settingKey)) return null;
+            string cacheKey = $"cache-{settingKey}";
 
-            var setting = await _siteSettingRepository.GetSiteSettings().FirstOrDefaultAsync(x => x.Name == settingKey && x.IsActive);
-            var result = _mapper.Map<SiteSettingDetailViewModel>(setting);
-
-            if (setting == null || result == null) return null;
-
-            switch (setting.Type)
+            if (!_memoryCache.TryGetValue(cacheKey, out SiteSettingDetailViewModel result))
             {
-                case SiteSettingType.ItemSetting:
-                    result.SingleSetting = setting.Value;
-                    break;
-                case SiteSettingType.GroupSettings:
-                    result = MapSiteSettingsValue(ref result, setting.Value);
-                    break;
+                try
+                {
+                    await semaphoreSlim2.WaitAsync();
+                    if (!_memoryCache.TryGetValue(cacheKey, out result))
+                    {
+                        if (string.IsNullOrEmpty(settingKey)) return null;
+
+                        var setting = await _siteSettingRepository.GetSiteSettings().FirstOrDefaultAsync(x => x.Name == settingKey && x.IsActive);
+                        result = _mapper.Map<SiteSettingDetailViewModel>(setting);
+
+                        if (setting == null || result == null) return null;
+
+                        switch (setting.Type)
+                        {
+                            case SiteSettingType.ItemSetting:
+                                result.SingleSetting = setting.Value;
+                                break;
+                            case SiteSettingType.GroupSettings:
+                                result = MapSiteSettingsValue(ref result, setting.Value);
+                                break;
+                        }
+
+                        var cacheOption = new MemoryCacheEntryOptions()
+                        .SetSlidingExpiration(TimeSpan.FromSeconds(60))
+                        .SetAbsoluteExpiration(TimeSpan.FromHours(1))
+                        .SetPriority(CacheItemPriority.Normal)
+                        .SetSize(1024);
+
+                        _memoryCache.Set(cacheKey, result, cacheOption);
+                    }
+                }
+                finally
+                {
+                    semaphoreSlim2.Release();
+                }
             }
 
             return result;
@@ -209,7 +246,7 @@ namespace RatioShop.Services.Implement
 
         public async Task<SiteSettingViewModel>? GetSiteSetting(bool isAdminSite = false)
         {
-            string cacheKey = $"GetSiteSetting-{isAdminSite.ToString()}";
+            string cacheKey = $"cache-common-setting-{isAdminSite.ToString().ToLower()}";
 
             if (!_memoryCache.TryGetValue(cacheKey, out SiteSettingViewModel result))
             {

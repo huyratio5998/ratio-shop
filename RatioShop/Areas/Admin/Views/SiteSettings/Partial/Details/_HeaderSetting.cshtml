@@ -75,11 +75,17 @@
                     <thead>
                         <tr>
                             <th>
+                                Id
+                            </th>
+                            <th>
                                 Text
                             </th>
                             <th>
                                 Url
-                            </th>                            
+                            </th>
+                            <th>
+                                ParentId
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,8 +94,10 @@
                             foreach (var item in Model.Navigations)
                             {
                                 <tr>
+                                    <td>@item.Id</td>
                                     <td>@item.Text</td>
                                     <td>@item.Url</td>
+                                    <td>@item.ParentId</td>
                                 </tr>
                             }
                         }

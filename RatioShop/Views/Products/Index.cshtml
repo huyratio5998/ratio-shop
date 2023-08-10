@@ -13,6 +13,7 @@
     var currentCategoryFilter = Model.FilterItems?.FirstOrDefault(x => x.Type == FilterType.Text.ToString() && x.FieldName == FieldNameFilter.Category.ToString());
     var currentPriceRangeFilter = Model.FilterItems?.FirstOrDefault(x => x.Type == FilterType.NumberRange.ToString() && x.FieldName == FieldNameFilter.Price.ToString());
     var isProductPackageView = Model.FilterSettings.IsPackageView;
+    var productSorts = Model.PLPSettings != null && Model.PLPSettings.ProductsSorts != null && Model.PLPSettings.ProductsSorts.Any() ? Model.PLPSettings.ProductsSorts : SiteSettings.ProductsSorts;
 }
 
 <!-- Product -->
@@ -24,7 +25,8 @@
                 {
                     foreach (var item in Model.FilterSettings.CategoryFilter)
                     {
-                        var selectedClass = currentCategoryFilter?.Value == item.Value || currentCategoryFilter != null && currentCategoryFilter.Value.Equals(item.Value) ? "how-active1" : "";
+                        var currentCategoryFilterValue = currentCategoryFilter?.Value ?? "";
+                        var selectedClass = currentCategoryFilterValue.Equals(item.Value) ? "how-active1" : "";
                         <button class="js_category-filter stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 @selectedClass" data-value="@item.Value">
                             @item.DisplayName
                         </button>
@@ -34,7 +36,7 @@
 
             <div class="flex-w flex-c-m m-tb-10">
                 <div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 @(isProductPackageView ? "how-active1" : "") js_toggle-package-view" data-is-package-view="@isProductPackageView">                    
-                    Packages
+                    @Model.PLPSettings?.PackageText
                 </div>
 
                 <div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
@@ -71,7 +73,7 @@
                         </div>
 
                         <ul>
-                            @foreach (var item in SiteSettings.ProductsSorts)
+                            @foreach (var item in productSorts)
                             {
                                 var filterActiveClass = item.Key == Model.SortType ? "filter-link-active" : "";
                                 <li class="p-b-6">

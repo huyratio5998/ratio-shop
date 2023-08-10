@@ -15,8 +15,10 @@ namespace RatioShop.Data.ViewModels.Layout
             _httpContextAccessor = httpContextAccessor;
             _siteSettingService = siteSettingService;
             this.SiteSettings = _siteSettingService.GetSiteSetting()?.Result;
+            _adminSiteSettings = _siteSettingService.GetSiteSetting(true)?.Result;
         }
         private SiteSettingViewModel? SiteSettings;
+        private SiteSettingViewModel? _adminSiteSettings;
 
         public string StoreName => SiteSettings?.GeneralSetting?.SiteName ?? CommonConstant.StoreName;
 
@@ -25,6 +27,8 @@ namespace RatioShop.Data.ViewModels.Layout
         public string StoreLogo => SiteSettings?.GeneralSetting?.SiteLogo?.ImageSrc ?? "/images/icons/favicon.png";
 
         SiteSettingViewModel ILayoutSettingsViewModel.SiteSettings => this.SiteSettings;
+
+        public SiteSettingViewModel AdminSiteSettings => this._adminSiteSettings;
 
         public string CurrentPath()
         {

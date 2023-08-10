@@ -57,10 +57,16 @@
     <thead>
         <tr>
             <th>
+                Id
+            </th>
+            <th>
                 Text
             </th>
             <th>
                 Url
+            </th>
+            <th>
+                ParentId
             </th>
             <th></th>
         </tr>
@@ -80,12 +86,20 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="variant-code" class="control-label">Text</label>
+                    <label for="navigation-id" class="control-label">Id</label>
+                    <input type="text" id="navigation-id" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="navigation-text" class="control-label">Text</label>
                     <input type="text" id="navigation-text" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label for="variant-number" class="control-label">Url</label>
+                    <label for="navigation-url" class="control-label">Url</label>
                     <input type="text" id="navigation-url" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="navigation-parentId" class="control-label">ParentId</label>
+                    <input type="text" id="navigation-parentId" class="form-control" />
                 </div>
                 <br />
                 <div class="form-group">

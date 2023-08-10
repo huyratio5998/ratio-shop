@@ -8,6 +8,7 @@ namespace RatioShop.Data.ViewModels.Layout
         string StoreIcon { get; }        
         string StoreLogo { get; }
         SiteSettingViewModel SiteSettings { get; }
+        SiteSettingViewModel AdminSiteSettings { get; }
         HeaderSettingsViewModel HeaderSettings();
         CommonSettingsViewModel CommonSettings();
         FooterSettingsViewModel FooterSettings();        
