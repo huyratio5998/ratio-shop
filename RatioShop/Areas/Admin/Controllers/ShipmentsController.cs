@@ -167,7 +167,7 @@ namespace RatioShop.Areas.Admin.Controllers
         {
             if (request == null) return BadRequest();
 
-            FileHelpers.UploadFile(request.FileImage, _hostingEnvironment, "images", "shipments", request.OrderNumber);
+            await FileHelpers.UploadFile(request.FileImage, _hostingEnvironment, "images", "shipments", request.OrderNumber);
             if (request.FileImage != null) request.Images = request.FileImage.FileName;
 
             var result = await _orderService.ShipmentTracking(request);

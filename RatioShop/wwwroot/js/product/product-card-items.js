@@ -9,50 +9,6 @@ const GetProductDetailById = async (productId) => {
 };
 
 // Helper function
-const InitSlick = (wrapClass = "wrap-slick3-ratio") => {
-  $(`.${wrapClass}`).each(function () {
-    $(this)
-      .find(".slick3")
-      .slick({
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        fade: true,
-        infinite: true,
-        autoplay: false,
-        autoplaySpeed: 6000,
-        arrows: true,
-        appendArrows: $(this).find(".wrap-slick3-arrows"),
-        prevArrow:
-          '<button class="arrow-slick3 prev-slick3"><i class="fa fa-angle-left" aria-hidden="true"></i></button>',
-        nextArrow:
-          '<button class="arrow-slick3 next-slick3"><i class="fa fa-angle-right" aria-hidden="true"></i></button>',
-
-        dots: true,
-        appendDots: $(this).find(".wrap-slick3-dots"),
-        dotsClass: "slick3-dots",
-        customPaging: function (slick, index) {
-          var portrait = $(slick.$slides[index]).data("thumb");
-          return (
-            '<img src=" ' +
-            portrait +
-            ' "/><div class="slick3-dot-overlay"></div>'
-          );
-        },
-      });
-  });
-
-  $(".gallery-lb").each(function () {
-    // the containers for all your galleries
-    $(this).magnificPopup({
-      delegate: "a", // the selector for gallery item
-      type: "image",
-      gallery: {
-        enabled: true,
-      },
-      mainClass: "mfp-fade",
-    });
-  });
-};
 
 const DropListSelectVariantsAction = (
   data,
@@ -194,6 +150,10 @@ const BuildProductPreviewModal = (data) => {
     ".js-variants-select"
   );
   const numberDetail = modalQuickviewArea.querySelector(".js-variantNumber");
+  const packagesArea = modalQuickviewArea.querySelector(".js-packages-area");
+  if (packagesArea) packagesArea.style.display = "none";
+  const btnAddToCart = modalQuickviewArea.querySelector(".js-addcart-detail");
+
   // build list variants
   if (data.product.variants && data.product.variants.length > 0) {
     if (
@@ -243,6 +203,9 @@ const BuildProductPreviewModal = (data) => {
     : "";
   descriptionDetail.innerHTML = data.product.description;
   detailImagesQuickview.innerHTML = BuildPreviewGallaryImages(data);
+  if (btnAddToCart) {
+    btnAddToCart.dataset.packageId = "";
+  }
   numberDetail.value = 1;
 
   InitSlick();
@@ -279,7 +242,7 @@ const BuildProductCartItem = (item, modalClass) => {
                         <div class="block2">
                             <div class="block2-pic hov-img0">
                                 ${productImage}
-                                <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 ${modalClass}" data-product-id="${item.product?.id}">
+                                <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 ${modalClass}" data-is-package="false" data-product-id="${item.product?.id}">
                                     Quick View
                                 </a>
                             </div>
@@ -376,7 +339,9 @@ const AddQuickViewProductEvent = (
   if (!btnQuickViews) return;
 
   btnQuickViews.forEach((e) => {
-    AddProductItemQuickViewEvent(parentElement, e);
+    if (e.dataset.isPackage == "false") {
+      AddProductItemQuickViewEvent(parentElement, e);
+    }
   });
 };
 

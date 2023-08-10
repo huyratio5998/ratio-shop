@@ -1,0 +1,80 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+@using Newtonsoft.Json
+@using RatioShop.Enums
+
+@model ProductListingSettingViewModel
+@{
+    var categoriesFilters = Model != null && Model.CategoriesFilter != null && Model.CategoriesFilter.Any() ? JsonConvert.SerializeObject(Model.CategoriesFilter) : null;
+}
+<h5>Product Listing</h5>
+<div class="form-group">
+    <label asp-for="DekstopPageSize" class="control-label"></label>
+    <input asp-for="DekstopPageSize" class="form-control" />
+    <span asp-validation-for="DekstopPageSize" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="MobilePageSize" class="control-label"></label>
+    <input asp-for="MobilePageSize" class="form-control" />
+    <span asp-validation-for="MobilePageSize" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="PackageText" class="control-label"></label>
+    <input asp-for="PackageText" class="form-control" />
+    <span asp-validation-for="PackageText" class="text-danger"></span>
+</div>
+<h6>Categories Filter settings</h6>
+<input asp-for="CategoriesFilterString" type="hidden" id="list-categoryFilter-input" value="@categoriesFilters" />
+<p>
+    <button id="addCategoryFilterItem" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryFilterModal">Add Category Filter Item</button>
+</p>
+<table class="table" id="categoryFilterTable">
+    <thead>
+        <tr>
+            <th>
+                Display Name
+            </th>
+            <th>
+                Value
+            </th>
+            <th>
+                Position
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div class="modal fade" id="addCategoryFilterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Category Filter Item</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="btn-modalCategoryFilterClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="categoryFilter-displayName" class="control-label">Display Name</label>
+                    <input type="text" id="categoryFilter-displayName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="categoryFilter-value" class="control-label">Value</label>
+                    <input type="text" id="categoryFilter-value" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="categoryFilter-position" class="control-label">Position</label>
+                    <input type="text" id="categoryFilter-position" class="form-control" />
+                </div>
+                <br />
+                <div class="form-group">
+                    <div id="categoryFilter-save" class="btn btn-primary mouse-hover">Save</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script defer src="@Url.Content("~/js/administrator/siteSetting/product-listing-setting.js")"></script>

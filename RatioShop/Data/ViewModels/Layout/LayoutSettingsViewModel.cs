@@ -1,20 +1,30 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using RatioShop.Areas.Admin.Models.SiteSettings;
 using RatioShop.Constants;
+using RatioShop.Services.Abstract;
 
 namespace RatioShop.Data.ViewModels.Layout
 {
     public class LayoutSettingsViewModel : ILayoutSettingsViewModel
     {
         private readonly IHttpContextAccessor _httpContextAccessor;        
+        private readonly ISiteSettingService _siteSettingService;
 
-        public LayoutSettingsViewModel(IHttpContextAccessor httpContextAccessor)
+        public LayoutSettingsViewModel(IHttpContextAccessor httpContextAccessor, ISiteSettingService siteSettingService)
         {
-            _httpContextAccessor = httpContextAccessor;            
+            _httpContextAccessor = httpContextAccessor;
+            _siteSettingService = siteSettingService;
+            this.SiteSettings = _siteSettingService.GetSiteSetting()?.Result;
         }
+        private SiteSettingViewModel? SiteSettings;
 
-        public string StoreName => CommonConstant.StoreName;
+        public string StoreName => SiteSettings?.GeneralSetting?.SiteName ?? CommonConstant.StoreName;
 
-        public string StoreIcon => "/images/icons/logo-01.png";
+        public string StoreIcon => SiteSettings?.HeaderSetting?.ShopLogo?.Icon?.ImageSrc ?? "/images/icons/logo-01.png";
+
+        public string StoreLogo => SiteSettings?.GeneralSetting?.SiteLogo?.ImageSrc ?? "/images/icons/favicon.png";
+
+        SiteSettingViewModel ILayoutSettingsViewModel.SiteSettings => this.SiteSettings;
 
         public string CurrentPath()
         {
@@ -23,7 +33,10 @@ namespace RatioShop.Data.ViewModels.Layout
 
         public FooterSettingsViewModel FooterSettings()
         {
-            return new FooterSettingsViewModel();
+            return new FooterSettingsViewModel
+            {
+                FooterSetting = SiteSettings?.FooterSetting,
+            };
         }
 
         public HeaderSettingsViewModel HeaderSettings()
@@ -31,6 +44,8 @@ namespace RatioShop.Data.ViewModels.Layout
             var currentPath = CurrentPath();
             var headerSettings = new HeaderSettingsViewModel()
             {
+                HeaderSetting = SiteSettings?.HeaderSetting,
+                HeaderSlides = SiteSettings?.HeaderSlides,
                 IsHideSilder = HideSliderByPath(currentPath)
             };
             return headerSettings;
@@ -81,6 +96,6 @@ namespace RatioShop.Data.ViewModels.Layout
                 IsHideRegisterPopup = HideRegisterPopup(currentPath)
             };
             return commonSettings;
-        }
+        }        
     }
 }

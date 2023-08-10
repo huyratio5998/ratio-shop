@@ -123,7 +123,7 @@ namespace RatioShop.Services.Implement
             var order = GetOrder(id);
             if (order == null) return null;
 
-            var cartDetail = _cartService.GetCartDetail(order.CartId, getLatestVariantPrice, isIncludeInActiveDiscount);
+            var cartDetail = _cartService.GetCartDetail(order.CartId, getLatestVariantPrice, isIncludeInActiveDiscount, true);
             if (cartDetail == null) return null;
 
             var orderDetail = _mapper.Map<OrderResponseViewModel>(order);
@@ -148,7 +148,7 @@ namespace RatioShop.Services.Implement
         {            
             if (order == null) return null;
 
-            var cartDetail = _cartService.GetCartDetail(order.CartId, getLatestVariantPrice, isIncludeInActiveDiscount);
+            var cartDetail = _cartService.GetCartDetail(order.CartId, getLatestVariantPrice, isIncludeInActiveDiscount, true);
             if (cartDetail == null) return null;
 
             var orderDetail = _mapper.Map<OrderResponseViewModel>(order);
@@ -174,7 +174,7 @@ namespace RatioShop.Services.Implement
             var order = GetOrder(id);
             if (order == null) return null;
 
-            var cartDetail = _cartService.GetCartDetail(order.CartId);
+            var cartDetail = _cartService.GetCartDetail(order.CartId, true, false, true);
             if (cartDetail == null) return null;
 
             var orderDetail = _mapper.Map<OrderViewModel>(order);

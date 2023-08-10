@@ -11,13 +11,13 @@
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
     var language = "vi-VN";
     string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "Index";
-    var parsePackageId = Guid.TryParse(ViewBag.PackageId, out Guid packageId);
+    var parsePackageId = Guid.TryParse(ViewBag.ParentId, out Guid packageId);
     string message = ViewBag.Message;
 }
 @if (parsePackageId && packageId != Guid.Empty)
 {
-    <h1>Product variants</h1>
-
+    <h1>Add package items</h1>
+    <a asp-action="Details" asp-route-id="@packageId">Back to package</a>
     <p>
         <span>
             <form asp-action="FilterProductVariant">
@@ -41,6 +41,7 @@
                     </select>
 
                     <input type="hidden" name="actionRedirect" value="@detailParam" />
+                    <input type="hidden" name="parentId" value="@packageId" />
                     <input type="hidden" name="page" value="1" />
                     <input type="submit" value="Filter" />
                 </div>
@@ -74,6 +75,7 @@
                     <th>
                         Price
                     </th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -98,16 +100,16 @@
                                 </td>
                             }
                             <td>
-                                @Html.DisplayFor(modelItem => item.Code)
+                                @Html.DisplayFor(modelItem => item.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Name)
+                                @Html.DisplayFor(modelItem => item.Code)
                             </td>
                             <td>
                                 @CommonHelper.CurrencyFormat(item.PriceAfterDiscount, language)
                             </td>
                             <td>
-                                <a href="#" class="js_package-item-btn-add" data-item-id="@item.Id" data-bs-toggle="modal" data-bs-target="#addPackageItem">Add to package</a> |                                
+                                <a href="#" class="js_package-item-btn-add" data-item-id="@item.Id" data-bs-toggle="modal" data-bs-target="#addPackageItem">Add to package</a>                                
                             </td>
                         </tr>
                     }
@@ -118,7 +120,7 @@
 
     <div>
         <div class="modal fade" id="addPackageItem" tabindex="-1" aria-labelledby="addPackageItemLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content">
                     <form asp-action="AddPackageItem">
                         <div class="modal-header">
@@ -128,9 +130,9 @@
                         <div class="modal-body row">
                             <label>
                                 Number
-                                <input type="text" name="itemNumber" class="js_package-item-number" />
+                                <input type="text" name="itemNumber" class="form-control js_package-item-number" />
                             </label>
-                            <input type="hidden" name="packageId" value="@parsePackageId" />
+                            <input type="hidden" name="packageId" value="@packageId" />
                             <input type="hidden" name="variantId" class="js_package-item-id" />
                         </div>
                         <div class="modal-footer">

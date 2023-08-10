@@ -385,6 +385,53 @@ namespace RatioShop.Data.Migrations
                     b.ToTable("Order");
                 });
 
+            modelBuilder.Entity("RatioShop.Data.Models.Package", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("DiscountRate")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNew")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSoldOnline")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductFriendlyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Package");
+                });
+
             modelBuilder.Entity("RatioShop.Data.Models.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -549,8 +596,17 @@ namespace RatioShop.Data.Migrations
                     b.Property<decimal?>("ItemPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("ItemType")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("PackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PackageNumber")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
@@ -571,6 +627,24 @@ namespace RatioShop.Data.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductVariantCart");
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.ProductVariantPackage", b =>
+                {
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ItemNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductVariantId", "PackageId");
+
+                    b.HasIndex("PackageId");
+
+                    b.ToTable("ProductVariantPackage");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.ProductVariantStock", b =>
@@ -717,6 +791,41 @@ namespace RatioShop.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("RatioShop.Data.Models.SiteSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SettingTemplate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteSettings");
                 });
 
             modelBuilder.Entity("RatioShop.Data.Models.Stock", b =>
@@ -899,6 +1008,25 @@ namespace RatioShop.Data.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("RatioShop.Data.Models.ProductVariantPackage", b =>
+                {
+                    b.HasOne("RatioShop.Data.Models.Package", "Package")
+                        .WithMany("ProductVariantPackage")
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RatioShop.Data.Models.ProductVariant", "ProductVariant")
+                        .WithMany("ProductVariantPackage")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Package");
+
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("RatioShop.Data.Models.ProductVariantStock", b =>
                 {
                     b.HasOne("RatioShop.Data.Models.ProductVariant", "ProductVariant")
@@ -984,6 +1112,11 @@ namespace RatioShop.Data.Migrations
                     b.Navigation("Shipments");
                 });
 
+            modelBuilder.Entity("RatioShop.Data.Models.Package", b =>
+                {
+                    b.Navigation("ProductVariantPackage");
+                });
+
             modelBuilder.Entity("RatioShop.Data.Models.Payment", b =>
                 {
                     b.Navigation("Orders");
@@ -999,6 +1132,8 @@ namespace RatioShop.Data.Migrations
             modelBuilder.Entity("RatioShop.Data.Models.ProductVariant", b =>
                 {
                     b.Navigation("ProductVariantCarts");
+
+                    b.Navigation("ProductVariantPackage");
 
                     b.Navigation("ProductVariantStocks");
                 });

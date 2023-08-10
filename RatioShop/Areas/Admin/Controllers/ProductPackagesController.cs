@@ -31,7 +31,7 @@ namespace RatioShop.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult FilterPackage(string actionRedirect, string? code, string? name, int? page = 1)
+        public IActionResult FilterPackage(string actionRedirect, string? code, string? name, SortingEnum sortType, int? page = 1)
         {
             var listFilterItems = new List<FacetFilterItem>();
             if (!string.IsNullOrWhiteSpace(code))
@@ -41,7 +41,7 @@ namespace RatioShop.Areas.Admin.Controllers
 
             if (page <= 1) page = null;
 
-            return RedirectToAction(actionRedirect, new { filterItems = listFilterItems.FilterItemToJson(), page = page });
+            return RedirectToAction(actionRedirect, new { filterItems = listFilterItems.FilterItemToJson(), SortType = sortType, page = page });
         }
 
         public IActionResult Index(BaseSearchArgs args)
@@ -64,7 +64,6 @@ namespace RatioShop.Areas.Admin.Controllers
             if (id == null || id == Guid.Empty) return NotFound();
 
             var packageViewModel = _packageService.GetPackageViewModel((Guid)id);
-            packageViewModel.Image = packageViewModel.Image.ResolveProductImages().FirstOrDefault();
 
             if (packageViewModel == null) return NotFound();
 
@@ -86,7 +85,7 @@ namespace RatioShop.Areas.Admin.Controllers
 
                 if (model.ImageFile != null)
                 {
-                    var uploadFileStatus = FileHelpers.UploadFile(model.ImageFile, _hostingEnvironment, "images", "packages");
+                    var uploadFileStatus = await FileHelpers.UploadFile(model.ImageFile, _hostingEnvironment, "images", "packages");
                     if (uploadFileStatus) packageEntity.Image = model.ImageFile?.FileName;
                 }
 
@@ -111,7 +110,7 @@ namespace RatioShop.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, PackageViewModel model)
+        public async Task<IActionResult> Edit(Guid id, PackageViewModel model)
         {
             if (model == null || id != model.Id)
             {
@@ -124,7 +123,7 @@ namespace RatioShop.Areas.Admin.Controllers
 
                 if (model.ImageFile != null)
                 {
-                    var updateStatus = FileHelpers.UploadFile(model.ImageFile, _hostingEnvironment, "images", "packages");
+                    var updateStatus = await FileHelpers.UploadFile(model.ImageFile, _hostingEnvironment, "images", "packages");
                     if (updateStatus) packageEntity.Image = model.ImageFile.FileName;
                 }
 
@@ -156,36 +155,10 @@ namespace RatioShop.Areas.Admin.Controllers
         }
 
         #region PackageItem
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EditPackageItem(Guid variantId, Guid packageId, int itemNumber)
-        {
-            if (variantId == Guid.Empty || packageId == Guid.Empty || itemNumber <= 0) return NotFound();
-
-            var updateStatus = _packageService.UpdatePackageItem(variantId, packageId, itemNumber);
-
-            if (!updateStatus)
-                return RedirectToAction("Edit", new { id = packageId, errorMessage = "Update package item failure!" });
-
-            return RedirectToAction("Edit", new { id = packageId });
-        }
-
-        [HttpPost]
-        public IActionResult RemovePackageItem(Guid id, Guid packageId)
-        {
-            if (id == Guid.Empty || packageId == Guid.Empty) return NotFound();
-
-            var deleteStatus = _packageService.DeletePackageItem(id, packageId);
-            if (!deleteStatus)
-                return RedirectToAction("Edit", new { id = packageId, errorMessage = "Delete package item failure!" });
-
-            return RedirectToAction("Edit", new { id = packageId });
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult FilterProductVariant(string actionRedirect, string? name, int? page = 1)
+        public IActionResult FilterProductVariant(string actionRedirect, Guid parentId, SortingEnum? sortType, string? name, int? page = 1)
         {
             var listFilterItems = new List<FacetFilterItem>();
             if (!string.IsNullOrWhiteSpace(name))
@@ -193,12 +166,12 @@ namespace RatioShop.Areas.Admin.Controllers
 
             if (page <= 1) page = null;
 
-            return RedirectToAction(actionRedirect, new { filterItems = listFilterItems.FilterItemToJson(), page = page });
+            return RedirectToAction(actionRedirect, new { filterItems = listFilterItems.FilterItemToJson(), sortType = sortType, parentId = parentId, page = page });
         }
 
-        public IActionResult AddPackageItem(Guid packageId, BaseSearchArgs args, string message = "")
+        public IActionResult AddPackageItem(Guid parentId, BaseSearchArgs args, string message = "")
         {
-            if (packageId == Guid.Empty) return RedirectToAction("Index");
+            if (parentId == Guid.Empty) return RedirectToAction("Index");
 
             var request = _mapper.Map<BaseSearchRequest>(args);
             request.IsSelectPreviousItems = false;
@@ -206,9 +179,10 @@ namespace RatioShop.Areas.Admin.Controllers
 
             ListProductVariantViewModel listVariants = _productVariantService.GetListVariants(request);
 
-            ViewBag.PackageId = packageId.ToString();
+            ViewBag.Message = message;
+            ViewBag.ParentId = parentId.ToString();
             ViewBag.Area = "Admin";
-            ViewBag.Controller = "Packages";
+            ViewBag.Controller = "ProductPackages";
             ViewBag.Action = "AddPackageItem";
             ViewBag.DetailParam = "AddPackageItem";
 
@@ -235,9 +209,35 @@ namespace RatioShop.Areas.Admin.Controllers
             }
 
             if (!updateStatus)
-                return View(new { packageId = packageId, message = "Update package item failure!" });
+                return RedirectToAction("AddPackageItem", new { parentId = packageId, message = "Update package item failure!" });
 
-            return View(new { packageId = packageId, message = "Update package item successfully!" });
+            return RedirectToAction("AddPackageItem", new { parentId = packageId, message = "Update package item successfully!" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditPackageItem(Guid variantId, Guid packageId, int itemNumber)
+        {
+            if (variantId == Guid.Empty || packageId == Guid.Empty || itemNumber <= 0) return NotFound();
+
+            var updateStatus = _packageService.UpdatePackageItem(variantId, packageId, itemNumber);
+
+            if (!updateStatus)
+                return RedirectToAction("Edit", new { id = packageId, errorMessage = "Update package item failure!" });
+
+            return RedirectToAction("Edit", new { id = packageId });
+        }
+
+        [HttpPost]
+        public IActionResult RemovePackageItem(Guid variantId, Guid packageId)
+        {
+            if (variantId == Guid.Empty || packageId == Guid.Empty) return NotFound();
+
+            var deleteStatus = _packageService.DeletePackageItem(variantId, packageId);
+            if (!deleteStatus)
+                return RedirectToAction("Edit", new { id = packageId, errorMessage = "Delete package item failure!" });
+
+            return RedirectToAction("Edit", new { id = packageId });
         }
 
         #endregion

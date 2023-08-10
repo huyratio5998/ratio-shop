@@ -15,7 +15,7 @@ namespace RatioShop.Services.Abstract
         // Addition logics
         Task<AddToCartResponsetViewModel> AddToCart(AddToCartRequestViewModel request);
         AddToCartResponsetViewModel ChangeCartItem(AddToCartRequestViewModel request);
-        CartDetailResponsViewModel? GetCartDetail(Guid id, bool getLatestVariantPrice = true, bool includeInActiveDiscount = false);
+        CartDetailResponsViewModel? GetCartDetail(Guid id, bool getLatestVariantPrice = true, bool includeInActiveDiscount = false, bool isMergePackageItem = false);
         bool UpdateCartUserByUserId(string cartId, string userId);
         Cart? GetCartByUserId(string userId);
         IEnumerable<Cart> GetAllCartByUserId(string userId);

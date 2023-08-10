@@ -12,7 +12,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="ImageFile" class="control-label js_img_changeTarget">
@@ -32,15 +32,20 @@
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
+             <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <label asp-for="ProductFriendlyName" class="control-label"></label>
                 <input asp-for="ProductFriendlyName" class="form-control" />
                 <span asp-validation-for="ProductFriendlyName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <label asp-for="ManualPrice" class="control-label"></label>
+                <input asp-for="ManualPrice" class="form-control" />
+                <span asp-validation-for="ManualPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="DiscountRate" class="control-label"></label>

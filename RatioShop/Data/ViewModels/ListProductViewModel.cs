@@ -11,6 +11,7 @@ namespace RatioShop.Data.ViewModels
         }
 
         public IEnumerable<ProductViewModel> Products { get; set; }
+        public IEnumerable<PackageViewModel> Packages { get; set; }
         public FilterSettings FilterSettings { get; set; }
     }
 }

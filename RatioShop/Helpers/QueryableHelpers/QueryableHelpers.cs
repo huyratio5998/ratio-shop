@@ -39,7 +39,7 @@ namespace RatioShop.Helpers.QueryableHelpers
                     return queries.OrderByDescending(nameof(BaseProduct.ModifiedDate));
                 default: return queries.OrderByDescending(nameof(BaseProduct.CreatedDate));
             }
-        }
+        }        
 
         public static IQueryable<T> SortedEntitiesGeneric<T>(this IQueryable<T> queries, SortingEnum? sortBy) where T : BaseEntity
         {
@@ -53,7 +53,7 @@ namespace RatioShop.Helpers.QueryableHelpers
                     return queries.OrderByDescending(nameof(BaseEntity.ModifiedDate));
                 default: return queries.OrderByDescending(nameof(BaseEntity.CreatedDate));
             }
-        }
+        }        
 
         public static IQueryable<T> PagingProductsGeneric<T>(this IQueryable<T> queries, IBasePagingRequest pagingRequest)
         {

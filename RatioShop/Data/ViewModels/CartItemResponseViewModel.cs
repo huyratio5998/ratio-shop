@@ -1,15 +1,26 @@
 ﻿using Newtonsoft.Json;
 using RatioShop.Data.ViewModels.CartViewModel;
+using RatioShop.Enums;
 
 namespace RatioShop.Data.ViewModels
 {
     public class CartItemResponseViewModel
     {
         [JsonProperty("variantId")]
-        public Guid VariantId { get; set; }        
+        public Guid VariantId { get; set; }
+
+        [JsonProperty("packageId")]
+        public Guid? PackageId { get; set; }
+
+        [JsonProperty("itemType")]
+        public CartItemType ItemType { get; set; }
+
         [JsonProperty("number")]
         public int Number { get; set; }
-        
+
+        [JsonProperty("packageNumber")]
+        public int PackageNumber { get; set; }
+
         [JsonProperty("enableStockTracking")]
         public bool EnableStockTracking { get; set; }
 
@@ -35,6 +46,9 @@ namespace RatioShop.Data.ViewModels
 
         [JsonProperty("image")]
         public string? Image { get; set; }
+
+        [JsonProperty("description")]
+        public string? Description { get; set; }
 
     }
 }

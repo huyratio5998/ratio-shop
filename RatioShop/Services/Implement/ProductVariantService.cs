@@ -150,14 +150,13 @@ namespace RatioShop.Services.Implement
             var productVariants = _productVariantRepository.GetProductVariants()
                 .AsQueryable()
                 .Include(x => x.Product)
-                .Where(x=> x.Product != null && !x.Product.IsDelete)
-                .OrderBy(x=>x.ProductId)
+                .Where(x=> x.Product != null && !x.Product.IsDelete && !x.IsDelete)                
                 .Select(x => x);
 
             productVariants = BuildPackageFilters(productVariants, args);
 
             productVariants = productVariants?.SortedBaseProductsGeneric(args.SortType);
-            productVariants = BuildSortVariant(productVariants, args);
+            productVariants = BuildSortVariant(productVariants, args);           
 
             var totalCount = productVariants?.Count() ?? 0;
             productVariants = productVariants?.PagingProductsGeneric(args);
@@ -246,13 +245,11 @@ namespace RatioShop.Services.Implement
             switch (sort.SortType)
             {
                 case SortingEnum.HeightoLow:
-                    queries = queries.OrderByDescending(x => x.Price * (decimal)(100 - (x.DiscountRate ?? 0)));
-                    break;
+                    return queries.OrderByDescending(x => x.Price * (decimal)(100 - (x.DiscountRate ?? 0)));                    
                 case SortingEnum.LowtoHeigh:
-                    queries = queries.OrderBy(x => x.Price * (decimal)(100 - (x.DiscountRate ?? 0)));
-                    break;
+                    return queries.OrderBy(x => x.Price * (decimal)(100 - (x.DiscountRate ?? 0)));                    
             }
-
+            
             return queries;
         }
     }

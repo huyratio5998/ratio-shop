@@ -1,0 +1,67 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+
+@model SlideSettingViewModel
+
+@if (Model != null)
+{
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-2" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Banner Setting
+            </button>
+        </h2>
+        <div id="panelsStayOpen-2" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Banner Image
+                                </th>
+                                <th>
+                                    Banner Title
+                                </th>
+                                <th>
+                                    Banner Content
+                                </th>
+                                <th>
+                                    Banner Button Text
+                                </th>
+                                <th>
+                                    Banner Button Link
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Banners != null && Model.Banners.Any())
+                            {
+                                foreach (var item in Model.Banners)
+                                {
+                                    <tr>
+                                        @if (string.IsNullOrEmpty(item.Image?.ImageSrc))
+                                        {
+                                            <td>
+                                                <img src="~/images/default-placeholder.jpg" style="height:150px;width:auto" alt="@item.Image?.ImageAlt">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <img src="@item.Image?.ImageSrc" style="height:150px;width:auto" alt="@item.Image?.ImageAlt">
+                                            </td>
+                                        }
+                                        <td>@item.Title</td>
+                                        <td>@item.Content</td>
+                                        <td>@item.ShopNow?.Text</td>
+                                        <td>@item.ShopNow?.Url</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}

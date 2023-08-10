@@ -4,5 +4,6 @@
     {
         public string? Language { get; set; }
         public ProductViewModel? Product { get; set; }       
+        public PackageViewModel? Package { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RatioShop.Apis.CustomizeApiAuthentication;
 using RatioShop.Constants;
 using RatioShop.Data.ViewModels;
 using RatioShop.Services.Abstract;
@@ -9,6 +10,7 @@ namespace RatioShop.Apis
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ShipmentController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -21,7 +23,9 @@ namespace RatioShop.Apis
         }
 
         [HttpPost]
-        [Route("track")]        
+        [Route("track")]      
+        [RatioApiKey]
+        [AllowAnonymous]
         public async Task<IActionResult> ShipmentTracking([FromBody] ShipmentTrackingRequestViewModel request)
         {
             if (request == null) return BadRequest();

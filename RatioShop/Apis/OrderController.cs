@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RatioShop.Constants;
 using RatioShop.Data.ViewModels.MyAccountViewModel;
@@ -11,6 +12,7 @@ namespace RatioShop.Apis
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;

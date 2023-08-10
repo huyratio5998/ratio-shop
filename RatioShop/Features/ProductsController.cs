@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using RatioShop.Constants;
 using RatioShop.Data.Models;
@@ -22,15 +23,17 @@ namespace RatioShop.Features
         private readonly ICategoryService _categoryService;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IProductVariantStockService _productVariantStockService;
+        private readonly IPackageService _packageService;
+        private readonly ICommonService _commonService;
+        private readonly IMemoryCache _memoryCache;
 
-        private readonly ICommonService _commonService;        
-
+        private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         private const int pageSizeDefault = 5;
         private const int pageSizeClientDesktopDefault = 8;
         private const int pageSizeClientMobileDefault = 3;
         private const int maxRelatedNumber = 8;
 
-        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService)
+        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService, IPackageService packageService, IMemoryCache memoryCache)
         {
             this._productService = productService;
             _hostingEnvironment = hostingEnvironment;
@@ -39,6 +42,8 @@ namespace RatioShop.Features
             _categoryService = categoryService;
             _productVariantStockService = productVariantStockService;
             _commonService = commonService;
+            _packageService = packageService;
+            _memoryCache = memoryCache;
         }
 
         // GET: Products
@@ -49,12 +54,37 @@ namespace RatioShop.Features
             request.PageSize = pageSize;
             request.IsSelectPreviousItems = true;
 
-            ListProductViewModel listProductViewModel = _productService.GetListProducts(request);
-            listProductViewModel.FilterSettings = new FilterSettings
+            var productCacheKey = $"products-{JsonConvert.SerializeObject(request)}";
+            if (!_memoryCache.TryGetValue(productCacheKey, out ListProductViewModel listProductViewModel))
             {
-                PriceRangeFilter = _productService.GetProductPriceFilter(5000000, 5),
-                CategoryFilter = SiteSettings.CategoriesFilter
-            };
+                try
+                {
+                    // use to prevent multi user save list to cache. Make sure only 1 does.
+                    await semaphoreSlim.WaitAsync();
+                    if (!_memoryCache.TryGetValue(productCacheKey, out listProductViewModel))
+                    {
+                        listProductViewModel = _productService.GetListProducts(request);
+                        listProductViewModel.FilterSettings = new FilterSettings
+                        {
+                            PriceRangeFilter = _productService.GetProductPriceFilter(5000000, 5),
+                            CategoryFilter = SiteSettings.CategoriesFilter,
+                            IsPackageView = request.IsGetPackages
+                        };
+
+                        var cacheOption = new MemoryCacheEntryOptions()
+                            .SetSlidingExpiration(TimeSpan.FromSeconds(60))
+                            .SetAbsoluteExpiration(TimeSpan.FromHours(1))
+                            .SetPriority(CacheItemPriority.Normal)
+                            .SetSize(1024);
+
+                        _memoryCache.Set(productCacheKey, listProductViewModel, cacheOption);
+                    }
+                }
+                finally
+                {
+                    semaphoreSlim.Release();
+                }
+            }
 
             // for share value of search on header partial
             ViewBag.Search = QueryableHelpers.GetFreeTextFilter(listProductViewModel?.FilterItems);
@@ -86,9 +116,33 @@ namespace RatioShop.Features
         {
             if (id == null) return NotFound();
 
-            var product = _productService.GetProduct((Guid)id);
-            product.RelatedProducts = _productService.GetRelatedProducts(product, maxRelatedNumber);
-            product.BreadCrumbs = _commonService.GetBreadCrumbsByProductId((Guid)id);
+            var productCacheKey = $"product-{id}";
+            if (!_memoryCache.TryGetValue(productCacheKey, out ProductViewModel product))
+            {
+                try
+                {
+                    // use to prevent multi user save list to cache. Make sure only 1 does.
+                    await semaphoreSlim.WaitAsync();
+                    if (!_memoryCache.TryGetValue(productCacheKey, out product))
+                    {
+                        product = _productService.GetProduct((Guid)id);
+                        product.RelatedProducts = _productService.GetRelatedProducts(product, maxRelatedNumber);
+                        product.BreadCrumbs = _commonService.GetBreadCrumbsByProductId((Guid)id);
+
+                        var cacheOption = new MemoryCacheEntryOptions()
+                            .SetSlidingExpiration(TimeSpan.FromSeconds(60))
+                            .SetAbsoluteExpiration(TimeSpan.FromHours(1))
+                            .SetPriority(CacheItemPriority.Normal)
+                            .SetSize(1024);
+
+                        _memoryCache.Set(productCacheKey, product, cacheOption);
+                    }
+                }
+                finally
+                {
+                    semaphoreSlim.Release();
+                }
+            }
 
             if (product == null) return NotFound();
 
@@ -149,7 +203,7 @@ namespace RatioShop.Features
                 var productEntity = model.Product;
                 productEntity.Id = Guid.NewGuid();
 
-                FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
+                await FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
                 productEntity.ProductImage = model.ProductImage?.FileName;
 
                 await _productService.AddProduct(productEntity);
@@ -176,7 +230,7 @@ namespace RatioShop.Features
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, ProductViewModel model)
+        public async Task<IActionResult> Edit(Guid id, ProductViewModel model)
         {
             if (model == null || model.Product == null || id != model.Product.Id)
             {
@@ -187,7 +241,7 @@ namespace RatioShop.Features
             {
                 var productEntity = model.Product;
 
-                FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
+                await FileHelpers.UploadFile(model.ProductImage, _hostingEnvironment, "images", "products");
                 if (model.ProductImage != null) productEntity.ProductImage = model.ProductImage.FileName;
 
                 _productService.UpdateProduct(productEntity);
@@ -220,11 +274,11 @@ namespace RatioShop.Features
         }
 
         [HttpPost]
-        public bool SubmitVariantImages(List<IFormFile>? variantImages)
+        public async Task<bool> SubmitVariantImages(List<IFormFile>? variantImages)
         {
-            if(variantImages == null || !variantImages.Any()) return false;
+            if (variantImages == null || !variantImages.Any()) return false;
 
-            return FileHelpers.UploadFiles(variantImages, _hostingEnvironment, "images", "products");
+            return await FileHelpers.UploadFiles(variantImages, _hostingEnvironment, "images", "products");
         }
 
         [HttpPost]
@@ -252,10 +306,10 @@ namespace RatioShop.Features
                         Number = item.Number,
                         Price = item.Price,
                         DiscountRate = item.DiscountRate,
-                        ProductId = data.ProductId,  
+                        ProductId = data.ProductId,
                         Images = item.Images,
                         Type = item.Type
-                    };                    
+                    };
 
                     var productVariant = _productVariantService.GetProductVariant(variant.Id.ToString());
                     if (productVariant == null)

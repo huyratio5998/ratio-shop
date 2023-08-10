@@ -8,6 +8,7 @@
 @{
     // params pass
     var parms = new Dictionary<string, string>();
+    var parentId = ViewBag.ParentId;
     var area = ViewBag.Area;
     var controller = ViewBag.Controller;
     var action = ViewBag.Action;
@@ -16,6 +17,7 @@
     var sortType = Model.SortType;
     if (filterItems != null) parms.Add("filterItems", filterItems);
     if (sortType != Enums.SortingEnum.Default) parms.Add("sortType", sortType.ToString());
+    if (!string.IsNullOrWhiteSpace(parentId)) parms.Add("parentId", parentId);
 
     // setting UI
     var disablePrevious = Model.PageIndex == 1 ? "disabled" : "";

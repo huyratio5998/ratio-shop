@@ -1,0 +1,147 @@
+﻿@using RatioShop.Areas.Admin.Models;
+@using RatioShop.Constants
+@using RatioShop.Data.ViewModels.MyAccountViewModel
+@using RatioShop.Enums
+@using RatioShop.Helpers
+
+@model ListSiteSettingViewModel
+
+@{
+    ViewData["Title"] = "Site setting";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+    string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "Index";
+    var currentSettingTypeFilter = @Model.FilterItems?.FirstOrDefault(x => x.FieldName.Equals("Type"))?.Value;
+}
+
+<h1>Site settings</h1>
+
+<p>
+    <span>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSetting">Create settings</button>
+    </span>
+    <span>
+        <form asp-action="FilterSiteSetting">
+            <div class="form-control">
+                <label for="name">Name:</label>
+                <input type="text" name="name" id="name" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("Name"))?.Value" />
+
+                <label for="key">Template:</label>
+                <input type="text" name="settingTemplate" id="settingTemplate" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("SettingTemplate"))?.Value" />
+
+                <label for="type">Type:</label>
+                <select id="type" name="type">
+                    <option value="">All</option>
+                    @foreach (SiteSettingType item in Enum.GetValues(typeof(SiteSettingType)))
+                    {
+                        if (item.ToString() == currentSettingTypeFilter)
+                        {
+                            <option value="@item.ToString()" selected>@item.ToString()</option>
+                        }
+                        else
+                        {
+                            <option value="@item.ToString()">@item.ToString()</option>
+                        }
+                    }
+                </select>                
+
+                <input type="hidden" name="actionRedirect" value="@detailParam" />
+                <input type="hidden" name="page" value="1" />
+                <input type="submit" value="Filter" />
+            </div>
+        </form>
+    </span>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>
+                    Template
+                </th>
+                <th>
+                    Type
+                </th>
+                <th>
+                    IsActive
+                </th>
+                <th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.SiteSettings != null && Model.SiteSettings.Any())
+            {
+                @foreach (var item in Model.SiteSettings)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id">
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SettingTemplate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Type)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IsActive)
+                        </td>
+                        <td>
+                            <div class="row col-12">
+                                <div class="col-6" style="width:60px">
+                                    <a asp-action="Edit" class="btn btn-outline-secondary" asp-route-id="@item.Id">Edit</a>
+                                </div>
+                                <div class="col-6" style="width:60px">
+                                    <form asp-action="Delete">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="submit" value="Delete" class="btn btn-outline-danger" />
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="createSetting" tabindex="-1" aria-labelledby="createSettingLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createSettingLabel">Setting template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body row row-cols-1 row-cols-lg-3 g-2 g-lg-2">
+                @{
+                    var siteSettingsType = typeof(SiteSettings.SettingTemplates).GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+                    foreach (var item in siteSettingsType)
+                    {
+                        var propertyValue = item.GetValue(null);
+                        <a asp-action="Create" asp-route-templateName="@propertyValue">
+                            <div class="col">
+                                <div class="p-3 border setting-hover">
+                                    <div>
+                                        @propertyValue settings
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_AdminGridPaging" model="Model" />

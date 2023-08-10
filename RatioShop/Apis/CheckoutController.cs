@@ -57,19 +57,22 @@ namespace RatioShop.Apis
             // proceed checkout
             // 
             // save order to DB : status inprogress, shipment infor
+            var cartDetailMergePackgeItem = _cartService.GetCartDetail(cartId, true, false, true);
+            if(cartDetailMergePackgeItem == null) return BadRequest();
+            
             var newOrder = new OrderViewModel()
             {
                 Order = new Order()
                 {
                     Status = CommonStatus.OrderStatus.Created,
-                    TotalMoney = cartDetail.TotalFinalPrice,
+                    TotalMoney = cartDetailMergePackgeItem.TotalFinalPrice,
                     IsRefund = false,
                     ShipmentStatus = CommonStatus.ShipmentStatus.Pending,
                     ShipmentFee = cartDetail.ShippingFee,
                     CartId = cartId,
                     PaymentId = request.PaymentId,
                 },
-                TotalItems = cartDetail.TotalItems,
+                TotalItems = cartDetailMergePackgeItem.TotalItems,
             };
             var order = await _orderService.CreateOrder(newOrder);
 

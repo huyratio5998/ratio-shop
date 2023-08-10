@@ -1,5 +1,6 @@
 import * as ProductItemsService from "./product-card-items.js";
 import * as ProductSearchService from "./product-search-service.js";
+import * as ProductPackageItemsService from "./package-card-item.js";
 
 // Helper function
 const ResetButtonLoadMore = (nextPage) => {
@@ -34,6 +35,10 @@ const LoadMoreEvent = () => {
     let nextPage = e.target.dataset.nextPage;
     if (nextPage <= 1) nextPage = 2;
     const pageSize = e.target.dataset.pageSize;
+    const packageViewBtn = document.querySelector(".js_toggle-package-view");
+    const isGetPackages = packageViewBtn
+      ? packageViewBtn.dataset.isPackageView.toLowerCase() == "true"
+      : false;
 
     // call api
     const data = await ProductSearchService.GetProducts(
@@ -41,18 +46,35 @@ const LoadMoreEvent = () => {
       sortType,
       false,
       nextPage,
-      pageSize
+      pageSize,
+      isGetPackages
     );
 
     if (!data) {
       console.error("Can't get products");
     } else {
+      const productPackages = data.packages;
       const products = data.products;
-      if (products) {
-        // append product
-        ProductItemsService.BuildAdditionProductCartItems(products, nextPage);
+      if (products || productPackages) {
+        if (isGetPackages && productPackages && productPackages.length > 0) {
+          ProductPackageItemsService.BuildAdditionProductPackageCartItems(
+            data.packages,
+            nextPage
+          );
+        } else if (!isGetPackages && products && products.length > 0) {
+          ProductItemsService.BuildAdditionProductCartItems(
+            data.products,
+            nextPage
+          );
+        }
         // update url params
         const urlParamsToChange = [
+          {
+            Name: "isGetPackages",
+            Value: isGetPackages,
+            IsNumberAndApplyFilter: false,
+            IsStringify: false,
+          },
           {
             Name: "page",
             Value: nextPage,

@@ -1,4 +1,5 @@
 import * as ProductItemsService from "./product-card-items.js";
+import * as ProductPackageItemsService from "./package-card-item.js";
 import * as ProductLoadMoreService from "./product-load-more-service.js";
 
 const searchInputEl = document.querySelector(".js_search-products-input");
@@ -14,7 +15,8 @@ const GetProducts = async (
   sortType,
   isSelectPreviousItems,
   page,
-  pageSize
+  pageSize,
+  isGetPackages = false
 ) => {
   const searchParams = new URLSearchParams({
     filterItems: filterItems,
@@ -22,6 +24,7 @@ const GetProducts = async (
     isSelectPreviousItems: isSelectPreviousItems,
     page: page,
     pageSize: pageSize,
+    isGetPackages: isGetPackages,
   });
 
   const result = await fetch(
@@ -58,6 +61,28 @@ const RefreshListProducts = (data, pageIndex, pageSize) => {
     loadMoreArea.innerHTML = "";
   } else {
     ProductItemsService.BuildProductCartItems(data.products, pageIndex);
+
+    // build load more button.
+    if (pageIndex < +data.totalPage) {
+      const nextPage = pageIndex + 1;
+      RefreshLoadMoreArea(nextPage, pageSize, data.totalPage);
+    } else loadMoreArea.innerHTML = "";
+  }
+};
+
+const RefreshListProductPackages = (data, pageIndex, pageSize) => {
+  if (!data) return;
+
+  if (data.packages.length == 0) {
+    const listProducts = document.querySelector(".js-listProducts");
+    const message = "Packages have not found!";
+    listProducts.innerHTML = `<div class="container mtext-110 cl2 p-b-12">${message}</div>`;
+    loadMoreArea.innerHTML = "";
+  } else {
+    ProductPackageItemsService.BuildProductPackageCartItems(
+      data.packages,
+      pageIndex
+    );
 
     // build load more button.
     if (pageIndex < +data.totalPage) {
@@ -146,6 +171,10 @@ const ProductFilterItemEvent = (
       const page = 1;
       const buttonSearch = document.querySelector(".js_search-products-btn");
       const pageSize = buttonSearch ? buttonSearch.dataset.pageSize : 8;
+      const packageViewBtn = document.querySelector(".js_toggle-package-view");
+      const isGetPackages = packageViewBtn
+        ? packageViewBtn.dataset.isPackageView.toLowerCase() == "true"
+        : false;
 
       // call api filter
       const data = await GetProducts(
@@ -153,7 +182,8 @@ const ProductFilterItemEvent = (
         currentSortType,
         false,
         page,
-        pageSize
+        pageSize,
+        isGetPackages
       );
 
       if (!data) {
@@ -168,6 +198,12 @@ const ProductFilterItemEvent = (
         // change url
         const urlParamsToChange = [
           {
+            Name: "isGetPackages",
+            Value: isGetPackages,
+            IsNumberAndApplyFilter: false,
+            IsStringify: false,
+          },
+          {
             Name: "filterItems",
             Value: filterItems,
             IsNumberAndApplyFilter: false,
@@ -181,7 +217,8 @@ const ProductFilterItemEvent = (
           },
         ];
         UpdateUrlParams(urlParamsToChange);
-        RefreshListProducts(data, page, pageSize);
+        if (isGetPackages) RefreshListProductPackages(data, page, pageSize);
+        else RefreshListProducts(data, page, pageSize);
       }
     });
   });
@@ -223,7 +260,10 @@ const ProductSortEvent = () => {
         : "";
 
       const page = 1;
-
+      const packageViewBtn = document.querySelector(".js_toggle-package-view");
+      const isGetPackages = packageViewBtn
+        ? packageViewBtn.dataset.isPackageView.toLowerCase() == "true"
+        : false;
       const buttonSearch = document.querySelector(".js_search-products-btn");
       const pageSize = buttonSearch ? buttonSearch.dataset.pageSize : 8;
       // call api to sort.
@@ -232,7 +272,8 @@ const ProductSortEvent = () => {
         sortTypeValue,
         false,
         page,
-        pageSize
+        pageSize,
+        isGetPackages
       );
 
       if (!data) {
@@ -247,6 +288,12 @@ const ProductSortEvent = () => {
         // change url
         const urlParamsToChange = [
           {
+            Name: "isGetPackages",
+            Value: isGetPackages,
+            IsNumberAndApplyFilter: false,
+            IsStringify: false,
+          },
+          {
             Name: "sortType",
             Value: sortTypeValue,
             IsNumberAndApplyFilter: false,
@@ -260,7 +307,8 @@ const ProductSortEvent = () => {
           },
         ];
         UpdateUrlParams(urlParamsToChange);
-        RefreshListProducts(data, page, pageSize);
+        if (isGetPackages) RefreshListProductPackages(data, page, pageSize);
+        else RefreshListProducts(data, page, pageSize);
       }
     });
   });
@@ -325,6 +373,10 @@ const ProductSearchEvent = () => {
         : searchButtonEl.dataset.pageSize;
     const currentSortType =
       urlParams.get("sortType") == null ? 0 : urlParams.get("sortType");
+    const packageViewBtn = document.querySelector(".js_toggle-package-view");
+    const isGetPackages = packageViewBtn
+      ? packageViewBtn.dataset.isPackageView.toLowerCase() == "true"
+      : false;
 
     // change common search value
     document.querySelector(".js_commonSearch").value = searchValue;
@@ -334,7 +386,8 @@ const ProductSearchEvent = () => {
       currentSortType,
       false,
       pageIndex,
-      pageSize
+      pageSize,
+      isGetPackages
     );
 
     if (!data) {
@@ -347,6 +400,12 @@ const ProductSearchEvent = () => {
       );
     } else {
       const urlParamsToChange = [
+        {
+          Name: "isGetPackages",
+          Value: isGetPackages,
+          IsNumberAndApplyFilter: false,
+          IsStringify: false,
+        },
         {
           Name: "filterItems",
           Value: filterItems,
@@ -361,12 +420,83 @@ const ProductSearchEvent = () => {
         },
       ];
       UpdateUrlParams(urlParamsToChange);
-      RefreshListProducts(data, pageIndex, pageSize);
+      if (isGetPackages) RefreshListProductPackages(data, pageIndex, pageSize);
+      else RefreshListProducts(data, pageIndex, pageSize);
     }
   });
 
   searchInputEl.addEventListener("keyup", (e) => {
     if (e.keyCode === 13) searchButtonEl.click();
+  });
+};
+
+const PackageToggleEvent = () => {
+  const togglePackageBtn = document.querySelector(".js_toggle-package-view");
+  if (!togglePackageBtn) return;
+
+  togglePackageBtn.addEventListener("click", async () => {
+    // toogle class active
+    togglePackageBtn.classList.toggle("how-active1");
+    togglePackageBtn.dataset.isPackageView = !(
+      togglePackageBtn.dataset.isPackageView.toLowerCase() == "true"
+    );
+
+    // get params data
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSortType = urlParams.get("sortType") ?? 0;
+    const filterItemsJson = urlParams.get("filterItems")
+      ? urlParams.get("filterItems")
+      : "";
+    const page = 1;
+    const buttonSearch = document.querySelector(".js_search-products-btn");
+    const pageSize = buttonSearch ? buttonSearch.dataset.pageSize : 8;
+    const isGetPackages =
+      togglePackageBtn.dataset.isPackageView.toLowerCase() == "true";
+
+    // call api to sort.
+    const data = await GetProducts(
+      filterItemsJson,
+      currentSortType,
+      false,
+      page,
+      pageSize,
+      isGetPackages
+    );
+
+    if (!data) {
+      console.error("Can't search product!");
+      DisplayMessageInMoment(
+        productSearchErrorMessageEl,
+        "Can't search product!",
+        "",
+        5000
+      );
+    } else {
+      // change url
+      const urlParamsToChange = [
+        {
+          Name: "isGetPackages",
+          Value: isGetPackages,
+          IsNumberAndApplyFilter: false,
+          IsStringify: false,
+        },
+        {
+          Name: "sortType",
+          Value: currentSortType,
+          IsNumberAndApplyFilter: false,
+          IsStringify: false,
+        },
+        {
+          Name: "page",
+          Value: page,
+          IsNumberAndApplyFilter: true,
+          IsStringify: false,
+        },
+      ];
+      UpdateUrlParams(urlParamsToChange);
+      if (isGetPackages) RefreshListProductPackages(data, page, pageSize);
+      else RefreshListProducts(data, page, pageSize);
+    }
   });
 };
 
@@ -395,6 +525,9 @@ const ProductFilterAllEvent = () => {
     "NumberRange",
     "filter-link-active"
   );
+
+  // add event for packages
+  PackageToggleEvent();
 };
 
 export { GetProducts, ProductFilterAllEvent };

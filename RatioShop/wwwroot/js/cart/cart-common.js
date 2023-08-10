@@ -6,10 +6,11 @@ const headerCartTotal = document.querySelector(".header-cart-total");
 const headerViewCartBtn = document.querySelector(".js_view-cart-header");
 
 // API
-const AddToCartApi = async (variantId, number) => {
+const AddToCartApi = async (variantId, packageId, number) => {
   const data = JSON.stringify({
     userId: null,
     variantId: variantId,
+    packageId: packageId,
     number: number,
   });
   const result = await fetch(`${baseApiUrl}/cart/addToCart`, {
@@ -25,10 +26,11 @@ const AddToCartApi = async (variantId, number) => {
   }
   return null;
 };
-const ChangeCartItem = async (variantId, number) => {
+const ChangeCartItem = async (variantId, packageId, number) => {
   const data = JSON.stringify({
     userId: null,
     variantId: variantId,
+    packageId: packageId,
     number: number,
   });
   const result = await fetch(`${baseApiUrl}/cart/changeCartItem`, {
@@ -102,8 +104,9 @@ const RefreshCartView = async () => {
       cartItemsRemoveBtn.forEach((e, index) => {
         e.addEventListener("click", async () => {
           const variantId = e.dataset.variantId;
-          if (variantId) {
-            const changeStatus = await ChangeCartItem(variantId, 0);
+          const packageId = e.dataset.packageId;
+          if (variantId || packageId) {
+            const changeStatus = await ChangeCartItem(variantId, packageId, 0);
             if (!changeStatus) alert("Change cart failure!");
             RefreshCartView();
             console.log("remove cart item event");
@@ -118,19 +121,42 @@ const RefreshCartView = async () => {
 };
 
 const BuildHeaderCartItem = (item) => {
-  const discountPrice = item.discountRate
-    ? `<span class="ratio-origional-price">${VNDong.format(item.price)}</span>`
-    : "";
+  const discountPrice =
+    item.discountRate && item.itemType == 0
+      ? `<span class="ratio-origional-price">${VNDong.format(
+          item.price
+        )}</span>`
+      : "";
   const priceDisplay = `${item.number} x ${VNDong.format(
     item.discountPrice
   )} ${discountPrice}`;
-  let headerCartItem = `<li class="header-cart-item flex-w flex-t m-b-12">
+  const cartItemName = item.variableName
+    ? `${item.name} <i>(${item.variableName})</i>`
+    : item.name;
+
+  let headerCartItem =
+    item.itemType == 0
+      ? `<li class="header-cart-item flex-w flex-t m-b-12">
                       <div class="header-cart-item-img js_remove-cart-item" data-variant-id="${item.variantId}">
                           <img src="${item.image}" alt="${item.name}">
                       </div>
                       <div class="header-cart-item-txt p-t-8">
                           <a href="/products/productdetail/${item.variantId}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-                          ${item.name} <i>(${item.variableName})</i>
+                          ${cartItemName}
+                          <p class="text-uppercase">${item.productCode}</p>
+                          </a>
+                          <span class="header-cart-item-info">
+                          ${priceDisplay}
+                          </span>
+                      </div>
+                    </li>`
+      : `<li class="header-cart-item flex-w flex-t m-b-12">
+                      <div class="header-cart-item-img js_remove-cart-item" data-package-id="${item.packageId}">
+                          <img src="${item.image}" alt="${item.name}">
+                      </div>
+                      <div class="header-cart-item-txt p-t-8">
+                          <a href="/packages/detail/${item.packageId}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+                          ${cartItemName}
                           <p class="text-uppercase">${item.productCode}</p>
                           </a>
                           <span class="header-cart-item-info">
@@ -235,38 +261,53 @@ const ResetCartDetail = () => {
 };
 
 const BuildCartItemDetail = (item) => {
-  const displayItemPrice = item.discountRate
-    ? `${VNDong.format(item.discountPrice)} <span class="ratio-origional-price">
+  const displayItemPrice =
+    item.discountRate && item.itemType == 0
+      ? `${VNDong.format(
+          item.discountPrice
+        )} <span class="ratio-origional-price">
   ${VNDong.format(item.price)}</span>`
-    : VNDong.format(item.price);
-  const productNameDisplay = `${item.name} - ${item.variableName}`;
+      : VNDong.format(item.price);
+  const productNameDisplay = item.variableName
+    ? `${item.name} - ${item.variableName}`
+    : `${item.name}`;
   const itemImage = item.image
     ? `${item.image}`
     : "/images/default-placeholder.jpg";
+  const itemLink =
+    item.itemType == 0
+      ? `/products/productdetail/${item.variantId}`
+      : `/packages/detail/${item.packageId}`;
+  const itemIdData =
+    item.itemType == 0
+      ? `data-variant-id="${item.variantId}"`
+      : `data-package-id="${item.packageId}"`;
+  const itemDescription = item.description
+    ? `<div class="stext-109 cl4">${item.description}</div>`
+    : "";
   let cartItemDetail = ` <tr class="table_row">
                                         <td class="column-1">
-                                            <div class="how-itemcart1 js_remove-cart-item" data-variant-id="${
-                                              item.variantId
-                                            }">
+                                            <div class="how-itemcart1 js_remove-cart-item" data-package-id="${
+                                              item.packageId
+                                            }" data-variant-id="${
+    item.variantId
+  }">
                                                 <img src="${itemImage}" alt="${
     item.variableName
   }" />
                                             </div>
                                         </td>
                                         <td class="column-2">
-                                        <a href="/products/productdetail/${
-                                          item.variantId
-                                        }" class="header-cart-item-name m-b-18 hov-cl1 trans-04">${productNameDisplay}
+                                        <a href="${itemLink}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">${productNameDisplay}
                                         <p class="text-uppercase">${
                                           item.productCode
                                         }</p>
                                         </a>
+                                        ${itemDescription}
                                         </td>
                                         <td class="column-3">${displayItemPrice}</td>
                                         <td class="column-4">
-                                            <div class="wrap-num-product flex-w m-l-auto m-r-0" data-variant-id="${
-                                              item.variantId
-                                            }">
+                                            <div class="wrap-num-product flex-w m-l-auto m-r-0" ${itemIdData}>
                                                 <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m js_change-cart-item-detail">
                                                     <i class="fs-16 zmdi zmdi-minus"></i>
                                                 </div>
@@ -306,9 +347,15 @@ const PartialUpdateTotalPiceView = (cartDetail) => {
   }
 };
 
-const ChangeItemNumber = async (variantId, currentNumber, additionValue) => {
+const ChangeItemNumber = async (
+  variantId,
+  packageId,
+  currentNumber,
+  additionValue
+) => {
   const changeStatus = await ChangeCartItem(
     variantId,
+    packageId,
     +currentNumber + +additionValue
   );
 
@@ -425,7 +472,8 @@ const CartDetailActionEvent = () => {
       el.addEventListener("click", async (e) => {
         const currentNumber = el.previousElementSibling.value;
         const variantId = el.parentNode.dataset.variantId;
-        await ChangeItemNumber(variantId, currentNumber, 1);
+        const packageId = el.parentNode.dataset.packageId;
+        await ChangeItemNumber(variantId, packageId, currentNumber, 1);
       });
     });
   }
@@ -435,7 +483,8 @@ const CartDetailActionEvent = () => {
       el.addEventListener("click", async (e) => {
         const currentNumber = el.nextElementSibling.value;
         const variantId = el.parentNode.dataset.variantId;
-        await ChangeItemNumber(variantId, currentNumber, -1);
+        const packageId = el.parentNode.dataset.packageId;
+        await ChangeItemNumber(variantId, packageId, currentNumber, -1);
       });
       //
       const numbeInputElement = el.nextElementSibling;
@@ -443,7 +492,8 @@ const CartDetailActionEvent = () => {
         numbeInputElement.addEventListener("focusout", async () => {
           const currentNumber = numbeInputElement.value;
           const variantId = el.parentNode.dataset.variantId;
-          await ChangeItemNumber(variantId, currentNumber, 0);
+          const packageId = el.parentNode.dataset.packageId;
+          await ChangeItemNumber(variantId, packageId, currentNumber, 0);
         });
       }
     });
@@ -457,13 +507,21 @@ const AddToCartEvent = (parentElement = document) => {
   btnAddCartDetail.addEventListener("click", async (e) => {
     e.preventDefault();
     // get data send
+    let packageId = null;
+    let variantId = null;
     const variantSelect = parentElement.querySelector(".js-variants-select");
-    const variantId = variantSelect.value;
+
+    if (btnAddCartDetail.dataset.packageId) {
+      packageId = btnAddCartDetail.dataset.packageId;
+    } else {
+      variantId = variantSelect.value;
+    }
     const number = parentElement.querySelector(".js-variantNumber").value;
-    if (!variantId || number <= 0) console.error("Invalid params");
+    if ((!variantId && !packageId) || number <= 0)
+      console.error("Invalid params");
 
     // call api add to cart
-    const data = await AddToCartApi(variantId, number);
+    const data = await AddToCartApi(variantId, packageId, number);
     // show success, update cart view.
     if (!data) {
       const errorMessage = "Fail add to cart";
@@ -493,8 +551,9 @@ const AddToCartEvent = (parentElement = document) => {
       // display popup success
       const itemName =
         parentElement.querySelector(".js-name-detail").textContent;
-      const itemVariableName =
-        variantSelect.options[variantSelect.selectedIndex].text;
+      const itemVariableName = btnAddCartDetail.dataset.packageId
+        ? ""
+        : variantSelect.options[variantSelect.selectedIndex].text;
       const fullItemDisplayName = itemName.includes(itemVariableName)
         ? itemName
         : `${itemName}(${itemVariableName})`;

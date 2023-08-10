@@ -1,7 +1,7 @@
 // events
 const AddPackageEvent = () => {
   const btnAdds = document.querySelectorAll(".js_package-item-btn-add");
-  if (!btnEdits) return;
+  if (!btnAdds) return;
 
   btnAdds.forEach((el) => {
     el.addEventListener("click", () => {

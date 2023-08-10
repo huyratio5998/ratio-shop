@@ -1,0 +1,90 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+@using Newtonsoft.Json
+
+@model SlideSettingViewModel
+@{
+    var bannerItems = Model != null && Model.Banners != null && Model.Banners.Any() ? JsonConvert.SerializeObject(Model.Banners) : null;
+}
+
+<h5>Banners Setting</h5>
+
+<input asp-for="BannersString" type="hidden" id="list-banner-input" value="@bannerItems" />
+<p>
+    <button id="addBannerItem" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bannerModal">Add Banner Item</button>
+</p>
+<table class="table" id="bannerTable">
+    <thead>
+        <tr>
+            <th>
+                Banner Image
+            </th>
+            <th>
+                Banner Title
+            </th>
+            <th>
+                Banner Content
+            </th>
+            <th>
+                Banner Button Text
+            </th>
+            <th>
+                Banner Button Link
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div class="modal fade" id="bannerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Banner Item</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="btn-modalBannerClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-group">
+                        <label for="banner-image-input" class="control-label js_img_changeTarget">
+                            <span>Banner Image</span>
+                            <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="banner image" id="banner-image" class="js_img_changeTarget" />
+                        </label>
+                        <input type="file" class="form-control js_img_changeEvent" id="banner-image-input" />
+                        <input type="hidden" id="banner-image-value" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="banner-image-alt" class="control-label">Banner Image Alt</label>
+                    <input type="text" id="banner-image-alt" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="banner-title" class="control-label">Banner Title</label>
+                    <input type="text" id="banner-title" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="banner-content" class="control-label">Banner Content</label>
+                    <input type="text" id="banner-content" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="banner-button-text" class="control-label">Banner Button Text</label>
+                    <input type="text" id="banner-button-text" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="banner-button-link" class="control-label">Banner Button Link</label>
+                    <input type="text" id="banner-button-link" class="form-control" />
+                </div>
+
+                <br />
+                <div class="form-group">
+                    <div id="banner-save" class="btn btn-primary mouse-hover">Save</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script defer src="@Url.Content("~/js/administrator/siteSetting/slide-setting.js")"></script>

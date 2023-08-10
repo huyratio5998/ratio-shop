@@ -55,30 +55,42 @@ const BuildTableItems = (data) => {
                       <th class="column-5">Total</th>
                   </tr>`;
   cartItems.forEach((el) => {
-    const priceDisplay = el.discountRate
-      ? `${VNDong.format(el.discountPrice)} <span class="ratio-origional-price">
+    const priceDisplay =
+      el.discountRate && el.itemType == 0
+        ? `${VNDong.format(
+            el.discountPrice
+          )} <span class="ratio-origional-price">
       ${VNDong.format(el.price)}</span>`
-      : VNDong.format(el.price);
+        : VNDong.format(el.price);
     const itemImage = el.image
       ? `${el.image}`
       : "/images/default-placeholder.jpg";
+    const itemLink =
+      el.itemType == 0
+        ? `/products/productdetail/${el.variantId}`
+        : `/packages/detail/${el.packageId}`;
+    const itemNameDisplay = el.variableName
+      ? `${el.name} - ${el.variableName}`
+      : `${el.name}`;
+    const itemDescription = el.description
+      ? `<div class="stext-109 cl4">${el.description}</div>`
+      : "";
     const itemRow = `<tr class="table_row">
                         <td class="column-1">
                             <div class="how-itemcart1" data-variant-id="
                             ${el.variantId}">
                                 <img src="${itemImage}" alt="
-                                ${el.name} ${el.variableName}">
+                                ${itemNameDisplay}">
                             </div>
                         </td>
                         <td class="column-2">
                         <div class="m-b-18">
-                          <a href="/products/productdetail/${
-                            el.variantId
-                          }" class="header-cart-item-name hov-cl1 trans-04">
-                              ${el.name} - ${el.variableName}
+                          <a href="${itemLink}" class="header-cart-item-name hov-cl1 trans-04">
+                            ${itemNameDisplay}
                           </a>
                           <p class="text-secondary">${el.productCode}</p>    
-                        </div>                        
+                        </div>   
+                        ${itemDescription}                    
                         </td>
                         <td class="column-3">${priceDisplay}</td>
                         <td class="column-4">

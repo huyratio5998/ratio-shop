@@ -8,6 +8,7 @@ namespace RatioShop.Data.Models
         public string? Name { get; set; }
         public string? ProductFriendlyName { get; set; }
         public string? Image { get; set; }
+        public string? Description { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:C}")]
         public decimal? Price { get; set; }

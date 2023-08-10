@@ -1,0 +1,45 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.Admin;
+
+@model AdminGeneralSettingViewModel
+
+@if (Model != null)
+{
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-2" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Admin General Setting
+            </button>
+        </h2>
+        <div id="panelsStayOpen-2" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        Site logo
+                    </dt>
+                    <dd class="col-sm-10">
+                        @if (string.IsNullOrEmpty(Model.SiteLogo?.ImageSrc))
+                        {
+                            <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="@Model.SiteLogo?.ImageAlt" />
+                        }
+                        else
+                        {
+                            <img src="@Model.SiteLogo.ImageSrc" alt="@Model.SiteLogo.ImageAlt" />
+                        }
+                    </dd>
+                    <dt class="col-sm-2">
+                        Site name
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.SiteName)
+                    </dd>
+                     <dt class="col-sm-2">
+                        Home page url
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.HomePageUrl)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+}

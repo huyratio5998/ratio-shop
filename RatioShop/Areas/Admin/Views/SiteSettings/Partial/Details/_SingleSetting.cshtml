@@ -1,0 +1,27 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings
+
+@model SiteSettingDetailViewModel
+
+@if (Model != null)
+{
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-2" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Setting
+            </button>
+        </h2>
+        <div id="panelsStayOpen-2" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        Value
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.SingleSetting)
+                    </dd>
+
+                </dl>
+            </div>
+        </div>
+    </div>
+}

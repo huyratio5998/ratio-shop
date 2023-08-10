@@ -15,7 +15,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="ImageFile" class="control-label js_img_changeTarget">
@@ -26,7 +26,7 @@
                     }
                     else
                     {
-                        <img src="@Model.Image.ResolveProductImages().FirstOrDefault()" style="height:250px;width:auto" alt="package image" class="js_img_changeTarget" />
+                        <img src="@Model.Image.ResolvePackageImages().FirstOrDefault()" style="height:250px;width:auto" alt="package image" class="js_img_changeTarget" />
                     }
                 </label>
 
@@ -43,15 +43,25 @@
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
+             <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <label asp-for="ProductFriendlyName" class="control-label"></label>
                 <input asp-for="ProductFriendlyName" class="form-control" />
                 <span asp-validation-for="ProductFriendlyName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Price" class="control-label">Specific Price</label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <label asp-for="ManualPrice" class="control-label">Manual Price</label>
+                <input asp-for="ManualPrice" value="@Model.ManualPrice" class="form-control" />
+                <span asp-validation-for="ManualPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AutoCalculatedPrice" class="control-label">Automatic Price</label>
+                <p>@CommonHelper.CurrencyFormat(Model.AutoCalculatedPrice, language) </p>                
+                <span asp-validation-for="AutoCalculatedPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="DiscountRate" class="control-label"></label>
@@ -88,7 +98,7 @@
 
 @*Package item*@
 <p>
-    <a asp-action="AddPackageItem" asp-route-packageId="@Model.Id">Add package item</a>
+    <a asp-action="AddPackageItem" asp-route-parentId="@Model.Id">Add package item</a>
 </p>
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -104,6 +114,9 @@
 <table class="table">
     <thead>
         <tr>
+            <th>
+                Name
+            </th>
             <th>
                 Code
             </th>
@@ -125,6 +138,11 @@
             @foreach (var item in Model.PackageItems)
             {
                 <tr>
+                    <td>
+                        <a asp-action="Details" asp-controller="Products" asp-area="" asp-route-id="@item.Id">
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </a>
+                    </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Code)
                     </td>
@@ -148,7 +166,11 @@
                     </td>
                     <td>
                         <a href="#" class="js_package-item-btn-edit" data-item-id="@item.Id" data-number="@item.Number" data-bs-toggle="modal" data-bs-target="#editPackageItem">Edit</a> |
-                        <a asp-action="RemovePackageItem" asp-route-id="@item.Id" asp-route-packageId="@Model.Id">Delete</a>
+                        <form asp-action="RemovePackageItem">
+                            <input type="hidden" name="variantId" value="@item.Id" />
+                            <input type="hidden" name="packageId" value="@Model.Id" />
+                            <input type="submit" value="Delete" />
+                        </form>
                     </td>
                 </tr>
             }
@@ -163,7 +185,7 @@
 
 <div>
     <div class="modal fade" id="editPackageItem" tabindex="-1" aria-labelledby="editPackageItemLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <form asp-action="EditPackageItem">
                     <div class="modal-header">
@@ -171,7 +193,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body row">
-                        <input type="text" name="itemNumber" class="js_package-item-number"/>
+                        <input type="text" name="itemNumber" class="form-control js_package-item-number"/>
                         <input type="hidden" name="packageId" value="@Model.Id" />
                         <input type="hidden" name="variantId" class="js_package-item-id" />
                     </div>

@@ -23,5 +23,8 @@ namespace RatioShop.Data.ViewModels.SearchViewModel
 
         [BindProperty(Name = "pageSize")]
         public int PageSize { get; set; }
+
+        [BindProperty(Name = "isGetPackages")]
+        public bool IsGetPackages { get; set; }
     }
 }

@@ -24,7 +24,7 @@
             }
             else
             {
-                <img src="@Model.Image" style="height:250px;width:auto" alt="package image" class="js_img_changeTarget" />
+                <img src="@Model.Image.ResolvePackageImages().FirstOrDefault()" style="height:250px;width:auto" alt="package image" class="js_img_changeTarget" />
             }
         </dd>
         <dt class="col-sm-2">
@@ -35,27 +35,23 @@
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductFriendlyName)
-        </dt>
+        </dt>       
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductFriendlyName)
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Image)
-        </dt>
+         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>       
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Image)
+            @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
+            Price
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Price)
+            @(Model.ManualPrice != null && Model.ManualPrice >= 0
+            ? CommonHelper.CurrencyFormat(Model.ManualPrice, language)
+            : CommonHelper.CurrencyFormat(Model.AutoCalculatedPrice, language))
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DiscountRate)
@@ -98,6 +94,9 @@
         <thead>
             <tr>
                 <th>
+                    Name
+                </th>
+                <th>
                     Code
                 </th>
                 <th>
@@ -117,6 +116,11 @@
                 @foreach (var item in Model.PackageItems)
                 {
                     <tr>
+                        <td>
+                            <a asp-action="Details" asp-controller="Products" asp-area="" asp-route-id="@item.Id">
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </a>
+                        </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Code)
                         </td>

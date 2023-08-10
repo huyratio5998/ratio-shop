@@ -209,6 +209,10 @@ const LoginFormEvent = () => {
         return;
       }
       // handle data
+      var token = document.querySelector(
+        'input[name="__RequestVerificationToken"]'
+      ).value;
+      loginFormData.set("__RequestVerificationToken", token);
       const rememberMe = loginFormData.get("rememberMe") == "on";
       loginFormData.set("rememberMe", rememberMe);
       loginFormData.set("isexternallogin", false);
@@ -220,6 +224,8 @@ const LoginFormEvent = () => {
 
       if (!response.ok) {
         console.error("Login failure!");
+        const errorMessage = "Your login request being rejected!";
+        DisplayMessageInMoment(errorMessageEl, errorMessage, "", 5000);
       } else {
         const data = await response.json();
         if (data.status == "Success") {

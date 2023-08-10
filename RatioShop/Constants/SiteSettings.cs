@@ -1,5 +1,4 @@
-﻿using RatioShop.Data.ViewModels.SearchViewModel;
-using RatioShop.Enums;
+﻿using RatioShop.Enums;
 
 namespace RatioShop.Constants
 {
@@ -8,6 +7,23 @@ namespace RatioShop.Constants
         public static bool EnableTrackProduct = true;
         public static bool EnableTrackCoupon = true;
 
+        public static class SettingTemplates
+        {            
+            public const string SingleSetting = "Single";
+
+            public const string General = "General";
+            public const string SEO = "SEO";
+            public const string Header = "Header";
+            public const string Footer = "Footer";
+            public const string Slide = "Slide";
+            public const string ProductListing = "Product Listing";
+            public const string ProductDetail = "Product Detail";
+
+            public const string AdminGeneral = "Admin General";
+            public const string AdminHeader = "Admin Header";
+            public const string AdminFooter = "Admin Footer";
+        };
+        
         public static Dictionary<SortingEnum, string> ProductsSorts = new Dictionary<SortingEnum, string>()
         {
             [SortingEnum.Default] = "Default",
@@ -58,8 +74,8 @@ namespace RatioShop.Constants
     }
     public class TextFilterSettings
     {
-        public string? Value { get; set; }
         public string DisplayName { get; set; }
+        public string? Value { get; set; }
         public int Position { get; set; }
     }
 }

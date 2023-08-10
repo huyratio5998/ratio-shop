@@ -92,7 +92,7 @@
                         else
                         {
                             <td>
-                                <img src="@item.Image" style="height:150px;width:auto" alt="@item.Name">
+                                <img src="@item.Image.ResolvePackageImages().FirstOrDefault()" style="height:150px;width:auto" alt="@item.Name">
                             </td>
                         }
                         <td>
@@ -102,7 +102,9 @@
                             @Html.DisplayFor(modelItem => item.Name)
                         </td>
                         <td>
-                            @CommonHelper.CurrencyFormat(item.Price, language)
+                            @(item.ManualPrice != null && item.ManualPrice >= 0
+                            ? CommonHelper.CurrencyFormat(item.ManualPrice, language)
+                            : CommonHelper.CurrencyFormat(item.AutoCalculatedPrice, language))      
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.IsNew)

@@ -15,6 +15,7 @@ namespace RatioShop.Services.Abstract
 
         ListPackageViewModel GetPackages(BaseSearchRequest request);
         PackageViewModel? GetPackageViewModel(Guid id);
+        PackageViewModel? GetAdditionPackageInfoViewModel(PackageViewModel packageViewModel);
         ProductVariantPackage? GetPackageItem(Guid id, Guid packageId);
         Task<bool> CreatePackageItem(Guid id, Guid packageId, int itemNumber);
         bool UpdatePackageItem(Guid id, Guid packageId, int itemNumber);
