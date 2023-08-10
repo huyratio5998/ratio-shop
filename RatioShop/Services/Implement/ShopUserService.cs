@@ -187,7 +187,7 @@ namespace RatioShop.Services.Implement
             }
 
             // check can login yet?
-            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
 
             if (signInResult.Succeeded)
             {
@@ -218,7 +218,7 @@ namespace RatioShop.Services.Implement
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        await _signInManager.SignInAsync(user, isPersistent: true, info.LoginProvider);
                         return new LoginResponseViewModel { Status = "Success", UserName = user.UserName };
                     }
                 }
