@@ -15,9 +15,8 @@ namespace RatioShop.Areas.Admin.Controllers
             _memoryCache = memoryCache;
         }
 
-        public IActionResult Index(string message="")
-        {
-            ViewBag.Message = message;
+        public IActionResult Index()
+        {            
             return View();
         }
 
@@ -33,22 +32,46 @@ namespace RatioShop.Areas.Admin.Controllers
             var listCachKeys = cacheKeys.Split(",");
             foreach (var cacheKey in listCachKeys)
             {
+                if (string.IsNullOrWhiteSpace(cacheKey)) continue;
                 try
                 {
                     switch (cacheKey)
                     {
                         case "site-setting":
                             {
-                                _memoryCache.Remove("GetSiteSetting-False");
+                                string SEOSettingKey = "seo-setting";
+                                string headerSettingKey = "header-setting";
+                                string headerSlidesSettingKey = "banner-setting";
+                                string footerSettingKey = "footer-setting";
+                                string generalSettingKey = "general-setting";
+                                string baseKey = "cache";
+
+                                _memoryCache.Remove("cache-common-setting-false");
+                                _memoryCache.Remove($"{baseKey}-{SEOSettingKey}");
+                                _memoryCache.Remove($"{baseKey}-{headerSettingKey}");
+                                _memoryCache.Remove($"{baseKey}-{headerSlidesSettingKey}");
+                                _memoryCache.Remove($"{baseKey}-{footerSettingKey}");
+                                _memoryCache.Remove($"{baseKey}-{generalSettingKey}");                                
                                 break;
                             }
                         case "admin-site-setting":
                             {
-                                _memoryCache.Remove("GetSiteSetting-True");
+                                string adminHeaderSettingKey = "admin-header-setting";
+                                string adminFooterSettingKey = "admin-footer-setting";
+                                string adminGeneralSettingKey = "admin-general-setting";
+                                string baseKey = "cache";
+
+                                _memoryCache.Remove("cache-common-setting-true");
+                                _memoryCache.Remove($"{baseKey}-{adminHeaderSettingKey}");
+                                _memoryCache.Remove($"{baseKey}-{adminFooterSettingKey}");
+                                _memoryCache.Remove($"{baseKey}-{adminGeneralSettingKey}");
+                                break;
+                            }                        
+                        default:
+                            {
+                                _memoryCache.Remove($"cache-{cacheKey}");
                                 break;
                             }
-                        default:
-                            break;
                     }                    
                 }
                 catch (Exception ex)

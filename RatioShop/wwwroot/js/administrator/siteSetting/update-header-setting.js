@@ -1,15 +1,26 @@
 const navigationTable = document.querySelector("#navigationTable");
 const navigationTextInput = document.querySelector("#navigation-text");
 const navigationUrlInput = document.querySelector("#navigation-url");
+const navigationIdInput = document.querySelector("#navigation-id");
+const navigationParentIdInput = document.querySelector("#navigation-parentId");
 const btnSaveNavigation = document.querySelector("#navigation-save");
 const btnCreateNavigationItem = document.querySelector("#addHeaderNavigation");
 const listNavigationInput = document.querySelector("#list-navigation-input");
 // Helpers
 const ResetNavigationFormValue = () => {
-  if (!navigationTextInput || !navigationUrlInput) return;
+  if (
+    !navigationTextInput ||
+    !navigationUrlInput ||
+    !navigationIdInput ||
+    !navigationParentIdInput
+  )
+    return;
 
   navigationTextInput.value = "";
   navigationUrlInput.value = "";
+  navigationIdInput.value = "";
+  navigationParentIdInput.value = "";
+
   btnSaveNavigation.dataset.action = "";
   btnSaveNavigation.dataset.index = "";
 };
@@ -34,8 +45,12 @@ const RefreshNavigationTable = (tableId) => {
     tbodyRef.innerHTML = "";
     listNavigations.forEach((x, index) => {
       const newRow = tbodyRef.insertRow(-1);
-      newRow.insertCell(0).appendChild(document.createTextNode(x.Text));
-      newRow.insertCell(1).appendChild(document.createTextNode(x.Url));
+      newRow.insertCell(0).appendChild(document.createTextNode(x.Id ?? ""));
+      newRow.insertCell(1).appendChild(document.createTextNode(x.Text));
+      newRow.insertCell(2).appendChild(document.createTextNode(x.Url));
+      newRow
+        .insertCell(3)
+        .appendChild(document.createTextNode(x.ParentId ?? ""));
 
       const editNode = document.createElement("a");
       editNode.classList.add("navigation-edit");
@@ -49,7 +64,7 @@ const RefreshNavigationTable = (tableId) => {
       deleteNode.classList.add("mouse-hover");
       deleteNode.appendChild(document.createTextNode("Delete"));
 
-      let actionCell = newRow.insertCell(2);
+      let actionCell = newRow.insertCell(4);
       actionCell.setAttribute("data-index", index);
       actionCell.appendChild(editNode);
       actionCell.appendChild(document.createTextNode(" | "));
@@ -77,11 +92,15 @@ const NavigationSaveEvent = () => {
       const navigationItem = {
         Text: navigationTextInput.value,
         Url: navigationUrlInput.value,
+        Id: navigationIdInput.value,
+        ParentId: navigationParentIdInput.value,
       };
       listNavigations.push(navigationItem);
     } else if (action == "edit" && index >= 0) {
       listNavigations[index].Text = navigationTextInput.value;
       listNavigations[index].Url = navigationUrlInput.value;
+      listNavigations[index].Id = navigationIdInput.value;
+      listNavigations[index].ParentId = navigationParentIdInput.value;
     }
 
     listNavigationInput.value = JSON.stringify(listNavigations);
@@ -102,6 +121,9 @@ const TableNavigationsEvent = () => {
         const index = e.currentTarget.parentNode.dataset.index;
         navigationTextInput.value = listNavigations[index].Text;
         navigationUrlInput.value = listNavigations[index].Url;
+        navigationIdInput.value = listNavigations[index].Id;
+        navigationParentIdInput.value = listNavigations[index].ParentId;
+
         btnSaveNavigation.dataset.action = "edit";
         btnSaveNavigation.dataset.index = index;
 

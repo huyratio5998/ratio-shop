@@ -16,6 +16,6 @@ namespace RatioShop.Services.Abstract
         public ListSiteSettingViewModel GetSiteSettings(BaseSearchRequest args);
         SiteSettingDetailViewModel GetSetting(Guid id);
         Task<SiteSettingDetailViewModel>? GetSetting(string settingKey);
-        Task<SiteSettingViewModel>? GetSiteSetting(bool includeAdmin = false);
+        Task<SiteSettingViewModel>? GetSiteSetting(bool isAdminSite = false);
     }
 }

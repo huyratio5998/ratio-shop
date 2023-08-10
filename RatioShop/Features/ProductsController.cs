@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using RatioShop.Areas.Admin.Models.SiteSettings;
 using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
@@ -26,14 +27,16 @@ namespace RatioShop.Features
         private readonly IPackageService _packageService;
         private readonly ICommonService _commonService;
         private readonly IMemoryCache _memoryCache;
+        private readonly ISiteSettingService _siteSettingService;
 
         private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         private const int pageSizeDefault = 5;
         private const int pageSizeClientDesktopDefault = 8;
         private const int pageSizeClientMobileDefault = 3;
         private const int maxRelatedNumber = 8;
+        private const string productSettingKey = "plp-setting";
 
-        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService, IPackageService packageService, IMemoryCache memoryCache)
+        public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService, IPackageService packageService, IMemoryCache memoryCache, ISiteSettingService siteSettingService)
         {
             this._productService = productService;
             _hostingEnvironment = hostingEnvironment;
@@ -44,14 +47,18 @@ namespace RatioShop.Features
             _commonService = commonService;
             _packageService = packageService;
             _memoryCache = memoryCache;
+            _siteSettingService = siteSettingService;
         }
 
         // GET: Products
         [AllowAnonymous]
         public async Task<IActionResult> Index(ProductSearchRequest request)
         {
-            var pageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
-            request.PageSize = pageSize;
+            var productSettings = (await _siteSettingService.GetSetting(productSettingKey))?.ProductListingSetting;
+            var pageSizeDesktop = productSettings != null ? productSettings.DekstopPageSize ?? pageSizeClientDesktopDefault : pageSizeClientDesktopDefault;
+            var pageSizeMobile = productSettings != null ? productSettings.MobilePageSize ?? pageSizeClientMobileDefault : pageSizeClientMobileDefault;
+
+            request.PageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeDesktop : pageSizeMobile;
             request.IsSelectPreviousItems = true;
 
             var productCacheKey = $"products-{JsonConvert.SerializeObject(request)}";
@@ -67,9 +74,10 @@ namespace RatioShop.Features
                         listProductViewModel.FilterSettings = new FilterSettings
                         {
                             PriceRangeFilter = _productService.GetProductPriceFilter(5000000, 5),
-                            CategoryFilter = SiteSettings.CategoriesFilter,
+                            CategoryFilter = (productSettings != null && productSettings.CategoriesFilter != null && productSettings.CategoriesFilter.Any()) ? productSettings?.CategoriesFilter : SiteSettings.CategoriesFilter,
                             IsPackageView = request.IsGetPackages
                         };
+                        listProductViewModel.PLPSettings = productSettings;
 
                         var cacheOption = new MemoryCacheEntryOptions()
                             .SetSlidingExpiration(TimeSpan.FromSeconds(60))

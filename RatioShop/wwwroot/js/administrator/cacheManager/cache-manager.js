@@ -35,7 +35,7 @@ const ChooseItemEvent = () => {
   cacheItems.forEach((el) => {
     el.addEventListener("click", (e) => {
       const cacheItemInput = el.querySelector(`input[type="checkbox"]`);
-      if (!cacheItemInput) return;
+      if (!cacheItemInput || e.target.tagName.toLowerCase() == "input") return;
 
       cacheItemInput.checked = !cacheItemInput.checked;
     });
