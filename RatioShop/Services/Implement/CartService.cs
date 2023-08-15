@@ -100,7 +100,11 @@ namespace RatioShop.Services.Implement
                 variant = _productVariant.GetProductVariant(request.VariantId.ToString());
                 if (variant == null || variant.Number <= 0) return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "Bad request");
 
-                cartDetail = _productVariantCartService.GetProductVariantCarts().FirstOrDefault(x => x.CartId == request.CartId && x.ProductVariantId == request.VariantId && x.ItemType == CartItemType.Product);
+                cartDetail = _productVariantCartService
+                    .GetProductVariantCarts()
+                    .FirstOrDefault(x => x.CartId == request.CartId 
+                    && x.ProductVariantId == request.VariantId 
+                    && x.ItemType == CartItemType.Product);
                 if (variant.Number < request.Number
                     || (cartDetail != null && variant.Number < (cartDetail.ItemNumber + request.Number)))
                     return new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, $"Out of stock. Product remains: {variant.Number}");

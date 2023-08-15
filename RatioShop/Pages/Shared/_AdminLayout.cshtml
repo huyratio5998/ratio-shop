@@ -1,6 +1,9 @@
 ﻿@using RatioShop.Areas.Admin.Models.SiteSettings.SettingItem;
 @using RatioShop.Data.ViewModels.Layout
 @using RatioShop.Helpers;
+@using Microsoft.AspNetCore.Identity
+@using RatioShop.Data.Models
+@inject SignInManager<ShopUser> SignInManager
 @inject ILayoutSettingsViewModel layoutSetting
 @{
     var adminHeaderSettings = layoutSetting.AdminSiteSettings?.AdminHeaderSetting;
@@ -42,7 +45,15 @@
                         {
                             @foreach (var item in adminHeaderSettings.Navigations.Where(x => x.ParentId == null))
                             {
-                                GenerateNavigationItems(item, adminHeaderSettings.Navigations.Where(x => x.ParentId != null).ToList());
+                                var isSigninUser = SignInManager.IsSignedIn(User);
+                                if (!isSigninUser && item.Url.Equals("/"))
+                                {
+                                    GenerateNavigationItems(item, adminHeaderSettings.Navigations.Where(x => x.ParentId != null).ToList());
+                                }
+                                else if (isSigninUser)
+                                {
+                                    GenerateNavigationItems(item, adminHeaderSettings.Navigations.Where(x => x.ParentId != null).ToList());
+                                }
                             }
                         }                        
                     </ul>

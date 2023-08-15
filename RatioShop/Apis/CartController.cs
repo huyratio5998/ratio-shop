@@ -18,7 +18,6 @@ namespace RatioShop.Apis
         private readonly IDiscountService _discountService;
         private readonly IProductVariantCartService _productVariantCartService;
 
-
         private readonly Guid _anonymousUserID = Guid.Parse(UserTest.UserAnonymousID);
         public CartController(ICartService cartService, IProductVariantCartService productVariantCartService, ICartDiscountService cartDiscountService, IDiscountService discountService)
         {
@@ -27,6 +26,7 @@ namespace RatioShop.Apis
             _cartDiscountService = cartDiscountService;
             _discountService = discountService;
         }
+        
         [HttpPost]
         [Route("addToCart")]
         [AllowAnonymous]
