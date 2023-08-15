@@ -209,9 +209,9 @@ const LoginFormEvent = () => {
         return;
       }
       // handle data
-      var token = document.querySelector(
-        'input[name="__RequestVerificationToken"]'
-      ).value;
+      var token = document
+        .querySelector("#js_register-form")
+        .querySelector('input[name="__RequestVerificationToken"]').value;
       loginFormData.set("__RequestVerificationToken", token);
       const rememberMe = loginFormData.get("rememberMe") == "on";
       loginFormData.set("rememberMe", rememberMe);
@@ -258,8 +258,7 @@ const ClientLogoutEvent = () => {
         const data = await response.json();
         if (data) {
           if (CheckAllowAnonymousUrl()) {
-            UpdateTopBarHeader(false, data.userName);
-            RefreshCartView();
+            location.reload();
           } else return RedirectToPath(true);
         }
       }
