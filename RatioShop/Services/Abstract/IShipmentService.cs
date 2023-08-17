@@ -14,7 +14,7 @@ namespace RatioShop.Services.Abstract
         List<Guid>? GetInprogressOrderIdsByShipperId(string? shipperId);
         List<Guid>? GetFinishedOrderIdsByShipperId(string? shipperId);
         List<Guid>? GetAllUnAssignedOrderIds();
-        List<UserResponseViewModel> GetAvailableShippers();
+        Task<List<UserResponseViewModel>> GetAvailableShippers();
         string? GetShipperNameById(string shipperId);
     }
 }

@@ -6,7 +6,6 @@ using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Enums;
 using RatioShop.Helpers;
 using RatioShop.Services.Abstract;
-using System.Security.Claims;
 
 namespace RatioShop.Areas.Admin.Controllers
 {
@@ -92,9 +91,9 @@ namespace RatioShop.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            if(orderDetail.ShipmentHistory != null) orderDetail.ShipmentHistory.AvailableShippers = _shipmentService.GetAvailableShippers();
+            if (orderDetail.ShipmentHistory != null) orderDetail.ShipmentHistory.AvailableShippers = await _shipmentService.GetAvailableShippers();
 
             return View(orderDetail);
-        }                
+        }
     }
 }

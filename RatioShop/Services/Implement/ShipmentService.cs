@@ -2,6 +2,7 @@
 using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
 using RatioShop.Data.ViewModels.User;
+using RatioShop.Enums;
 using RatioShop.Services.Abstract;
 
 namespace RatioShop.Services.Implement
@@ -123,32 +124,44 @@ namespace RatioShop.Services.Implement
             return orderIds;
         }
 
-        public List<UserResponseViewModel> GetAvailableShippers()
+        public async Task<List<UserResponseViewModel>> GetAvailableShippers()
         {
             // should get by role later            
-            var users = _shopUserService.GetShopUsers().Select(x => new UserResponseViewModel
-            {
-                FullName = x.FullName,
-                PhoneNumber = x.PhoneNumber,
-                ShipperId = Guid.Parse(x.Id)
-            }).ToList();
+            var users = _shopUserService.GetShopUsers().ToList();
+            var shippers = new List<UserResponseViewModel>();
 
-            if (users == null || !users.Any()) return new List<UserResponseViewModel>();
+            if (users == null || !users.Any()) return shippers;
 
             foreach (var user in users)
-            {                
+            {
+                var roles = await _shopUserService.GetUserRoles(user);
+                if (roles != null && roles.Contains(UserRole.Shipper.ToString()))
+                    shippers.Add(
+                        new UserResponseViewModel
+                        {
+                            FullName = string.IsNullOrEmpty(user.EmployeeName) ? user.FullName : user.EmployeeName,
+                            PhoneNumber = user.PhoneNumber,
+                            ShipperId = Guid.Parse(user.Id)
+                        }
+                );
+            }
+
+            if (!shippers.Any()) return shippers;
+
+            foreach (var user in shippers)
+            {
                 var totalShipmentInprogress = GetInprogressOrderIdsByShipperId(user.ShipperId.ToString())?.Count();
                 user.TotalAssignedOrders = totalShipmentInprogress ?? 0;
             }
 
-            return users.OrderBy(x=>x.TotalAssignedOrders).ToList();
+            return shippers.OrderBy(x => x.TotalAssignedOrders).ToList();
         }
 
         public string? GetShipperNameById(string shipperId)
         {
             if (string.IsNullOrEmpty(shipperId)) return null;
 
-            return _shopUserService.GetShopUser(shipperId)?.FullName;
+            return _shopUserService.GetShopUser(shipperId)?.EmployeeName ?? _shopUserService.GetShopUser(shipperId)?.FullName;
         }
     }
 }

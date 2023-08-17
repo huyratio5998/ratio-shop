@@ -39,7 +39,7 @@ namespace RatioShop.Areas.Admin.Controllers
             var orderDetail = _orderService.GetOrderDetailResponse(orderId.ToString());
             if (orderDetail == null) return RedirectToAction("Index", "Orders");
 
-            if (orderDetail.ShipmentHistory != null) orderDetail.ShipmentHistory.AvailableShippers = _shipmentService.GetAvailableShippers();
+            if (orderDetail.ShipmentHistory != null) orderDetail.ShipmentHistory.AvailableShippers = await _shipmentService.GetAvailableShippers();
 
             return View(orderDetail);
         }
