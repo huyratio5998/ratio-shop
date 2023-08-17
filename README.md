@@ -2,7 +2,7 @@
 ===========
 
 Design to solve basic commerce website.
-(The core feature working well. Goals for practicing purpose)
+_(The core feature working well. Goals for practicing purpose)_
 
 ### Technology used ###
 
