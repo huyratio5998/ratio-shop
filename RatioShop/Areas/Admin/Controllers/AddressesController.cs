@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RatioShop.Data.Models;
 using RatioShop.Services.Abstract;
+using System.Data;
 
-namespace RatioShop.Features
+namespace RatioShop.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class AddressesController : Controller
     {
         private readonly IAddressService _AddressService;

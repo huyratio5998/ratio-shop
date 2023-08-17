@@ -7,6 +7,7 @@
         Manager,
         Employee,
         Shipper,
-        Customer
+        Customer,
+        ContentEditor
     }
 }

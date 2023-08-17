@@ -1,42 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using RatioShop.Data;
 using RatioShop.Data.Models;
+using RatioShop.Services.Abstract;
+using System.Data;
 
-namespace RatioShop.Features
+namespace RatioShop.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class ProductVariantsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProductVariantService _productVariantService;
+        private readonly IProductService _productService;
 
-        public ProductVariantsController(ApplicationDbContext context)
+        public ProductVariantsController(IProductVariantService productVariantService, IProductService productService)
         {
-            _context = context;
+            _productVariantService = productVariantService;
+            _productService = productService;
         }
 
         // GET: ProductVariants
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.ProductVariant.Include(p => p.Product);
-            return View(await applicationDbContext.ToListAsync());
+            var results = _productVariantService.GetProductVariants();
+            return View(results);
         }
 
         // GET: ProductVariants/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
-            if (id == null || _context.ProductVariant == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var productVariant = await _context.ProductVariant
-                .Include(p => p.Product)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var productVariant = _productVariantService.GetProductVariant(id.ToString());
+
             if (productVariant == null)
             {
                 return NotFound();
@@ -48,7 +49,10 @@ namespace RatioShop.Features
         // GET: ProductVariants/Create
         public IActionResult Create()
         {
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Id");
+            var products = _productService.GetProducts().Select(x => x.Product);
+
+            ViewData["ProductId"] = new SelectList(products, "Id", "Id");
+
             return View();
         }
 
@@ -61,29 +65,34 @@ namespace RatioShop.Features
         {
             if (ModelState.IsValid)
             {
-                productVariant.Id = Guid.NewGuid();
-                _context.Add(productVariant);
-                await _context.SaveChangesAsync();
+                await _productVariantService.CreateProductVariant(productVariant);
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Id", productVariant.ProductId);
+
+            var products = _productService.GetProducts().Select(x => x.Product);
+            ViewData["ProductId"] = new SelectList(products, "Id", "Id", productVariant.ProductId);
+
             return View(productVariant);
         }
 
         // GET: ProductVariants/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null || _context.ProductVariant == null)
+            if (id == null || id == Guid.Empty)
             {
                 return NotFound();
             }
 
-            var productVariant = await _context.ProductVariant.FindAsync(id);
+            var productVariant = _productVariantService.GetProductVariant(id.ToString());
             if (productVariant == null)
             {
                 return NotFound();
             }
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Id", productVariant.ProductId);
+
+            var products = _productService.GetProducts().Select(x => x.Product);
+            ViewData["ProductId"] = new SelectList(products, "Id", "Id", productVariant.ProductId);
+
             return View(productVariant);
         }
 
@@ -103,8 +112,7 @@ namespace RatioShop.Features
             {
                 try
                 {
-                    _context.Update(productVariant);
-                    await _context.SaveChangesAsync();
+                    _productVariantService.UpdateProductVariant(productVariant);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,21 +127,23 @@ namespace RatioShop.Features
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Id", productVariant.ProductId);
+
+            var products = _productService.GetProducts().Select(x => x.Product);
+            ViewData["ProductId"] = new SelectList(products, "Id", "Id", productVariant.ProductId);
+
             return View(productVariant);
         }
 
         // GET: ProductVariants/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == null || _context.ProductVariant == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var productVariant = await _context.ProductVariant
-                .Include(p => p.Product)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var productVariant = _productVariantService.GetProductVariant(id.ToString());
+
             if (productVariant == null)
             {
                 return NotFound();
@@ -147,23 +157,16 @@ namespace RatioShop.Features
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (_context.ProductVariant == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.ProductVariant'  is null.");
-            }
-            var productVariant = await _context.ProductVariant.FindAsync(id);
-            if (productVariant != null)
-            {
-                _context.ProductVariant.Remove(productVariant);
-            }
-            
-            await _context.SaveChangesAsync();
+            _productVariantService.DeleteProductVariant(id.ToString());
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductVariantExists(Guid id)
         {
-          return (_context.ProductVariant?.Any(e => e.Id == id)).GetValueOrDefault();
+            var productVariant = _productVariantService.GetProductVariant(id.ToString(), false);
+
+            return productVariant != null;
         }
     }
 }

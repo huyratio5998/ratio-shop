@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <cache enabled="true" vary-by="@headerSettings.Id + @headerSettings.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
+        <cache enabled="true" vary-by="@headerSettings?.Id + @headerSettings?.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
             <div class="wrap-menu-desktop">
                 <nav class="limiter-menu-desktop container">
 
@@ -90,7 +90,7 @@
         </cache>
     </div>
 
-    <cache enabled="true" vary-by="@headerSettings.Id + @headerSettings.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
+    <cache enabled="true" vary-by="@headerSettings?.Id + @headerSettings?.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
         <!-- Header Mobile -->
         <div class="wrap-header-mobile">
             <!-- Logo moblie -->
@@ -160,7 +160,7 @@
                 </div>
             </li>
         </ul>
-        <cache enabled="true" vary-by="@headerSettings.Id + @headerSettings.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
+        <cache enabled="true" vary-by="@headerSettings?.Id + @headerSettings?.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
             <ul class="main-menu-m">
                 @if (headerSettings != null && headerSettings.Navigations != null && headerSettings.Navigations.Any())
                 {
@@ -175,7 +175,7 @@
         </cache>
     </div>
 
-    <cache enabled="true" vary-by="@headerSettings.Id + @headerSettings.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
+    <cache enabled="true" vary-by="@headerSettings?.Id + @headerSettings?.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
         <!-- Modal Search -->
         <div class="modal-search-header flex-c-m trans-04 js-hide-modal-search">
             <div class="container-search-header">
@@ -195,7 +195,7 @@
     </cache>
 </header>
 
-<cache enabled="true" vary-by="@headerSettings.Id + @headerSettings.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
+<cache enabled="true" vary-by="@headerSettings?.Id + @headerSettings?.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
     <!-- Cart -->
     <div class="wrap-header-cart js-panel-cart">
         <div class="s-full js-hide-cart"></div>

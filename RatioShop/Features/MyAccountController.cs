@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RatioShop.Constants;
 using RatioShop.Data.ViewModels.MyAccountViewModel;
 using RatioShop.Data.ViewModels.User;
@@ -8,6 +9,7 @@ using System.Security.Claims;
 
 namespace RatioShop.Features
 {
+    [Authorize]
     public class MyAccountController : Controller
     {
         private readonly IShopUserService _shopUserService;

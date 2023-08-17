@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using RatioShop.Constants;
 
 namespace RatioShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "SuperAdmin,Manager,Admin,Shipper,Employee")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class CacheManagerController : Controller
     {
         private IMemoryCache _memoryCache;
@@ -16,14 +17,14 @@ namespace RatioShop.Areas.Admin.Controllers
         }
 
         public IActionResult Index()
-        {            
+        {
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ClearCache(string cacheKeys)
-        {            
+        {
             if (string.IsNullOrEmpty(cacheKeys))
             {
                 return BadRequest(false);
@@ -37,42 +38,44 @@ namespace RatioShop.Areas.Admin.Controllers
                 {
                     switch (cacheKey)
                     {
-                        case "site-setting":
+                        case CacheConstant.SiteSettingKey:
                             {
-                                string SEOSettingKey = "seo-setting";
-                                string headerSettingKey = "header-setting";
-                                string headerSlidesSettingKey = "banner-setting";
-                                string footerSettingKey = "footer-setting";
-                                string generalSettingKey = "general-setting";
-                                string baseKey = "cache";
-
-                                _memoryCache.Remove("cache-common-setting-false");
-                                _memoryCache.Remove($"{baseKey}-{SEOSettingKey}");
-                                _memoryCache.Remove($"{baseKey}-{headerSettingKey}");
-                                _memoryCache.Remove($"{baseKey}-{headerSlidesSettingKey}");
-                                _memoryCache.Remove($"{baseKey}-{footerSettingKey}");
-                                _memoryCache.Remove($"{baseKey}-{generalSettingKey}");                                
+                                _memoryCache.Remove($"{CacheConstant.CacheCommonSetting}-false");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.SEOSettingKey}");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.HeaderSettingKey}");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.HeaderSlidesSettingKey}");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.FooterSettingKey}");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.GeneralSettingKey}");
                                 break;
                             }
-                        case "admin-site-setting":
+                        case CacheConstant.AdminSiteSettingKey:
                             {
-                                string adminHeaderSettingKey = "admin-header-setting";
-                                string adminFooterSettingKey = "admin-footer-setting";
-                                string adminGeneralSettingKey = "admin-general-setting";
-                                string baseKey = "cache";
-
-                                _memoryCache.Remove("cache-common-setting-true");
-                                _memoryCache.Remove($"{baseKey}-{adminHeaderSettingKey}");
-                                _memoryCache.Remove($"{baseKey}-{adminFooterSettingKey}");
-                                _memoryCache.Remove($"{baseKey}-{adminGeneralSettingKey}");
+                                _memoryCache.Remove($"{CacheConstant.CacheCommonSetting}-true");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.AdminHeaderSettingKey}");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.AdminFooterSettingKey}");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{CacheConstant.AdminGeneralSettingKey}");
                                 break;
-                            }                        
+                            }
+                        case CacheConstant.PDPKey:
+                            {
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{cacheKey}");
+                                CacheConstant.PDPCancellation.Cancel();
+                                CacheConstant.PDPCancellation = new CancellationTokenSource();
+                                break;
+                            }
+                        case CacheConstant.PLPKey:
+                            {
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{cacheKey}");
+                                CacheConstant.PLPCancellation.Cancel();
+                                CacheConstant.PLPCancellation = new CancellationTokenSource();
+                                break;
+                            }
                         default:
                             {
-                                _memoryCache.Remove($"cache-{cacheKey}");
+                                _memoryCache.Remove($"{CacheConstant.BaseCache}-{cacheKey}");
                                 break;
                             }
-                    }                    
+                    }
                 }
                 catch (Exception ex)
                 {

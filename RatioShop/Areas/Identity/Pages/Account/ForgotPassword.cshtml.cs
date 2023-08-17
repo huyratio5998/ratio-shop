@@ -17,6 +17,7 @@ using RatioShop.Data.Models;
 
 namespace RatioShop.Areas.Identity.Pages.Account
 {
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor,Employee,Shipper")]
     public class ForgotPasswordModel : PageModel
     {
         private readonly UserManager<ShopUser> _userManager;

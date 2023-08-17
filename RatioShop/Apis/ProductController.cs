@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
+using RatioShop.Constants;
 using RatioShop.Data.ViewModels;
 using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Services.Abstract;
@@ -32,7 +34,7 @@ namespace RatioShop.Apis
         {
             if (ModelState.IsValid)
             {
-                var productCacheKey = $"products-api-{JsonConvert.SerializeObject(request)}";
+                var productCacheKey = $"{CacheConstant.ProductsApi}-{JsonConvert.SerializeObject(request)}";
                 if (!_memoryCache.TryGetValue(productCacheKey, out ListProductResponseViewModel responseResult))
                 {
                     try
@@ -48,7 +50,8 @@ namespace RatioShop.Apis
                                 .SetSlidingExpiration(TimeSpan.FromSeconds(60))
                                 .SetAbsoluteExpiration(TimeSpan.FromHours(1))
                                 .SetPriority(CacheItemPriority.High)
-                                .SetSize(1024);
+                                .SetSize(1024)
+                                .AddExpirationToken(new CancellationChangeToken(CacheConstant.PLPCancellation.Token));
 
                             _memoryCache.Set(productCacheKey, responseResult, cacheOption);
                         }
@@ -73,7 +76,7 @@ namespace RatioShop.Apis
         {
             if (productId == Guid.Empty) return NotFound();
 
-            var productCacheKey = $"product-api-{productId}";
+            var productCacheKey = $"{CacheConstant.ProductApi}-{productId}";
             if (!_memoryCache.TryGetValue(productCacheKey, out ProductViewModel product))
             {
                 try
@@ -87,7 +90,8 @@ namespace RatioShop.Apis
                         var cacheOption = new MemoryCacheEntryOptions()
                             .SetSlidingExpiration(TimeSpan.FromSeconds(60))
                             .SetAbsoluteExpiration(TimeSpan.FromHours(1))
-                            .SetPriority(CacheItemPriority.Normal);                            
+                            .SetPriority(CacheItemPriority.Normal)
+                            .AddExpirationToken(new CancellationChangeToken(CacheConstant.PDPCancellation.Token));
 
                         _memoryCache.Set(productCacheKey, product, cacheOption);
                     }

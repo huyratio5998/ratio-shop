@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RatioShop.Areas.Admin.Models.SiteSettings;
@@ -10,10 +11,12 @@ using RatioShop.Enums;
 using RatioShop.Helpers;
 using RatioShop.Helpers.FileHelpers;
 using RatioShop.Services.Abstract;
+using System.Data;
 
 namespace RatioShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class SiteSettingsController : Controller
     {
         private readonly IWebHostEnvironment _hostingEnvironment;

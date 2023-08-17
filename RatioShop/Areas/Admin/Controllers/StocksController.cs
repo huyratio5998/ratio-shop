@@ -1,46 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using RatioShop.Data;
 using RatioShop.Data.Models;
+using RatioShop.Services.Abstract;
+using System.Data;
 
-namespace RatioShop.Features
+namespace RatioShop.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class StocksController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IStockService _stockService;
+        private readonly IAddressService _addressService;
 
-        public StocksController(ApplicationDbContext context)
+        public StocksController(IStockService stockService, IAddressService addressService)
         {
-            _context = context;
+            _stockService = stockService;
+            _addressService = addressService;
         }
 
         // GET: Stocks
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Stock.Include(s => s.Address);
-            return View(await applicationDbContext.ToListAsync());
+            var stocks = _stockService.GetStocks().AsQueryable().Include(x => x.Address);
+
+            return View(stocks);
         }
 
         // GET: Stocks/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Stock == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var stock = await _context.Stock
-                .Include(s => s.Address)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var stock = _stockService.GetStock((int)id);
+
             if (stock == null)
             {
                 return NotFound();
             }
+
+            stock.Address = _addressService.GetAddress(stock.AddressId);
 
             return View(stock);
         }
@@ -48,7 +52,9 @@ namespace RatioShop.Features
         // GET: Stocks/Create
         public IActionResult Create()
         {
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "Id");
+            var address = _addressService.GetAddresses();
+            ViewData["AddressId"] = new SelectList(address, "Id", "Id");
+
             return View();
         }
 
@@ -61,28 +67,33 @@ namespace RatioShop.Features
         {
             if (ModelState.IsValid)
             {
-                _context.Add(stock);
-                await _context.SaveChangesAsync();
+                await _stockService.CreateStock(stock);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "Id", stock.AddressId);
+
+            var address = _addressService.GetAddresses();
+            ViewData["AddressId"] = new SelectList(address, "Id", "Id", stock.AddressId);
+
             return View(stock);
         }
 
         // GET: Stocks/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Stock == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var stock = await _context.Stock.FindAsync(id);
+            var stock = _stockService.GetStock((int)id);
             if (stock == null)
             {
                 return NotFound();
             }
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "Id", stock.AddressId);
+
+            var address = _addressService.GetAddresses();
+            ViewData["AddressId"] = new SelectList(address, "Id", "Id", stock.AddressId);
+
             return View(stock);
         }
 
@@ -102,8 +113,7 @@ namespace RatioShop.Features
             {
                 try
                 {
-                    _context.Update(stock);
-                    await _context.SaveChangesAsync();
+                    _stockService.UpdateStock(stock);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,26 +128,27 @@ namespace RatioShop.Features
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "Id", stock.AddressId);
+            var address = _addressService.GetAddresses();
+            ViewData["AddressId"] = new SelectList(address, "Id", "Id", stock.AddressId);
+
             return View(stock);
         }
 
         // GET: Stocks/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Stock == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var stock = await _context.Stock
-                .Include(s => s.Address)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var stock = _stockService.GetStock((int)id);
             if (stock == null)
             {
                 return NotFound();
             }
 
+            stock.Address = _addressService.GetAddress(stock.AddressId);
             return View(stock);
         }
 
@@ -146,23 +157,16 @@ namespace RatioShop.Features
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Stock == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Stock'  is null.");
-            }
-            var stock = await _context.Stock.FindAsync(id);
-            if (stock != null)
-            {
-                _context.Stock.Remove(stock);
-            }
-            
-            await _context.SaveChangesAsync();
+            _stockService.DeleteStock(id);
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool StockExists(int id)
         {
-          return (_context.Stock?.Any(e => e.Id == id)).GetValueOrDefault();
+            var stock = _stockService.GetStock(id);
+
+            return stock != null;
         }
     }
 }

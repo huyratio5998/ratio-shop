@@ -200,7 +200,7 @@ namespace RatioShop.Services.Implement
 
         public async Task<SiteSettingDetailViewModel>? GetSetting(string settingKey)
         {
-            string cacheKey = $"cache-{settingKey}";
+            string cacheKey = $"{CacheConstant.BaseCache}-{settingKey}";
 
             if (!_memoryCache.TryGetValue(cacheKey, out SiteSettingDetailViewModel result))
             {
@@ -246,7 +246,7 @@ namespace RatioShop.Services.Implement
 
         public async Task<SiteSettingViewModel>? GetSiteSetting(bool isAdminSite = false)
         {
-            string cacheKey = $"cache-common-setting-{isAdminSite.ToString().ToLower()}";
+            string cacheKey = $"{CacheConstant.CacheCommonSetting}-{isAdminSite.ToString().ToLower()}";
 
             if (!_memoryCache.TryGetValue(cacheKey, out SiteSettingViewModel result))
             {
@@ -255,38 +255,28 @@ namespace RatioShop.Services.Implement
                     await semaphoreSlim.WaitAsync();
                     if (!_memoryCache.TryGetValue(cacheKey, out result))
                     {
-                        string SEOSettingKey = "seo-setting";
-                        string headerSettingKey = "header-setting";
-                        string headerSlidesSettingKey = "banner-setting";
-                        string footerSettingKey = "footer-setting";
-                        string generalSettingKey = "general-setting";
-
-                        string adminHeaderSettingKey = "admin-header-setting";
-                        string adminFooterSettingKey = "admin-footer-setting";
-                        string adminGeneralSettingKey = "admin-general-setting";
-
                         result = new SiteSettingViewModel();
 
                         if (!isAdminSite)
                         {
-                            result.SEOSetting = (await GetSetting(SEOSettingKey))?.SEOSetting;
-                            result.HeaderSetting = (await GetSetting(headerSettingKey))?.HeaderSetting;
-                            result.HeaderSlides = (await GetSetting(headerSlidesSettingKey))?.SlideSetting;
-                            result.FooterSetting = (await GetSetting(footerSettingKey))?.FooterSetting;
-                            result.GeneralSetting = (await GetSetting(generalSettingKey))?.GeneralSetting;
+                            result.SEOSetting = (await GetSetting(CacheConstant.SEOSettingKey))?.SEOSetting;
+                            result.HeaderSetting = (await GetSetting(CacheConstant.HeaderSettingKey))?.HeaderSetting;
+                            result.HeaderSlides = (await GetSetting(CacheConstant.HeaderSlidesSettingKey))?.SlideSetting;
+                            result.FooterSetting = (await GetSetting(CacheConstant.FooterSettingKey))?.FooterSetting;
+                            result.GeneralSetting = (await GetSetting(CacheConstant.GeneralSettingKey))?.GeneralSetting;
                         }
                         else
                         {
-                            result.AdminHeaderSetting = (await GetSetting(adminHeaderSettingKey))?.HeaderSetting;
-                            result.AdminFooterSetting = (await GetSetting(adminFooterSettingKey))?.FooterSetting;
-                            result.AdminGeneralSetting = (await GetSetting(adminGeneralSettingKey))?.AdminGeneralSetting;
+                            result.AdminHeaderSetting = (await GetSetting(CacheConstant.AdminHeaderSettingKey))?.HeaderSetting;
+                            result.AdminFooterSetting = (await GetSetting(CacheConstant.AdminFooterSettingKey))?.FooterSetting;
+                            result.AdminGeneralSetting = (await GetSetting(CacheConstant.AdminGeneralSettingKey))?.AdminGeneralSetting;
                         }
 
                         var cacheOption = new MemoryCacheEntryOptions()
                         .SetSlidingExpiration(TimeSpan.FromSeconds(60))
                         .SetAbsoluteExpiration(TimeSpan.FromHours(1))
                         .SetPriority(CacheItemPriority.Normal)
-                        .SetSize(1024); 
+                        .SetSize(1024);
 
                         _memoryCache.Set(cacheKey, result, cacheOption);
                     }

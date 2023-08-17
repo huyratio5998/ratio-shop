@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RatioShop.Data.Models;
 using RatioShop.Services.Abstract;
+using System.Data;
 
-namespace RatioShop.Features
+namespace RatioShop.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin")]
     public class PaymentsController : Controller
     {
         private readonly IPaymentService _paymentService;
