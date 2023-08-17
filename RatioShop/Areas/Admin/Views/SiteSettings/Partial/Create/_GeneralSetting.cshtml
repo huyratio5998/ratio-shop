@@ -1,0 +1,40 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+@using Newtonsoft.Json
+@using RatioShop.Enums
+
+@model GeneralSettingViewModel
+
+<h5>General Information</h5>
+<div class="form-group">
+    <label asp-for="SiteName" class="control-label"></label>
+    <input asp-for="SiteName" class="form-control" />
+    <span asp-validation-for="SiteName" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="HomePageUrl" class="control-label"></label>
+    <input asp-for="HomePageUrl" class="form-control" />
+    <span asp-validation-for="HomePageUrl" class="text-danger"></span>
+</div>
+
+<h6>Site logo</h6>
+<div class="form-group">
+    <label asp-for="SiteLogo.Icon" class="control-label js_img_changeTarget">
+        <span>Logo</span>
+        @if (string.IsNullOrEmpty(Model?.SiteLogo?.ImageSrc))
+        {
+            <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="@Model?.SiteLogo?.ImageAlt" />
+        }
+        else
+        {
+            <img src="@Model?.SiteLogo?.ImageSrc" alt="@Model?.SiteLogo?.ImageAlt" class="js_img_changeTarget" />
+        }
+    </label>
+    <input type="file" asp-for="SiteLogo.Icon" class="form-control js_img_changeEvent" />
+    <input type="hidden" asp-for="SiteLogo.ImageSrc" />
+    <span asp-validation-for="SiteLogo.Icon" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="SiteLogo.ImageAlt" class="control-label"></label>
+    <input asp-for="SiteLogo.ImageAlt" class="form-control" />
+    <span asp-validation-for="SiteLogo.ImageAlt" class="text-danger"></span>
+</div>

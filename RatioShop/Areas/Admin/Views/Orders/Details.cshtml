@@ -1,0 +1,307 @@
+﻿@using RatioShop.Constants
+@using RatioShop.Data.ViewModels.OrdersViewModel
+@using RatioShop.Helpers
+
+@model OrderResponseViewModel
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+
+    var orderStatusBadgeClass = CommonHelper.GetStatusBadgeClass(Model.Status, 5);
+    var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(Model.ShipmentStatus, 5);
+    var createdDateUTCFormat = Model.CreatedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+    var modifiedDateUTCFormat = Model.ModifiedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+    var isUnAssignedShipment = Model.ShipmentStatus == CommonStatus.ShipmentStatus.Pending && (!Model.ShipmentHistory?.Shipments?.Any(x => x.Shipper != null) ?? false);
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Order</h4>
+    <hr />
+    <div class="row">
+        <div class="col-6">
+            <a class="btn btn-outline-dark" asp-action="Index">Back to List</a>
+        </div>
+        <div class="col-6 row">
+            @if (Model.Status != CommonStatus.OrderStatus.Complete && Model.Status != CommonStatus.OrderStatus.Closed && Model.Status != CommonStatus.OrderStatus.Canceled)
+            {
+                <form asp-action="UpdateOrderStatus" asp-controller="Order" asp-area="" class="col-6 js_cancelOrderForm">
+                    <input type="hidden" name="orderId" value="@Model.OrderId" />
+                    <input type="hidden" name="status" value="@CommonStatus.OrderStatus.Canceled" />
+                    <button type="submit" class="btn btn-outline-danger">Cancel Order</button>
+                </form>
+            }
+
+            @if (Model.Status != CommonStatus.OrderStatus.Complete && Model.Status != CommonStatus.OrderStatus.Closed)
+            {
+                <form asp-action="UpdateOrderStatus" asp-controller="Order" asp-area="" class="col-6 js_completeOrderForm">
+                    <input type="hidden" name="orderId" value="@Model.OrderId" />
+                    <input type="hidden" name="status" value="@CommonStatus.OrderStatus.Complete" />
+                    <button class="btn btn-outline-success">Complete order</button>
+                </form>
+            }
+        </div>
+    </div>
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.OrderNumber)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.OrderNumber)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-9">
+            <span class="badge rounded-pill @orderStatusBadgeClass">
+                @Html.DisplayFor(model => model.Status)
+            </span>
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.IsRefund)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.IsRefund)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ShipmentStatus)
+        </dt>
+        <dd class="col-sm-9">
+            <span class="badge rounded-pill @shipmentStatusBadgeClass">
+                @Html.DisplayFor(model => model.ShipmentStatus)
+            </span>
+            <a asp-action="ShipmentHistory" asp-controller="Shipments" asp-route-orderId="@Model.OrderId" class="btn btn-info">Shipment Details</a>
+            @if (isUnAssignedShipment)
+            {
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignShipmentAddress">Assign shipment</button>
+            }
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Payment)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Payment.DisplayName)
+        </dd>
+        <dt class="col-sm-3">
+            Coupons
+        </dt>
+        <dd class="col-sm-9">
+            @if (Model.CartDetail != null && Model.CartDetail.CouponCodes != null && Model.CartDetail.CouponCodes.Any())
+            {
+                foreach (var item in Model.CartDetail.CouponCodes)
+                {
+                    <span class="badge rounded-pill bg-light text-dark">
+                        @item
+                    </span>
+
+                    <span>, </span>
+                }
+            }
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.CreatedDate)
+        </dt>
+        <dd class="col-sm-9 js_datetime-format-local" data-date-value="@createdDateUTCFormat">
+            @Html.DisplayFor(model => model.CreatedDate)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ModifiedDate)
+        </dt>
+        <dd class="col-sm-9 js_datetime-format-local" data-date-value="@modifiedDateUTCFormat">
+            @Html.DisplayFor(model => model.ModifiedDate)
+        </dd>
+        <dt class="col-sm-3">
+            Customer
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.CartDetail.ShippingAddressDefault.FullName)
+        </dd>
+        <dt class="col-sm-3">
+            Phone number
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.CartDetail.ShippingAddressDefault.PhoneNumber)
+        </dd>
+    </dl>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Image
+                </th>
+                <th>
+                    Product Code
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Number
+                </th>
+                <th>
+                    Discount Rate
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    Final Price
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.CartDetail?.CartItems != null && Model.CartDetail.CartItems.Any())
+            {
+                @foreach (var item in Model.CartDetail?.CartItems)
+                {
+                    <tr>
+                        @if (string.IsNullOrEmpty(item.Image))
+                        {
+                            <td>
+                                <img src="~/images/default-placeholder.jpg" style="height:50px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img src="@item.Image" style="height:50px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ProductCode)
+                        </td>
+                        <td>
+                            @(string.IsNullOrWhiteSpace(item.VariableName) ? item.Name : $"{item.Name} - {@item.VariableName}")
+                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                            {
+                                <div>
+                                    <i>
+                                        @($" {item.Description}")
+                                    </i>
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Number)
+                        </td>
+                        <td>
+                            @($"{item.DiscountRate}%")
+                        </td>
+                        <td>
+                            @CommonHelper.CurrencyFormat(item.Price, language)
+                        </td>
+                        <td>
+                            @CommonHelper.CurrencyFormat(item.DiscountPrice, language)
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@{
+    var totalItemPriceOrigional = Model.CartDetail?.CartItems?.Sum(x => x.Price * x.Number);
+    var totalItemDiscount = totalItemPriceOrigional - Model.CartDetail?.TotalPrice;
+    var totalCouponsDiscount = Model.CartDetail?.TotalPrice + Model.CartDetail?.ShippingFee - Model.CartDetail?.TotalFinalPrice;
+    var totalDiscount = totalItemDiscount + totalCouponsDiscount;
+}
+<dl class="row">
+    <dt class="col-sm-3">
+        Total item
+    </dt>
+    <dd class="col-sm-9">
+        @Model.CartDetail?.TotalItems
+    </dd>
+    <dt class="col-sm-3">
+        Total item price(origin)
+    </dt>
+    <dd class="col-sm-9">
+        @CommonHelper.CurrencyFormat(totalItemPriceOrigional, language)
+    </dd>
+    <dt class="col-sm-3">
+        @Html.DisplayNameFor(model => model.ShipmentFee)
+    </dt>
+    <dd class="col-sm-9">
+        @CommonHelper.CurrencyFormat(Model.ShipmentFee, language)
+    </dd>
+    <dt class="col-sm-3">
+        Total Items Discount
+    </dt>
+    <dd class="col-sm-9 text-danger">
+        -@CommonHelper.CurrencyFormat(totalItemDiscount, language)
+    </dd>
+    <dt class="col-sm-3">
+        Total Coupons Discount
+    </dt>
+    <dd class="col-sm-9 text-danger">
+        -@CommonHelper.CurrencyFormat(totalCouponsDiscount, language)
+    </dd>
+    <dt class="col-sm-3">
+        Total Discount
+    </dt>
+    <dd class="col-sm-9 text-danger">
+        <b>
+            -@CommonHelper.CurrencyFormat(totalDiscount, language)
+        </b>
+    </dd>
+    <dt class="col-sm-3">
+        @Html.DisplayNameFor(model => model.TotalMoney)
+    </dt>
+    <dd class="col-sm-9">
+        <b>
+            @CommonHelper.CurrencyFormat(Model.TotalMoney, language)
+        </b>
+        <span> <s> @CommonHelper.CurrencyFormat(totalItemPriceOrigional + Model.ShipmentFee, language)</s></span>
+    </dd>
+</dl>
+
+@*modal assign shipment address*@
+@if (isUnAssignedShipment)
+{
+    <div class="modal fade" id="assignShipmentAddress" tabindex="-1" aria-labelledby="assignShipmentAddressLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Choose shipper</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row row-cols-1 row-cols-lg-3 g-2 g-lg-2">
+                    @if (Model.ShipmentHistory != null && Model.ShipmentHistory.AvailableShippers != null && Model.ShipmentHistory.AvailableShippers.Any())
+                    {
+                        <input type="hidden" name="currentOrderId" value="@Model.OrderId" />
+                        foreach (var item in Model.ShipmentHistory.AvailableShippers)
+                        {
+                            <div class="col js_shipperChooseArea">
+                                <div class="p-3 border">
+                                    <input type="radio" name="assignedShipper" value="@item.ShipperId" />
+                                    <p>Name: @item.FullName</p>
+                                    <p>Phone number: @item.PhoneNumber</p>
+                                    <p>Total orders shipping: @item.TotalAssignedOrders</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div>
+                            There're no available shippers.
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary js_save-AssignShipmentToShipper">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="module" defer src="@Url.Content("~/js/administrator/orders/order-detail.js")"></script>

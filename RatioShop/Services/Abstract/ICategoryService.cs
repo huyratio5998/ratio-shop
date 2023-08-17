@@ -10,5 +10,9 @@ namespace RatioShop.Services.Abstract
         Task<Category> CreateCategory(Category category);
         bool UpdateCategory(Category category);
         bool DeleteCategory(int id);
+
+        //
+        IEnumerable<Category> GetCategoriesWithParentData();
+        IEnumerable<Category> GetListCategoriesChildren(int categoryId, bool isIncludeCurrentCategory = false);
     }
 }

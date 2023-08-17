@@ -27,7 +27,6 @@ const btnModalProductCategoriesClose = document.querySelector(
   "#btn-modalProductCategoryClose"
 );
 const btnCreateProductCategory = document.querySelector("#addProductCategory");
-const inputPopupCatalog = document.querySelector("#productCategory-catalog");
 
 const updateProductAdditionalInfor = async (data) => {
   try {
@@ -39,7 +38,7 @@ const updateProductAdditionalInfor = async (data) => {
       removeProductCategories: RemoveProductCategories,
     };
     const response = await fetch(
-      "/products/UpdateProductAdditionalInformation",
+      "/admin/products/UpdateProductAdditionalInformation",
       {
         method: "POST",
         headers: {
@@ -122,6 +121,10 @@ const resetVariantsPopupField = () => {
   document.querySelector("#variant-number").value = "";
   document.querySelector("#variant-price").value = "";
   document.querySelector("#variant-discountRate").value = "";
+  document.querySelector("#variant-images-string").value = "";
+  document.querySelector("#variant-images-string-display").innerHTML = "";
+  document.querySelector("#variant-images").value = "";
+  document.querySelector("#variant-type").selectedIndex = 0;
   document
     .querySelector("#variantStocksTable")
     .getElementsByTagName("tbody")[0].innerHTML = "";
@@ -129,7 +132,6 @@ const resetVariantsPopupField = () => {
 };
 const resetProductCategoriesPopupField = () => {
   document.querySelector("#categoryId").value = availableCategories[0].Id;
-  inputPopupCatalog.value = getCatalogByCategoryId(availableCategories[0].Id);
   productCategoryEditIndex = undefined;
 };
 // Stock
@@ -250,9 +252,6 @@ const refreshProductCategoriesTableData = (tableId) => {
     productCategories.forEach((x, index) => {
       const newRow = tbodyRef.insertRow(-1);
       newRow.insertCell(0).appendChild(document.createTextNode(x.DisplayName));
-      newRow
-        .insertCell(1)
-        .appendChild(document.createTextNode(getCatalogByCategoryId(x.Id)));
       //
       const editNode = document.createElement("a");
       const deleteNode = document.createElement("a");
@@ -266,7 +265,7 @@ const refreshProductCategoriesTableData = (tableId) => {
       deleteNode.classList.add("mouse-hover");
       deleteNode.appendChild(document.createTextNode("Delete"));
 
-      let actionCell = newRow.insertCell(2);
+      let actionCell = newRow.insertCell(1);
       actionCell.setAttribute("data-productCategoryId", x.Id);
       actionCell.setAttribute("data-index", index);
       actionCell.appendChild(editNode);
@@ -288,7 +287,7 @@ const refreshProductCategoriesTableData = (tableId) => {
 
 // Event
 const popupVariantsSubmitEvent = () => {
-  formVariant.addEventListener("submit", (e) => {
+  formVariant.addEventListener("submit", async (e) => {
     e.preventDefault();
     const variantCode = document.querySelector("#variant-code").value;
     const newVariantValue = {
@@ -296,9 +295,34 @@ const popupVariantsSubmitEvent = () => {
       Number: document.querySelector("#variant-number").value,
       Price: document.querySelector("#variant-price").value,
       DiscountRate: document.querySelector("#variant-discountRate").value,
+      Images: document.querySelector("#variant-images-string").value,
+      Type: Number.parseInt(document.querySelector("#variant-type").value),
     };
 
+    // post images
+    let variantImagesString = [];
+    const variantImages = document.querySelector("#variant-images").files;
+    if (variantImages && variantImages.length > 0) {
+      var data = new FormData();
+      for (const file of variantImages) {
+        variantImagesString.push(file.name);
+        data.append("variantImages", file);
+      }
+
+      const response = await fetch("/admin/products/SubmitVariantImages", {
+        method: "POST",
+        body: data,
+      });
+      const result = await response.json();
+      if (result) newVariantValue.Images = variantImagesString.join();
+    }
+
+    // update data in variable
     if (variantEditIndex) {
+      productVariants[variantEditIndex].Images = newVariantValue.Images;
+      productVariants[variantEditIndex].Type = Number.parseInt(
+        newVariantValue.Type
+      );
       productVariants[variantEditIndex].Code = newVariantValue.Code;
       productVariants[variantEditIndex].Number = Number.parseInt(
         newVariantValue.Number
@@ -309,6 +333,7 @@ const popupVariantsSubmitEvent = () => {
       productVariants[variantEditIndex].DiscountRate = Number.parseFloat(
         newVariantValue.DiscountRate
       );
+
       // update stockVariant variable
       productVariants[variantEditIndex].ProductVariantStocks =
         getVariantStockValue();
@@ -318,12 +343,12 @@ const popupVariantsSubmitEvent = () => {
       productVariants.push(newVariantValue);
     }
 
-    //data = { productId: currentProductId, variants: productVariants, removeVariants: RemoveVariants };
     refreshVariantsTableData("#variantTable");
     resetVariantsPopupField();
     hidePopup();
   });
 };
+
 const tableVariantsEvent = () => {
   btnEditVariants.forEach((element) => {
     element.addEventListener("click", (e) => {
@@ -337,7 +362,12 @@ const tableVariantsEvent = () => {
         productVariants[index].Price;
       document.querySelector("#variant-discountRate").value =
         productVariants[index].DiscountRate;
-
+      document.querySelector("#variant-images-string").value =
+        productVariants[index].Images;
+      document.querySelector("#variant-images-string-display").innerHTML =
+        productVariants[index].Images;
+      document.querySelector("#variant-type").value =
+        productVariants[index].Type;
       // generate variant stock table
       refreshVariantStockTable(productVariants[index].ProductVariantStocks);
     });
@@ -398,9 +428,6 @@ const tableProductCategoriesEvent = () => {
       const index = e.currentTarget.parentNode.dataset.index;
       productCategoryEditIndex = index;
       document.querySelector("#categoryId").value = productCategories[index].Id;
-      inputPopupCatalog.value = getCatalogByCategoryId(
-        productCategories[index].Id
-      );
     });
   });
 
@@ -418,21 +445,6 @@ const tableProductCategoriesEvent = () => {
       }
     });
   });
-};
-
-const getCatalogWhenCategoryChange = () => {
-  document.querySelector("#categoryId").addEventListener("change", () => {
-    const categoryElement = document.querySelector("#categoryId");
-    const currentCategoryValue = categoryElement.value;
-    const selectedCatalog = getCatalogByCategoryId(currentCategoryValue);
-
-    inputPopupCatalog.value = selectedCatalog ? selectedCatalog : "";
-  });
-};
-
-const getCatalogByCategoryId = (catalogId) => {
-  return availableCategories.filter((x) => x.Id == catalogId)[0].Catalog
-    .DisplayName;
 };
 
 // Product stock event
@@ -467,7 +479,6 @@ const initEvent = () => {
   popupVariantsSubmitEvent();
   tableVariantsEvent();
   popupProductCategorySubmitEvent();
-  getCatalogWhenCategoryChange();
   tableProductCategoriesEvent();
   addProductStockEvent();
   //

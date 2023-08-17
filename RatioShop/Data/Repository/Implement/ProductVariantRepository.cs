@@ -14,9 +14,17 @@ namespace RatioShop.Data.Repository.Implement
             return await Create(ProductVariant);
         }
 
-        public bool DeleteProductVariant(string id)
+        public bool DeleteProductVariant(string id, bool isDeepDelete = false)
         {
-            return Delete(id);
+            if (isDeepDelete) return Delete(id);
+            else
+            {
+                var productVariant = GetProductVariant(id);
+                if (productVariant == null) return false;
+
+                productVariant.IsDelete = true;
+                return Update(productVariant);
+            }
         }
 
         public IEnumerable<ProductVariant> GetProductVariants()
@@ -24,9 +32,12 @@ namespace RatioShop.Data.Repository.Implement
             return GetAll();
         }
 
-        public IQueryable<ProductVariant> GetProductVariantsByProductId(Guid productId)
+        public IQueryable<ProductVariant> GetProductVariantsByProductId(Guid productId, bool isIncludeDeletedVariant)
         {
-            return GetAll().Where(x=>x.ProductId.ToString().ToLower().Equals(productId.ToString().ToLower())).OrderBy(x=>x.Price);
+            if (isIncludeDeletedVariant)
+                return GetAll().Where(x => x.ProductId.ToString().ToLower().Equals(productId.ToString().ToLower())).OrderBy(x => x.Price);
+            else
+                return GetAll().Where(x => !x.IsDelete && x.ProductId.ToString().ToLower().Equals(productId.ToString().ToLower())).OrderBy(x => x.Price);
         }
 
         public ProductVariant? GetProductVariant(string id)
@@ -34,9 +45,9 @@ namespace RatioShop.Data.Repository.Implement
             return GetById(id);
         }
 
-        public bool UpdateProductVariant(ProductVariant ProductVariant)
+        public bool UpdateProductVariant(ProductVariant productVariant)
         {
-            return Update(ProductVariant);
+            return Update(productVariant);
         }
     }
 }

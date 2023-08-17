@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RatioShop.Data.Models;
+using RatioShop.Helpers;
 
 namespace RatioShop.Data.Repository
 {
@@ -31,18 +32,34 @@ namespace RatioShop.Data.Repository
             return true;
         }
 
-        public override T? GetById(string id)
+        public override T? GetById(string id, bool isTracking = false)
         {
             if (string.IsNullOrEmpty(id)) return null;
+            T? result;
+            
+            if (isTracking) result = _context.Set<T>().FirstOrDefault(x => x.Id.ToString().ToLower().Equals(id.ToLower()));
+            else result = _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id.ToString().ToLower().Equals(id.ToLower()));
 
-            return _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id.ToString().Equals(id, StringComparison.OrdinalIgnoreCase));
+            if (result == null) return null;
+
+            result.CreatedDate = result.CreatedDate.GetCorrectUTC();
+            result.ModifiedDate = result.ModifiedDate.GetCorrectUTC();            
+            return result;
         }
 
-        public override T? GetById(int id)
+        public override T? GetById(int id, bool isTracking = false)
         {
-            if (id == 0) return null;
+            if (id == 0) return null;            
+            T? result = null;
 
-            return _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id == id);
+            if(isTracking) result = _context.Set<T>().FirstOrDefault(x => x.Id == id);
+            else result = _context.Set<T>().AsNoTracking().FirstOrDefault(x => x.Id == id);
+
+            if (result == null) return null;
+
+            result.CreatedDate = result.CreatedDate.GetCorrectUTC();
+            result.ModifiedDate = result.ModifiedDate.GetCorrectUTC();            
+            return result;
         }
     }
 }

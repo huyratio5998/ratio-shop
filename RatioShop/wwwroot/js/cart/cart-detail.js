@@ -226,7 +226,6 @@ const ChangeDefaultAddressEvents = () => {
 };
 
 const Init = () => {
-  console.log("cart detail init: cart-detail.js");
   ApplyCouponEvent();
   ChangeDefaultAddressEvents();
 };

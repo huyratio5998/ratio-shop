@@ -1,4 +1,6 @@
-﻿using RatioShop.Constants;
+﻿using RatioShop.Areas.Admin.Models.SiteSettings.SettingItem;
+using RatioShop.Constants;
+using RatioShop.Data.ViewModels.SearchViewModel;
 using RatioShop.Enums;
 using System.Globalization;
 using System.Text.Json;
@@ -24,7 +26,7 @@ namespace RatioShop.Helpers
         public static string BuildOrderNumberByDate(string shopSignature)
         {
             var random = new Random();
-            var result = $"{shopSignature}{random.Next(1, 9)}{DateTime.UtcNow.ToString("yyMMddHHmmss")}";
+            var result = $"{shopSignature}{DateTime.UtcNow.ToString("yyMMddHHmmss")}{random.Next(1, 100)}";
             return result;
 
         }
@@ -68,40 +70,113 @@ namespace RatioShop.Helpers
             session.SetString(key, JsonSerializer.Serialize(value));
         }
 
-        public static string GetStatusBadgeClass(string status)
+        public static string GetStatusBadgeClass(string? status, int bootstrapVersion = 4)
         {
             var badgeClass = "";
+            string BadgeSuccess = bootstrapVersion == 4 ? "badge-success" : "bg-success";
+            string BadgeLight = bootstrapVersion == 4 ? "badge-light" : "bg-light text-dark";
+            string BadgeInfo = bootstrapVersion == 4 ? "badge-info" : "bg-info text-dark";
+            string BadgeDanger = bootstrapVersion == 4 ? "badge-danger" : "bg-danger";
+            string BadgeWarning = bootstrapVersion == 4 ? "badge-warning" : "bg-warning text-dark";
+
             switch (status)
             {
                 case CommonStatus.Success:
                 case CommonStatus.OrderStatus.Complete:
                 case CommonStatus.ShipmentStatus.Delivered:
-                    badgeClass = "badge-success";
+                    badgeClass = BadgeSuccess;
                     break;
                 case CommonStatus.OrderStatus.Created:
                 case CommonStatus.ShipmentStatus.Pending:
-                    badgeClass = "badge-light";
+                    badgeClass = BadgeLight;
                     break;
                 case CommonStatus.OrderStatus.PaymentRecieved:
                 case CommonStatus.OrderStatus.Delivering:
-                    badgeClass = "badge-info";
+                    badgeClass = BadgeInfo;
                     break;
                 case CommonStatus.OrderStatus.Canceled:
                 case CommonStatus.OrderStatus.Closed:
                 case CommonStatus.ShipmentStatus.Expired:
                 case CommonStatus.ShipmentStatus.Failure:
-                    badgeClass = "badge-danger";
+                    badgeClass = BadgeDanger;
                     break;
                 case CommonStatus.OrderStatus.PendingPayment:
                 case CommonStatus.ShipmentStatus.Returned:
 
-                    badgeClass = "badge-warning";
+                    badgeClass = BadgeWarning;
                     break;
                 default:
-                    badgeClass = "badge-light";
+                    badgeClass = BadgeLight;
                     break;
             }
             return badgeClass;
-        }        
+        }
+
+        public static DateTime? GetCorrectUTC(this DateTime? dateTime)
+        {
+            var isParseSuccess = DateTime.TryParse(dateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"), out var dateTimeUTC);
+            if (isParseSuccess) return dateTimeUTC.ToUniversalTime();
+            return dateTime;
+        }
+
+        public static IEnumerable<FacetFilterItem>? CleanDefaultFilter(this IEnumerable<FacetFilterItem>? filters)
+        {
+            if (filters == null || !filters.Any()) return null;
+
+            var result = new List<FacetFilterItem>();
+            foreach (var filter in filters)
+            {
+                if (filter == null || filter.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(filter.Value)) continue;
+                result.Add(filter);
+            }
+
+            return result;
+        }
+
+        public static string? FilterItemToJson(this IEnumerable<FacetFilterItem>? filters)
+        {
+            if (filters == null || !filters.Any()) return null;
+            filters = filters.Where(x => x != null);
+
+            return JsonSerializer.Serialize(filters);
+        }
+
+        public static List<string> ResolveProductImages(this string variantImages)
+        {
+            string baseUrl = "/images/products";
+            return ResolveImages(variantImages, baseUrl);
+        }
+
+        public static List<string> ResolvePackageImages(this string variantImages)
+        {
+            string baseUrl = "/images/packages";
+            return ResolveImages(variantImages, baseUrl);
+        }
+
+        private static List<string> ResolveImages(string variantImages, string baseUrl)
+        {
+            if (string.IsNullOrEmpty(variantImages)) return new List<string> { "/images/default-placeholder.jpg" };
+
+            var listImages = variantImages.Trim().Split(',');
+
+            var result = new List<string>();
+            if (listImages != null && listImages.Any())
+            {
+                foreach (var item in listImages)
+                {
+                    if (string.IsNullOrWhiteSpace(item)) continue;
+                    result.Add($"{baseUrl}/{item.Trim()}");
+                }
+            }
+
+            return result;
+        }
+
+        public static List<LinkItemViewModel>? GetChildItems(this LinkItemViewModel item, List<LinkItemViewModel> items)
+        {
+            if(item == null || items == null || !items.Any()) return null;
+
+            return items.Where(x=>x.ParentId == item.Id).ToList();
+        }
     }
 }

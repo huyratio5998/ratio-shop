@@ -26,6 +26,7 @@ namespace RatioShop.Apis
         [HttpPost]
         [Route("register")]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register([FromForm] RegisterRequestViewModel request)
         {
             if (request == null) return BadRequest();
@@ -48,6 +49,7 @@ namespace RatioShop.Apis
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login([FromForm] LoginRequestViewModel request)
         {
             if (request == null) return BadRequest();
@@ -59,6 +61,7 @@ namespace RatioShop.Apis
         }
 
         [Route("logout")]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             var logoutResponse = await _shopUserService.UserLogout();

@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RatioShop.Constants;
-using RatioShop.Data.ViewModels.MyAccount;
+using RatioShop.Data.ViewModels.MyAccountViewModel;
 using RatioShop.Data.ViewModels.User;
 using RatioShop.Helpers;
 using RatioShop.Services.Abstract;
 using System.Security.Claims;
 
 namespace RatioShop.Features
-{    
+{
+    [Authorize]
     public class MyAccountController : Controller
     {
         private readonly IShopUserService _shopUserService;
@@ -25,8 +27,8 @@ namespace RatioShop.Features
             _addressService = addressService;
         }
 
-        public IActionResult Index(string tab = CommonConstant.MyAccount.PersonalTab, int page = 1)
-        {            
+        public IActionResult Index(string? searchText = null, string tab = CommonConstant.MyAccount.PersonalTab, int page = 1)
+        {
             if (User == null || !User.Identity.IsAuthenticated) RedirectToAction("Index", "Home");
 
             var userId = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -39,15 +41,10 @@ namespace RatioShop.Features
             if (tab.Equals(CommonConstant.MyAccount.OrderHistoryTab, StringComparison.OrdinalIgnoreCase))
             {
                 var orderPageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
-                var totalOrderByUser = _orderService.GetTotalOrderByUserId(userId);
-                orderHistories = new ListOrderViewModel
-                {
-                    Orders = _orderService.GetOrderHistoryByUserId(userId, page, orderPageSize)?.ToList(),
-                    PageIndex = page,
-                    PageSize = orderPageSize,
-                    TotalCount = totalOrderByUser,
-                    TotalPage = totalOrderByUser == 0 ? 1 : (int)Math.Ceiling((double)totalOrderByUser / orderPageSize),
-                };
+                if (searchText != null)
+                    orderHistories = _orderService.GetOrderHistoryByUserId(userId, searchText, page, orderPageSize);
+                else
+                    orderHistories = _orderService.GetOrderHistoryByUserId(userId, page, orderPageSize);
             }
             else if (tab.Equals(CommonConstant.MyAccount.PersonalTab, StringComparison.OrdinalIgnoreCase))
             {
@@ -58,6 +55,7 @@ namespace RatioShop.Features
 
             var myAccount = new MyAccountViewModel
             {
+                SearchText = searchText,
                 SelectedTab = tab,
                 UserData = userData,
                 OrderHistory = orderHistories,
@@ -65,6 +63,13 @@ namespace RatioShop.Features
                 ListDistrict = districts
             };
             return View(myAccount);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult OrderHistorySearch(string? searchText = null, string tab = CommonConstant.MyAccount.PersonalTab, int page = 1)
+        {
+            return RedirectToAction("Index", new { searchText, tab, page });
         }
     }
 }

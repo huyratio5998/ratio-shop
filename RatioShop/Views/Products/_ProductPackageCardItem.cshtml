@@ -1,0 +1,53 @@
+﻿@using RatioShop.Data.ViewModels
+@using RatioShop.Helpers
+
+@model ProductItemViewModel
+
+@if (Model.Package != null)
+{
+    var language = string.IsNullOrEmpty(Model.Language) ? "vi-VN" : Model.Language;
+
+    <div class="block2">
+        <div class="block2-pic hov-img0">
+            @if (string.IsNullOrEmpty(Model.Package.Image))
+            {
+                <img src="~/images/default-placeholder.jpg" alt="@Model.Package.Name">
+            }
+            else
+            {
+                <img src="@Model.Package.Image.ResolvePackageImages().FirstOrDefault()" alt="@Model.Package.Name">
+            }
+
+            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1" data-is-package="true" data-product-id="@Model.Package.Id">
+                Quick View
+            </a>
+        </div>
+
+        <div class="block2-txt flex-w flex-t p-t-14">
+            <div class="block2-txt-child1 flex-col-l ">
+                <a asp-controller="ProductPackages" asp-action="ProductPackageDetail" asp-route-id="@Model.Package.Id" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                    <p class="text-uppercase">@Model.Package.Code</p>
+                    <p>@Model.Package.ProductFriendlyName</p>
+                </a>
+                @{
+                    var packagePrice = Model.Package.ManualPrice != null
+                    ? CommonHelper.CurrencyFormat(Model.Package.ManualPrice, language)
+                    : CommonHelper.CurrencyFormat(Model.Package.AutoCalculatedPrice, language);
+
+                    if (packagePrice != null)
+                    {
+                        <span class="stext-105 cl3">
+                            @packagePrice
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="stext-105 cl3">
+                            Not set
+                        </span>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}

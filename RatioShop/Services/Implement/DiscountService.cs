@@ -46,7 +46,17 @@ namespace RatioShop.Services.Implement
         {
             if (string.IsNullOrWhiteSpace(code)) return null;
 
-            return _discountRepository.GetDiscounts().ToList().FirstOrDefault(x => x.Code.Equals(code) && x.Status.Equals(CommonStatus.Discount.Active));
+            return _discountRepository.GetDiscounts().ToList().FirstOrDefault(x => x.Code.Equals(code) && x.Status.Equals(CommonStatus.Discount.Active) && !x.IsDelete);
+        }
+
+        public bool TemporaryDeleteDiscount(int id)
+        {
+            var discount = GetDiscount(id);
+            if(discount == null) return false;
+
+            discount.IsDelete = true;
+            discount.Status = CommonStatus.Discount.InActive;
+            return UpdateDiscount(discount);
         }
     }
 }

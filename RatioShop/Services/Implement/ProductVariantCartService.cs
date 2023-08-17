@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using RatioShop.Data.Models;
 using RatioShop.Data.Repository.Abstract;
-using RatioShop.Data.ViewModels.Cart;
+using RatioShop.Data.ViewModels.CartViewModel;
 using RatioShop.Services.Abstract;
 
 namespace RatioShop.Services.Implement

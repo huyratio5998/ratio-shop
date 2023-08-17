@@ -1,130 +1,79 @@
-﻿<footer class="bg3 p-t-75 p-b-32">
-		<div class="container">
-			<div class="row">
-				<div class="col-sm-6 col-lg-3 p-b-50">
-					<h4 class="stext-301 cl0 p-b-30">
-						Categories
-					</h4>
+﻿@using RatioShop.Data.ViewModels.Layout;
 
-					<ul>
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								Women
-							</a>
-						</li>
+@model ILayoutSettingsViewModel
+@{
+    var footerSettings = Model.FooterSettings()?.FooterSetting;
+}
 
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								Men
-							</a>
-						</li>
+<footer class="bg3 p-t-75 p-b-32">
+    <div class="container">
+        <div class="row">
+            @if (footerSettings != null && footerSettings.FooterInfos != null && footerSettings.FooterInfos.Any())
+            {
+                @foreach (var item in footerSettings.FooterInfos)
+                {
+                    <div class="col-sm-6 col-lg-3 p-b-50">
+                        <h4 class="stext-301 cl0 p-b-30">
+                            @item.Title
+                        </h4>
 
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								Shoes
-							</a>
-						</li>
+                        @if (!string.IsNullOrEmpty(item.Description))
+                        {
+                            <p class="stext-107 cl7 size-201">
+                                @item.Description
+                            </p>
+                        }
 
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								Watches
-							</a>
-						</li>
-					</ul>
-				</div>
+                        <ul>
+                            @if (item.Items != null && item.Items.Any())
+                            {
+                                if (item.ItemDisplayInline)
+                                {
+                                    <div class="p-t-27">
+                                        @foreach (var infoItem in item.Items)
+                                        {
+                                            <a href="@infoItem.Url" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+                                                @Html.Raw(infoItem.Text)
+                                            </a>
+                                        }
+                                    </div>
 
-				<div class="col-sm-6 col-lg-3 p-b-50">
-					<h4 class="stext-301 cl0 p-b-30">
-						Help
-					</h4>
+                                }
+                                else
+                                {
+                                    foreach (var infoItem in item.Items)
+                                    {
+                                        <li class="p-b-10">
+                                            <a href="@infoItem.Url" class="stext-107 cl7 hov-cl1 trans-04">
+                                                @Html.Raw(infoItem.Text)
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            }
+                        </ul>
+                    </div>
+                }
 
-					<ul>
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								Track Order
-							</a>
-						</li>
+            }            
+        </div>
 
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								Returns 
-							</a>
-						</li>
+        <div class="p-t-40">
+            <div class="flex-c-m flex-w p-b-18">
+                @if (footerSettings != null && footerSettings.PaymentSupports != null && footerSettings.PaymentSupports.Any())
+                {
+                    @foreach (var item in footerSettings.PaymentSupports)
+                    {
+                        <a href="@item.Url" class="m-all-1">
+                            <img src="@item.Icon?.ImageSrc" alt="@item.Icon?.ImageAlt">
+                        </a>
+                    }
+                }
+            </div>
 
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								Shipping
-							</a>
-						</li>
-
-						<li class="p-b-10">
-							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-								FAQs
-							</a>
-						</li>
-					</ul>
-				</div>
-
-				<div class="col-sm-6 col-lg-3 p-b-50">
-					<h4 class="stext-301 cl0 p-b-30">
-						GET IN TOUCH
-					</h4>
-
-					<p class="stext-107 cl7 size-201">
-						Any questions? Let us know in store at 8th floor, 379 Hudson St, New York, NY 10018 or call us on (+1) 96 716 6879
-					</p>
-
-					<div class="p-t-27">
-						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
-							<i class="fa fa-facebook"></i>
-						</a>
-
-						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
-							<i class="fa fa-instagram"></i>
-						</a>
-
-						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
-							<i class="fa fa-pinterest-p"></i>
-						</a>
-					</div>
-				</div>
-
-				<div class="col-sm-6 col-lg-3 p-b-50">
-					<h4 class="stext-301 cl0 p-b-30">
-						Newsletter
-					</h4>					
-				</div>
-			</div>
-
-			<div class="p-t-40">
-				<div class="flex-c-m flex-w p-b-18">
-					<a href="#" class="m-all-1">
-						<img src="/images/icons/icon-pay-01.png" alt="ICON-PAY">
-					</a>
-
-					<a href="#" class="m-all-1">
-						<img src="/images/icons/icon-pay-02.png" alt="ICON-PAY">
-					</a>
-
-					<a href="#" class="m-all-1">
-						<img src="/images/icons/icon-pay-03.png" alt="ICON-PAY">
-					</a>
-
-					<a href="#" class="m-all-1">
-						<img src="/images/icons/icon-pay-04.png" alt="ICON-PAY">
-					</a>
-
-					<a href="#" class="m-all-1">
-						<img src="/images/icons/icon-pay-05.png" alt="ICON-PAY">
-					</a>
-				</div>
-
-				<p class="stext-107 cl6 txt-center">
-					<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | Made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a> &amp; distributed by <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
-<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-
-				</p>
-			</div>
-		</div>
-	</footer>
+            <p class="stext-107 cl6 txt-center">
+                @Html.Raw(footerSettings?.Coppyright)
+            </p>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,112 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings
+
+@model SiteSettingDetailViewModel
+
+@{
+    ViewData["Title"] = "Details Settings";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+}
+
+<h1>Details Settings</h1>
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-1" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+            General Information
+        </button>
+    </h2>
+    <div id="panelsStayOpen-1" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+        <div class="accordion-body">
+            <dl class="row">
+
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.Name)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Name)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.SettingTemplate)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.SettingTemplate)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.IsActive)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.IsActive)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.Type)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Type)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.CreatedDate)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.CreatedDate)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.ModifiedDate)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.ModifiedDate)
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+@if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.SingleSetting))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_SingleSetting.cshtml" model="Model" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.Header))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_HeaderSetting.cshtml" model="Model.HeaderSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.Footer))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_FooterSetting.cshtml" model="Model.FooterSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.AdminHeader))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_HeaderSetting.cshtml" model="Model.HeaderSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.AdminFooter))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_FooterSetting.cshtml" model="Model.FooterSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.General))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_GeneralSetting.cshtml" model="Model.GeneralSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.SEO))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_SEOSetting.cshtml" model="Model.SEOSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.Slide))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_SlideSetting.cshtml" model="Model.SlideSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.ProductListing))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_ProductListingSetting.cshtml" model="Model.ProductListingSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.ProductDetail))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_ProductDetailSetting.cshtml" model="Model.ProductDetailSetting" />
+}
+else if (Model.SettingTemplate.Equals(Constants.SiteSettings.SettingTemplates.AdminGeneral))
+{
+    <partial name="/Areas/Admin/Views/SiteSettings/Partial/Details/_AdminGeneralSetting.cshtml" model="Model.AdminGeneralSetting" />
+}
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

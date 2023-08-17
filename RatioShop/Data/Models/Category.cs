@@ -6,7 +6,9 @@
         public string? DisplayName { get; set; }
 
         List<ProductCategory>? ProductCategories { get; set; }
-        public int CatalogId { get; set; }
-        public Catalog? Catalog { get; set; }
+        public int? ParentId { get; set; }
+        public Category? ParentCategory { get; set; }
+
+        public virtual ICollection<Category> Children { get; set; }
     }
 }

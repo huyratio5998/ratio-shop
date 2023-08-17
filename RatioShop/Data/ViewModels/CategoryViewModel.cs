@@ -13,7 +13,6 @@ namespace RatioShop.Data.ViewModels
             Category = category;
         }
         public Category Category { get; set; }
-        public Dictionary<string,string?> AvailableCatalogs { get; set; }
-        public string Catalog { get; set; }        
+        public Dictionary<string,string?> AvailableCategory { get; set; }        
     }
 }

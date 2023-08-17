@@ -1944,6 +1944,13 @@ input.num-product::-webkit-inner-spin-button {
   min-height: 750px;
   padding: 50px;
 }
+/* my account */
+.ratio-btn-num-product-up,
+.ratio-btn-num-product-down {
+  width: 45px;
+  height: 100%;
+  cursor: pointer;
+}
 /* login popup */
 .ratio-forgot-pass {
   color: #888;
@@ -2007,6 +2014,11 @@ input.num-product::-webkit-inner-spin-button {
 }
 .ratio-hidden {
   display: none;
+}
+
+.ratio-selected-link {
+  color: #717fe0;
+  text-decoration: none;
 }
 .ratio-table-td > td {
   vertical-align: middle;

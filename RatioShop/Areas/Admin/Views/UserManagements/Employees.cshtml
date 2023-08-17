@@ -1,0 +1,137 @@
+﻿@using RatioShop.Areas.Admin.Models.User
+@using RatioShop.Enums
+
+@model ListUsersViewModel<EmployeeViewModel>
+
+@{
+    ViewData["Title"] = "Employee Management";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+    string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "Index";
+}
+
+<h1>Employee Management</h1>
+
+<p>
+    <span>
+        <a asp-action="CreateEmployee">Create employee</a>
+    </span>
+    <span>
+        <form asp-action="FilterOrder">
+            <div class="form-control">
+                <label for="orderNumber">Full Name:</label>
+                <input type="text" name="fullName" id="fullName" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("FullName"))?.Value" />
+
+                <label for="orderStatus">Phone Number:</label>
+                <input type="text" name="phoneNumber" id="phoneNumber" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("PhoneNumber"))?.Value" />
+
+                <label for="paymentType">Email:</label>
+                <input type="text" name="email" id="email" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("Email"))?.Value" />
+            </div>
+
+            <div class="form-control">
+
+                <label for="shipmentStatus">City:</label>
+                <input type="text" name="city" id="city" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("City"))?.Value" />
+                <label for="shipmentStatus">District:</label>
+                <input type="text" name="district" id="district" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("District"))?.Value" />
+            </div>
+
+            <div class="form-control">
+                <label for="orderNumber">Employee Code:</label>
+                <input type="text" name="employeeCode" id="employeeCode" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("EmployeeCode"))?.Value" />
+
+                <label for="orderStatus">Employee Name:</label>
+                <input type="text" name="employeeName" id="employeeName" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals("EmployeeName"))?.Value" />                
+
+                <input type="hidden" name="actionRedirect" value="@detailParam" />
+                <input type="hidden" name="page" value="1" />
+                <input type="submit" value="Filter" />
+            </div>
+        </form>
+    </span>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                 <th>
+                    Code
+                </th>
+                <th>
+                    Employee Name
+                </th>
+                 <th>
+                    Role
+                </th>
+                <th>
+                    Full Name
+                </th>
+                <th>
+                    Phone Number
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    City
+                </th>
+                <th>
+                    District
+                </th>
+                <th>
+                    Full Address
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.Users != null && Model.Users.Any())
+            {
+
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.EmployeeCode)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.EmployeeName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.UserRole)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.FullName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.PhoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.Email)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.ShippingAddress1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.ShippingAddress2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.FullShippingAddress)
+                        </td>
+                        <td>
+                            <a asp-action="UpdateEmployee" asp-route-userId="@user.Id">Edit</a> |
+                            <a asp-action="EmployeeDetail" asp-route-id="@user.Id">Details</a> |
+                            <a asp-action="DeleteEmployee" asp-route-userId="@user.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<partial name="_AdminGridPaging" model="Model" />
+

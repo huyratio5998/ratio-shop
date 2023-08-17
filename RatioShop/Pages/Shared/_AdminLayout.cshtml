@@ -1,72 +1,121 @@
-﻿<!DOCTYPE html>
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.SettingItem;
+@using RatioShop.Data.ViewModels.Layout
+@using RatioShop.Helpers;
+@using Microsoft.AspNetCore.Identity
+@using RatioShop.Data.Models
+@inject SignInManager<ShopUser> SignInManager
+@inject ILayoutSettingsViewModel layoutSetting
+@{
+    var adminHeaderSettings = layoutSetting.AdminSiteSettings?.AdminHeaderSetting;
+    var adminFooterSettings = layoutSetting.AdminSiteSettings?.AdminFooterSetting;
+    var adminGeneralSettings = layoutSetting.AdminSiteSettings?.AdminGeneralSetting;
+}
+<!DOCTYPE html>
 <html lang="en-VN">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RatioShop Admin</title>
+    <title>Admin - @ViewData["Title"]</title>    
+    @if (!string.IsNullOrEmpty(adminGeneralSettings?.SiteLogo?.ImageSrc))
+    {
+        <link rel="icon" href="@adminGeneralSettings?.SiteLogo?.ImageSrc" />
+    }
+    else
+    {
+        <link rel="icon" type="image/jpg" href="/admin-ratio-favicon.jpg" sizes="32x32" />
+    }
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RatioShop.styles.css" asp-append-version="true" />
     <script src="/js/common-helper.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">RatioShop Admin</a>
+                <a class="navbar-brand" href="@adminHeaderSettings?.ShopLogo?.Url">@adminHeaderSettings?.ShopLogo?.Text</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Admin">Admin Page</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="ProductSettings">ProductSettings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Category" asp-action="Index">CategorySettings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Index">CatalogSettings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Addresses" asp-action="Index">AddressSettings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="ProductVariantStocks" asp-action="Index">ProductStockManagement</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Discounts" asp-action="Index">Discounts Management</a>
-                        </li>
+                        @if (adminHeaderSettings != null && adminHeaderSettings.Navigations != null && adminHeaderSettings.Navigations.Any())
+                        {
+                            @foreach (var item in adminHeaderSettings.Navigations.Where(x => x.ParentId == null))
+                            {
+                                var isSigninUser = SignInManager.IsSignedIn(User);
+                                if (!isSigninUser && item.Url.Equals("/"))
+                                {
+                                    GenerateNavigationItems(item, adminHeaderSettings.Navigations.Where(x => x.ParentId != null).ToList());
+                                }
+                                else if (isSigninUser)
+                                {
+                                    GenerateNavigationItems(item, adminHeaderSettings.Navigations.Where(x => x.ParentId != null).ToList());
+                                }
+                            }
+                        }                        
                     </ul>
+
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-3">            
             @RenderBody()
         </main>
     </div>
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - RatioShop - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            @Html.Raw(adminFooterSettings?.Coppyright)
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/administrator/administrator-common.js" asp-append-version="true"></script>
+    <script src="/vendor/sweetalert/sweetalert.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+@{
+    void GenerateNavigationItems(LinkItemViewModel item, List<LinkItemViewModel> items)
+    {
+        var childItems = item.GetChildItems(items);
+        if (childItems == null || !childItems.Any())
+        {
+            @if (item.ParentId == null || item.ParentId == 0)
+            {
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="@item.Url">@item.Text</a>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <a class="text-dark dropdown-item" href="@item.Url">@item.Text</a>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="nav-item dropdown">
+                <a class="nav-link text-dark dropdown-toggle " href="#" id="@item.Id" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @item.Text
+                </a>
+                <ul class="dropdown-menu dropdown-submenu" aria-labelledby="@item.Id">
+                    @foreach (var child in childItems)
+                    {
+                        GenerateNavigationItems(child, items);
+                    }
+                </ul>
+            </li>
+        }
+    }
+}

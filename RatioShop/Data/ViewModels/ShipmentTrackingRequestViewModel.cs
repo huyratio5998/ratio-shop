@@ -7,5 +7,8 @@
         public string? Reasons { get; set; }
         public string? Images { get; set; }
         public Guid ShipperId { get; set; }
+
+        public IFormFile? FileImage { get; set; }
+        public string? OrderNumber { get; set; }
     }
 }

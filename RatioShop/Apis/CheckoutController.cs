@@ -57,18 +57,33 @@ namespace RatioShop.Apis
             // proceed checkout
             // 
             // save order to DB : status inprogress, shipment infor
+            var cartDetailMergePackgeItem = _cartService.GetCartDetail(cartId, true, false, true);
+            if(cartDetailMergePackgeItem == null) return BadRequest();
+            
             var newOrder = new OrderViewModel()
             {
-                Status = CommonStatus.OrderStatus.Created,
-                TotalMoney = cartDetail.TotalFinalPrice,
-                TotalItems = cartDetail.TotalItems,
-                IsRefund = false,
-                ShipmentStatus = CommonStatus.ShipmentStatus.Pending,
-                ShipmentFee = cartDetail.ShippingFee,
-                CartId = cartId,
-                PaymentId = request.PaymentId,
+                Order = new Order()
+                {
+                    Status = CommonStatus.OrderStatus.Created,
+                    TotalMoney = cartDetailMergePackgeItem.TotalFinalPrice,
+                    IsRefund = false,
+                    ShipmentStatus = CommonStatus.ShipmentStatus.Pending,
+                    ShipmentFee = cartDetail.ShippingFee,
+                    CartId = cartId,
+                    PaymentId = request.PaymentId,
+                },
+                TotalItems = cartDetailMergePackgeItem.TotalItems,
             };
-            var order = await _orderService.CreateOrder(newOrder);            
+            var order = await _orderService.CreateOrder(newOrder);
+
+            // update cart item discount rate and item price latest            
+            var updateItemPriceStatus = _cartService.UpdateCartItemPriceAndDiscountRate(cartDetail, cartId);
+            if (!updateItemPriceStatus) return Ok(new CheckoutResponseViewModel()
+            {
+                Status = CommonStatus.Failure,
+                Message = "Something when wrong, please try again later",
+            });
+
             // update product number, stock deduction.                
             var trackingStatus = _cartService.TrackingProductItemByCart(cartDetail, cartId);
             if (!trackingStatus) return Ok(new CheckoutResponseViewModel()
@@ -78,7 +93,7 @@ namespace RatioShop.Apis
             });
             //
             newOrder.Order = order;
-            newOrder.Payment = paymentMethod;
+            newOrder.Order.Payment = paymentMethod;
             // + call api 3 party or COD
             var proceedResult = await _paymentService.ProceedPayment(newOrder);
             // get response: 
@@ -102,7 +117,9 @@ namespace RatioShop.Apis
             {
                 ShipmentStatus = CommonStatus.ShipmentStatus.Pending,
                 Reasons = "Create shipment",
+                SystemMessage = "Create shipment",
                 OrderId = order.Id,
+                UpdateStatus = true
             });
 
             // update cart status

@@ -1,0 +1,162 @@
+﻿@model RatioShop.Data.ViewModels.ProductViewModel
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Product</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.Code)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.Code)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.ProductFriendlyName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.ProductFriendlyName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.ProductRawName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.ProductRawName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.IsDelete)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.IsDelete)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.IsNew)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.IsNew)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.EnableStockTracking)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.EnableStockTracking)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsSoldOnline)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IsSoldOnline)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.ProductImage)
+        </dt>
+        <dd class="col-sm-10">
+            @if (string.IsNullOrEmpty(Model.Product.ProductImage))
+            {
+                <img src="~/images/default-placeholder.jpg" style="height:250px;width:auto" alt="product image" />
+            }
+            else
+            {
+                <img src="@Model.ProductDefaultImage" style="height:250px;width:auto" alt="product image" class="js_img_changeTarget" />
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.Variants)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Product.Variants != null && Model.Product.Variants.Any())
+            {
+                <p>@string.Join(", ", Model.Product.Variants.Select(x=>x.Code))</p>
+                <p><a id="variants-detail" class="btn btn-info">Show more / Hide</a></p>
+                <table class="table hidden">
+                    <thead>
+                        <tr>
+                            <th>
+                                Code
+                            </th>
+                            <th>
+                                Number
+                            </th>
+                            <th>
+                                Price
+                            </th>
+                            <th>
+                                DiscountRate
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Product.Variants != null && Model.Product.Variants.Any())
+                        {
+                            foreach (var item in Model.Product.Variants)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Code)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Number)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Price)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.DiscountRate)
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            }
+        </dd>
+
+        <dt class="col-sm-2">
+            Category
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.ProductCategories != null && Model.ProductCategories.Any())
+            {
+                <p>@string.Join(", ", Model.ProductCategories.Select(x=>x.DisplayName))</p>
+            }
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.CreatedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.CreatedDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product.ModifiedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product.ModifiedDate)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Product.Id">Edit</a> |
+    <a asp-action="ProductSettings">Back to List</a>
+</div>
+
+<script type="module" defer src="@Url.Content("~/js/administrator/product/productDetailSetting.js")"></script>

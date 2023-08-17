@@ -1,0 +1,153 @@
+﻿@using Newtonsoft.Json
+@using RatioShop.Areas.Admin.Models.SiteSettings
+@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+@using RatioShop.Enums
+
+@model FooterSettingViewModel
+
+@{
+    var footerInfoItems = Model != null && Model.FooterInfos != null && Model.FooterInfos.Any() ? JsonConvert.SerializeObject(Model.FooterInfos) : null;
+    var footerPaymentSupports = Model != null && Model.PaymentSupports != null && Model.PaymentSupports.Any() ? JsonConvert.SerializeObject(Model.PaymentSupports) : null;
+}
+<h5>Footer Informations</h5>
+
+<div class="form-group">
+    <label asp-for="Coppyright" class="control-label"></label>
+    <input asp-for="Coppyright" class="form-control" />
+    <span asp-validation-for="Coppyright" class="text-danger"></span>
+</div>
+
+@*Footer Info settings*@
+<h6>Footer Info settings</h6>
+<input asp-for="FooterInfosString" type="hidden" id="list-footerInfos-input" value="@footerInfoItems" />
+<p>
+    <button id="addFooterInfoItem" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#footerInfoModal">Add Footer Info Item</button>
+</p>
+
+<table class="table" id="footerInfoTable">
+    <thead>
+        <tr>
+            <th>
+                Title
+            </th>
+            <th>
+                Description
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div class="modal fade" id="footerInfoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Footer Info Item</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="btn-modalFooterInfoClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="footerInfo-title" class="control-label">Title</label>
+                    <input type="text" id="footerInfo-title" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label for="footerInfo-description" class="control-label">Description</label>
+                    <input type="text" id="footerInfo-description" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="footerInfo-displayInLine" class="control-label">Items Display Inline</label>
+                    <input type="checkbox" id="footerInfo-displayInLine" class="form-check-input" />
+                </div>
+                <div class="form-group">
+                    <br />
+                    <a id="footerInfo-addLinkItem" class="btn-primary btn">Add Link Item</a>                    
+                    <table class="table" id="footerInfoLinkItemsTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Text
+                                </th>
+                                <th>
+                                    Link
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br />
+                <div class="form-group">
+                    <div id="footerInfo-save" class="btn btn-primary mouse-hover">Save</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Footer Payment Support settings*@
+<h6>Footer Payment Support settings</h6>
+<input asp-for="PaymentSupportsString" type="hidden" id="list-footerPaymentSupport-input" value="@footerPaymentSupports" />
+<p>
+    <button id="addPaymentSupportItem" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#footerPaymentSupportModal">Add Footer Payment Item</button>
+</p>
+<table class="table" id="footerPaymentSupportTable">
+    <thead>
+        <tr>
+            <th>
+                Image
+            </th>
+            <th>
+                Link
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div class="modal fade" id="footerPaymentSupportModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Payment Support Item</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="btn-modalFooterPaymentSupportClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-group">
+                        <label for="payment-image-input" class="control-label js_img_changeTarget">
+                            <span>Image</span>
+                            <img src="~/images/default-placeholder.jpg" style="max-height:250px;width:auto" alt="payment image" id="payment-image" class="js_img_changeTarget" />
+                        </label>
+                        <input type="file" class="form-control js_img_changeEvent" id="payment-image-input" />
+                        <input type="hidden" id="payment-image-value" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="payment-image-alt" class="control-label">Image alt</label>
+                    <input type="text" id="payment-image-alt" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="payment-link" class="control-label">Link</label>
+                    <input type="text" id="payment-link" class="form-control" />
+                </div>
+                <br />
+                <div class="form-group">
+                    <div id="payment-save" class="btn btn-primary mouse-hover">Save</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script defer src="@Url.Content("~/js/administrator/siteSetting/footer-setting.js")"></script>

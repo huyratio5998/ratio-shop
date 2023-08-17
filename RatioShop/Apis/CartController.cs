@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RatioShop.Constants;
 using RatioShop.Data.ViewModels;
+using RatioShop.Data.ViewModels.CartViewModel;
 using RatioShop.Helpers.CookieHelpers;
 using RatioShop.Services.Abstract;
 using System.Security.Claims;
@@ -17,7 +18,6 @@ namespace RatioShop.Apis
         private readonly IDiscountService _discountService;
         private readonly IProductVariantCartService _productVariantCartService;
 
-
         private readonly Guid _anonymousUserID = Guid.Parse(UserTest.UserAnonymousID);
         public CartController(ICartService cartService, IProductVariantCartService productVariantCartService, ICartDiscountService cartDiscountService, IDiscountService discountService)
         {
@@ -26,6 +26,7 @@ namespace RatioShop.Apis
             _cartDiscountService = cartDiscountService;
             _discountService = discountService;
         }
+        
         [HttpPost]
         [Route("addToCart")]
         [AllowAnonymous]
@@ -33,7 +34,7 @@ namespace RatioShop.Apis
         {
             if (User == null || !User.Identity.IsAuthenticated) return Ok(new AddToCartResponsetViewModel(Guid.Empty, CommonStatus.Failure, "UnAuthenticated", false, false));
 
-            if (data == null || data.VariantId == Guid.Empty || data.Number <= 0) return BadRequest();
+            if (data == null || ((data.VariantId == null || data.VariantId == Guid.Empty) && (data.PackageId == null || data.PackageId == Guid.Empty)) || data.Number <= 0) return BadRequest();
 
             Guid.TryParse(Request.Cookies[CookieKeys.CartId]?.ToString(), out var cartId);
             data.CartId = cartId;
@@ -50,9 +51,10 @@ namespace RatioShop.Apis
 
         [HttpPost]
         [Route("changeCartItem")]
+        [Authorize]
         public IActionResult ChangeCartItem([FromBody] AddToCartRequestViewModel data)
         {
-            if (data == null || data.VariantId == Guid.Empty || data.Number < 0) return BadRequest();
+            if (data == null || ((data.VariantId == null || data.VariantId == Guid.Empty) && (data.PackageId == null || data.PackageId == Guid.Empty)) || data.Number < 0) return BadRequest();
 
             Guid.TryParse(Request.Cookies[CookieKeys.CartId]?.ToString(), out var cartId);
             data.CartId = cartId;
@@ -65,6 +67,7 @@ namespace RatioShop.Apis
         }
 
         [Route("detail")]
+        [Authorize]
         public IActionResult GetCartDetail()
         {
             var cartIdString = Request.Cookies[CookieKeys.CartId]?.ToString();
@@ -81,15 +84,16 @@ namespace RatioShop.Apis
             }
 
             Guid.TryParse(cartIdString, out var cartId);
-            if (cartId == Guid.Empty) return Ok(new CartDetailResponsetViewModel());
+            if (cartId == Guid.Empty) return Ok(new CartDetailResponsViewModel());
 
-            var cartDetail = _cartService.GetCartDetail(cartId);
+            var cartDetail = _cartService.GetCartDetail(cartId, true, false, true);
 
             if (cartDetail == null) return BadRequest();
             return Ok(cartDetail);
         }
 
         [Route("cleanAnonymousCart")]
+        [Authorize]
         public async Task<IActionResult> CleanAnonymousCart()
         {
             var cleanNumber = 0;
@@ -108,6 +112,7 @@ namespace RatioShop.Apis
         }
 
         [Route("applycouponcode")]
+        [Authorize]
         public IActionResult ApplyCouponCode([FromQuery] string couponCode)
         {
             Guid.TryParse(Request.Cookies[CookieKeys.CartId]?.ToString(), out var cartId);
@@ -125,6 +130,7 @@ namespace RatioShop.Apis
         }
 
         [Route("removecouponcode")]
+        [Authorize]
         public IActionResult RemoveCouponCode([FromQuery] string couponCode)
         {
             Guid.TryParse(Request.Cookies[CookieKeys.CartId]?.ToString(), out var cartId);

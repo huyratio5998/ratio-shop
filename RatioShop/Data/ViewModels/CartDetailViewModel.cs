@@ -1,4 +1,4 @@
-﻿using RatioShop.Data.ViewModels.Cart;
+﻿using RatioShop.Data.ViewModels.CartViewModel;
 
 namespace RatioShop.Data.ViewModels
 {

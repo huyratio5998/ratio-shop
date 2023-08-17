@@ -30,8 +30,21 @@ namespace RatioShop.Data.Repository.Implement
         }
 
         public bool UpdateDiscount(Discount Discount)
-        {
-            return Update(Discount);
+        {            
+            try
+            {
+                _context.Entry(Discount).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.Entry(Discount).Property(x => x.Value).IsModified = false;
+                _context.Entry(Discount).Property(x => x.Code).IsModified = false;
+                _context.Entry(Discount).Property(x => x.DiscountType).IsModified = false;                
+                _context.SaveChanges();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

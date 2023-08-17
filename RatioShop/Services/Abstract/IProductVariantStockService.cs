@@ -1,6 +1,6 @@
 ﻿using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
-using RatioShop.Data.ViewModels.Cart;
+using RatioShop.Data.ViewModels.CartViewModel;
 
 namespace RatioShop.Services.Abstract
 {

@@ -13,6 +13,30 @@ const IsNullOrEmptyString = (checkValue) => {
   return !checkValue || result;
 };
 
+const ConvertToLocalDate = () => {
+  const elements = document.querySelectorAll(".js_date-format-local");
+  if (!elements) return;
+
+  elements.forEach((el) => {
+    const date = el.dataset.dateValue;
+    if (date) {
+      el.innerHTML = new Date(date).toLocaleDateString("en-GB");
+    }
+  });
+};
+
+const ConvertToLocalDateTime = () => {
+  const elements = document.querySelectorAll(".js_datetime-format-local");
+  if (!elements) return;
+
+  elements.forEach((el) => {
+    const date = el.dataset.dateValue;
+    if (date) {
+      el.innerHTML = new Date(date).toLocaleString("en-GB");
+    }
+  });
+};
+
 const DisplayMessageInMoment = (element, message, className, timeOut) => {
   if (!element) return;
 
@@ -34,7 +58,8 @@ const RedirectToPath = (isToDefaultPage = false, pathName = "") => {
   let destinationPathUrl = defaultRedirectPathLocation;
   if (!isToDefaultPage) destinationPathUrl = pathName;
 
-  window.location.pathname = destinationPathUrl;
+  const redirectUrl = window.location.origin + destinationPathUrl;
+  window.location = redirectUrl;
 };
 
 const CheckAllowAnonymousUrl = () => {
@@ -65,6 +90,8 @@ const MutationObserverClassChangeHelper = (
   param1 = null,
   param2 = null,
   param3 = null,
+  param4 = null,
+  param5 = null,
   isContainsClass = true
 ) => {
   let dropdownChangeTimes = 0;
@@ -78,7 +105,8 @@ const MutationObserverClassChangeHelper = (
         : !listClasses.includes(className);
 
       if (validateCondition) {
-        if (++dropdownChangeTimes == 1) action(param1, param2, param3);
+        if (++dropdownChangeTimes == 1)
+          action(param1, param2, param3, param4, param5);
       } else dropdownChangeTimes = 0;
     });
   });
@@ -90,6 +118,53 @@ const ChangeCurrentUrlWithoutReload = (nextURL) => {
   const nextState = { additionalInformation: "Updated the URL with JS" };
   window.history.pushState(nextState, nextTitle, nextURL);
 };
+
+// param object properties: Name, Value, IsNumberAndApplyFilter, IsStringify
+const UpdateUrlParams = (params) => {
+  if (!params) return;
+
+  const url = new URL(window.location.href);
+  let stateData = {};
+
+  for (let i = 0; i < params.length; i++) {
+    const param = params[i];
+    stateData[param.Name] = param.Value;
+
+    // remove param on url when no valuable
+    if (
+      param.IsNumberAndApplyFilter &&
+      (!param.Value || param.Value == 1 || param.Value == 0)
+    ) {
+      url.searchParams.delete(param.Name);
+      continue;
+    } else if (!param.IsNumberAndApplyFilter && !param.Value) {
+      url.searchParams.delete(param.Name);
+      continue;
+    }
+
+    if (param.IsStringify) {
+      let filterItems = param.Value;
+      filterItems = filterItems.filter((el) => el.value);
+      if (filterItems && filterItems.length == 0) {
+        url.searchParams.delete(param.Name);
+        continue;
+      }
+      param.Value = filterItems;
+    }
+
+    // add or update param value
+    const paramExist = url.searchParams.has(param.Name);
+    const paramData = param.IsStringify
+      ? JSON.stringify(param.Value)
+      : param.Value;
+
+    if (paramExist) url.searchParams.set(param.Name, paramData);
+    else url.searchParams.append(param.Name, paramData);
+  }
+
+  window.history.pushState(stateData, "", url);
+};
+
 // Api
 const GetAddressByTypeValue = async (type, value) => {
   const result = await fetch(
@@ -111,8 +186,52 @@ const GetAddressByType = async (type) => {
   return null;
 };
 
-// Events
+const InitSlick = (wrapClass = "wrap-slick3-ratio") => {
+  $(`.${wrapClass}`).each(function () {
+    $(this)
+      .find(".slick3")
+      .slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        fade: true,
+        infinite: true,
+        autoplay: false,
+        autoplaySpeed: 6000,
+        arrows: true,
+        appendArrows: $(this).find(".wrap-slick3-arrows"),
+        prevArrow:
+          '<button class="arrow-slick3 prev-slick3"><i class="fa fa-angle-left" aria-hidden="true"></i></button>',
+        nextArrow:
+          '<button class="arrow-slick3 next-slick3"><i class="fa fa-angle-right" aria-hidden="true"></i></button>',
 
+        dots: true,
+        appendDots: $(this).find(".wrap-slick3-dots"),
+        dotsClass: "slick3-dots",
+        customPaging: function (slick, index) {
+          var portrait = $(slick.$slides[index]).data("thumb");
+          return (
+            '<img src=" ' +
+            portrait +
+            ' "/><div class="slick3-dot-overlay"></div>'
+          );
+        },
+      });
+  });
+
+  $(".gallery-lb").each(function () {
+    // the containers for all your galleries
+    $(this).magnificPopup({
+      delegate: "a", // the selector for gallery item
+      type: "image",
+      gallery: {
+        enabled: true,
+      },
+      mainClass: "mfp-fade",
+    });
+  });
+};
+
+// Events
 // Change city
 const SelectCityEvent = (cityElement, districtElement) => {
   if (!cityElement || !districtElement) return;
@@ -153,7 +272,9 @@ const Select2EventHelper = (
   func,
   param1 = null,
   param2 = null,
-  param3 = null
+  param3 = null,
+  param4 = null,
+  param5 = null
 ) => {
   const targetElement = element.nextElementSibling;
   if (!targetElement) return;
@@ -166,6 +287,8 @@ const Select2EventHelper = (
     param1,
     param2,
     param3,
+    param4,
+    param5,
     false
   );
 

@@ -1,0 +1,117 @@
+﻿@using RatioShop.Enums;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+
+    List<string> currentUserRoles = ViewBag.UserRole != null ? ViewBag.UserRole : new List<string>();
+    var isAdmin = currentUserRoles.Contains(UserRole.SuperAdmin.ToString())
+    || currentUserRoles.Contains(UserRole.Admin.ToString())
+    || currentUserRoles.Contains(UserRole.Manager.ToString());
+
+    var isContentEditor = currentUserRoles.Contains(UserRole.ContentEditor.ToString());
+    var isShipper = currentUserRoles.Contains(UserRole.Shipper.ToString());
+    var isEmployee = currentUserRoles.Contains(UserRole.Employee.ToString());
+
+    string activeBtnClass = "active";
+    string activeTabClass = "show active";
+}
+
+<h1>Welcome to dashboard admin</h1>
+
+<div class="d-flex align-items-start">
+    <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        @if (isAdmin)
+        {
+            <button class="nav-link @activeBtnClass" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-order" type="button" role="tab" aria-controls="v-pills-home" aria-selected="true">Order Viewer</button>
+            <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">Users</button>
+
+            activeBtnClass = string.Empty;
+        }
+        @if (isAdmin || isShipper)
+        {
+            <button class="nav-link @activeBtnClass" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-shipment" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">Shipments</button>
+
+            activeBtnClass = string.Empty;
+
+        }
+
+        @if (isAdmin || isContentEditor)
+        {
+            <button class="nav-link @activeBtnClass" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-others" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">Others</button>
+
+            activeBtnClass = string.Empty;
+
+        }
+    </div>
+    <div class="tab-content" id="v-pills-tabContent">
+        @if (isAdmin)
+        {
+            <div class="tab-pane fade @activeTabClass" id="v-pills-order" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                <ul>
+                    <li>
+                        <a asp-controller="Orders" asp-action="Index">Order Viewer</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-pane fade" id="v-pills-users" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+                <ul>
+                    <li>
+                        <a asp-controller="UserManagements" asp-action="Index">User Management</a>
+                    </li>
+                    <li>
+                        <a asp-controller="UserManagements" asp-action="Employees">Employees Management</a>
+                    </li>
+                </ul>
+            </div>
+
+            activeTabClass = string.Empty;
+        }
+        @if (isAdmin || isShipper)
+        {
+            <div class="tab-pane fade @activeTabClass" id="v-pills-shipment" role="tabpanel" aria-labelledby="v-pills-shipment-tab">
+                <ul>
+                    <li>
+                        <a asp-controller="Shipments" asp-action="MyShipment">My Shipments</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Shipments" asp-action="MyFinishedShipment">My Finished Shipments</a>
+                    </li>
+                </ul>
+            </div>
+
+            activeTabClass = string.Empty;
+        }
+
+        @if (isAdmin || isContentEditor)
+        {
+            <div class="tab-pane fade @activeTabClass" id="v-pills-others" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+                <ul>
+                    <li>
+                        <a asp-controller="Category" asp-action="Index">Category</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Addresses" asp-action="Index">Address</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Discounts" asp-action="Index">Discount</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Payments" asp-action="Index">Payment</a>
+                    </li>
+                    <li>
+                        <a asp-controller="ProductVariants" asp-action="Index">ProductVariant</a>
+                    </li>
+                    <li>
+                        <a asp-controller="ProductVariantStocks" asp-action="Index">ProductVariantStock</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Stocks" asp-action="Index">Stock</a>
+                    </li>
+                </ul>
+            </div>
+
+            activeTabClass = string.Empty;
+        }
+
+    </div>
+</div>

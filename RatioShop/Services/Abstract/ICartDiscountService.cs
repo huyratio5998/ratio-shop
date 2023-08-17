@@ -13,7 +13,7 @@ namespace RatioShop.Services.Abstract
         bool CheckDiscountAvailable(Guid cartId, Discount discount);
         bool ResetCartDiscount(Guid cartId);
         IEnumerable<CartDiscount> GetCartDiscountsByCartId(Guid cartId);
-        IEnumerable<string> GetListCouponApplyByCartId(Guid cartId);
+        IEnumerable<string> GetListCouponApplyByCartId(Guid cartId, bool includeInActiveStatus = false);
         IEnumerable<Discount> GetDicountsByCouponsCode(List<string> coupons);
         CartDiscount? GetCartDiscount(Guid cartId, string coupon);
         bool DeleteCartDiscount(Guid cartId, string coupon);

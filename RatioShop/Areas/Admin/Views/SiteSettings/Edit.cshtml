@@ -1,0 +1,129 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings
+@using RatioShop.Enums
+
+@model SiteSettingDetailViewModel
+
+
+@{
+    ViewData["Title"] = "Edit settings";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    string settingTemplate = !string.IsNullOrWhiteSpace(Model.SettingTemplate) ? Model.SettingTemplate : Constants.SiteSettings.SettingTemplates.SingleSetting;
+    var settingType = settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.SingleSetting) ? @SiteSettingType.ItemSetting.ToString() : @SiteSettingType.GroupSettings.ToString();
+    string errorMessage = ViewBag.ErrorMessage;
+
+}
+
+<h1>Edit settings</h1>
+
+<h4>@settingTemplate</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <h5>General Information</h5>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+
+            @if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.SingleSetting))
+            {
+                <div class="form-group">
+                    <label asp-for="SingleSetting" class="control-label">Value</label>
+                    <input asp-for="SingleSetting" class="form-control" />
+                    <span asp-validation-for="SingleSetting" class="text-danger"></span>
+                </div>
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.Header))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_HeaderSetting.cshtml" for="HeaderSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.Footer))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_FooterSetting.cshtml" for="FooterSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.AdminHeader))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_HeaderSetting.cshtml" for="HeaderSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.AdminFooter))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_FooterSetting.cshtml" for="FooterSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.General))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_GeneralSetting.cshtml" for="GeneralSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.SEO))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_SEOSetting.cshtml" for="SEOSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.Slide))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_SlideSetting.cshtml" for="SlideSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.ProductListing))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_ProductListingSetting.cshtml" for="ProductListingSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.ProductDetail))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_ProductDetailSetting.cshtml" for="ProductDetailSetting" />
+            }
+            else if (settingTemplate.Equals(Constants.SiteSettings.SettingTemplates.AdminGeneral))
+            {
+                <partial name="/Areas/Admin/Views/SiteSettings/Partial/Create/_AdminGeneralSetting.cshtml" for="AdminGeneralSetting" />
+            }
+
+            <input type="hidden" asp-for="CreatedDate" />
+            <input type="hidden" asp-for="ModifiedDate" />
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="SettingTemplate" class="form-control" value="@settingTemplate" />
+            <input type="hidden" asp-for="Type" class="form-control" value="@settingType" />
+
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="toast align-items-center js_ratio-toast mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body text-danger">
+                @errorMessage
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<script>
+    const toastDemo = document.querySelector(".js_ratio-toast");
+    if (toastDemo) {
+        const toast = new bootstrap.Toast(toastDemo);
+        if (toast) {
+            toast.show();
+        }
+    }
+</script>

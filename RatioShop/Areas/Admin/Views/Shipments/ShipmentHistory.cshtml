@@ -1,0 +1,207 @@
+﻿@using RatioShop.Data.ViewModels.OrdersViewModel
+@using RatioShop.Helpers
+
+@model OrderResponseViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
+}
+
+@if (Model == null)
+{
+    <h1>Shipment History</h1>
+    <h3>Can't load this page</h3>
+    <p>
+        <a class="btn btn-outline-dark" asp-action="Index" asp-controller="Orders">Back to list orders</a>
+    </p>
+}
+else
+{
+    var currentStatusBadge = CommonHelper.GetStatusBadgeClass(Model.ShipmentStatus, 5);
+    var curretnShipper = @Model?.ShipmentHistory?.Shipments.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.Shipper != null)?.Shipper;
+
+    <div>
+        <h1>Shipment History</h1>
+        <div>
+            <span>Order number: </span>
+            <h3>
+                <i>
+                    @Model.OrderNumber
+                </i>
+            </h3>
+        </div>
+    </div>
+
+    <p>
+        <a class="btn btn-outline-dark" asp-action="Details" asp-controller="Orders" asp-route-id="@Model.OrderId">Back to Order</a>
+    </p>
+
+    <dl class="row">
+        <dt class="col-sm-3">
+            Reciever
+        </dt>
+        <dd class="col-sm-3">
+            @Model.CartDetail?.FullName
+        </dd>
+        <dt class="col-sm-3">
+            Phone Number
+        </dt>
+        <dd class="col-sm-3">
+            @Model.CartDetail?.PhoneNumber
+        </dd>
+        <dt class="col-sm-3">
+            Shipping Address
+        </dt>
+        <dd class="col-sm-9">
+            @Model.CartDetail?.FullShippingAddress
+        </dd>
+        <dt class="col-sm-3">
+            Total Price
+        </dt>
+        <dd class="col-sm-9">
+            <b>
+                @CommonHelper.CurrencyFormat(Model?.TotalMoney, language)
+            </b>
+        </dd>
+        <dt class="col-sm-3">
+            Current Status
+        </dt>
+        <dd class="col-sm-3">
+            <span class="badge rounded-pill @currentStatusBadge">
+                @Html.DisplayFor(model => model.ShipmentStatus)
+            </span>
+        </dd>
+        <dt class="col-sm-3">
+            Current Shipper
+        </dt>
+        <dd class="col-sm-3">
+            <div class="row">
+                <div class="col-6">
+                    @curretnShipper?.FullName
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignShipmentAddress">Change</button>
+                </div>
+            </div>
+        </dd>
+    </dl>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        Date
+                    </th>
+                    <th>
+                        Status
+                    </th>
+                    <th>
+                        Reasons
+                    </th>                    
+                    <th>
+                        Shipper
+                    </th>
+                    <th>
+                        Phone Number
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.ShipmentHistory?.Shipments != null && Model.ShipmentHistory.Shipments.Any())
+                {
+                    @foreach (var item in Model.ShipmentHistory.Shipments)
+                    {
+                        var createdDateUTCFormat = item.CreatedDate.GetCorrectUTC()?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"); ;
+                        var shipmentStatusBadgeClass = CommonHelper.GetStatusBadgeClass(item.ShipmentStatus, 5);
+
+                        <tr>
+                            <td class="js_date-format-local" data-date-value="@createdDateUTCFormat">
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill @shipmentStatusBadgeClass">
+                                    @Html.DisplayFor(model => item.ShipmentStatus)
+                                </span>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Reasons)
+                            </td>                            
+                            <td>
+                                @item.Shipper?.FullName
+                            </td>
+                            <td>
+                                @item.Shipper?.PhoneNumber
+                            </td>
+                            <td>
+                                <a href="#" data-id="@item.Id" class="js_shipment-history-detail" data-bs-toggle="modal" data-bs-target="#shipmentHistoryDetail">Detail</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="assignShipmentAddress" tabindex="-1" aria-labelledby="assignShipmentAddressLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Choose shipper</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row row-cols-1 row-cols-lg-3 g-2 g-lg-2">
+                    @if (Model.ShipmentHistory != null && Model.ShipmentHistory.AvailableShippers != null && Model.ShipmentHistory.AvailableShippers.Any())
+                    {
+                        <input type="hidden" name="currentOrderId" value="@Model.OrderId" />
+                        foreach (var item in Model.ShipmentHistory.AvailableShippers)
+                        {
+                            var radioChecked = curretnShipper?.ShipperId == item.ShipperId;
+
+                            <div class="col js_shipperChooseArea">
+                                <div class="p-3 border">
+                                    <input type="radio" name="assignedShipper" checked="@radioChecked" value="@item.ShipperId" />
+                                    <p>Name: @item.FullName</p>
+                                    <p>Phone number: @item.PhoneNumber</p>
+                                    <p>Total orders shipping: @item.TotalAssignedOrders</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div>
+                            There're no available shippers.
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary js_save-AssignShipmentToShipper">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="shipmentHistoryDetail" tabindex="-1" aria-labelledby="shipmentHistoryDetailLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shipmentHistoryDetailLabel">History Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <dl class="row js_shipment-history-detail-popup-data" data-base-img-url="/images/shipments/@Model.OrderNumber">                        
+                    </dl>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" defer src="@Url.Content("~/js/administrator/shipment/shipment-history.js")"></script>
+}

@@ -1,0 +1,78 @@
+﻿@using RatioShop.Areas.Admin.Models.SiteSettings.ContentSettings.PublicSite;
+
+@model ProductListingSettingViewModel
+
+@if (Model != null)
+{
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-2" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Product List Setting
+            </button>
+        </h2>
+        <div id="panelsStayOpen-2" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.DekstopPageSize)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.DekstopPageSize)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.MobilePageSize)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.MobilePageSize)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.PackageText)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.PackageText)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-3" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                Categories Filter
+            </button>
+        </h2>
+        <div id="panelsStayOpen-3" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Display Name
+                            </th>
+                            <th>
+                                Value
+                            </th>
+                            <th>
+                                Position
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.CategoriesFilter != null && Model.CategoriesFilter.Any())
+                        {
+                            foreach (var item in Model.CategoriesFilter)
+                            {
+                                <tr>
+                                    <td>@item.DisplayName</td>
+                                    <td>@item.Value</td>
+                                    <td>@item.Position</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
