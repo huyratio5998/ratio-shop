@@ -44,7 +44,7 @@ Design to solve basic commerce website.
 
 Front End | Admin area
 ----|------
-|Account: RatioShopManager/4Bd7U4l8DYR&
+Account: client1/Abc@123!|Account: RatioShopManager/4Bd7U4l8DYR&
 [FrontEnd](https://www.ratio-shop.somee.com/)|[Admin](https://www.ratio-shop.somee.com/admin)
 
 ### Ratio Shop reference ###
