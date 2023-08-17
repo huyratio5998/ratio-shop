@@ -25,7 +25,6 @@ const VariantChangeEventProductDetail = async () => {
 
 // Init
 const Init = () => {
-  console.log("product-detail.js");
   VariantChangeEventProductDetail();
 
   const quickViewArea = document.querySelector(".js_quickViewAreaEvent");
