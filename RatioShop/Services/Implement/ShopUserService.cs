@@ -350,6 +350,7 @@ namespace RatioShop.Services.Implement
                         || roles.Contains(UserRole.Admin.ToString())
                         || roles.Contains(UserRole.Manager.ToString())
                         || roles.Contains(UserRole.SuperAdmin.ToString())
+                        || roles.Contains(UserRole.ContentEditor.ToString())
                         )
                     {
                         userRoles.Add(item.Id.ToString(), string.Join(", ", roles));

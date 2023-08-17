@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RatioShop.Data;
 using RatioShop.Data.Models;
 using RatioShop.Services.Abstract;
+using System.Data;
 
-namespace RatioShop.Features
+namespace RatioShop.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class ProductVariantStocksController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -30,8 +30,8 @@ namespace RatioShop.Features
 
         // GET: ProductVariantStocks
         public async Task<IActionResult> Index()
-        {            
-            var productVariantStocks = _productVariantStockService.GetProductVariantStocks().ToList();            
+        {
+            var productVariantStocks = _productVariantStockService.GetProductVariantStocks().ToList();
             if (productVariantStocks != null && productVariantStocks.Any())
             {
                 foreach (var item in productVariantStocks)
@@ -40,7 +40,7 @@ namespace RatioShop.Features
                     item.Stock = _stockService.GetStock(item.StockId);
                 }
             }
-            return View(productVariantStocks?.OrderBy(x=>x.ProductVariant?.ProductId));
+            return View(productVariantStocks?.OrderBy(x => x.ProductVariant?.ProductId));
         }
 
         // GET: ProductVariantStocks/Details/5
@@ -74,7 +74,7 @@ namespace RatioShop.Features
                     item.Product = _productService.GetProduct(item.ProductId).Product;
                 }
             }
-            ViewData["ProductVariantId"] = new SelectList(productVariants?.Select(x => new { Id = x.Id, Code = x.Code, ProductCode = x.Product.Code, CodeDisplay = $"{x.Code} - product: {x.Product?.Name}" }).OrderBy(x => x.ProductCode), "Id", "CodeDisplay");
+            ViewData["ProductVariantId"] = new SelectList(productVariants?.Select(x => new { x.Id, x.Code, ProductCode = x.Product.Code, CodeDisplay = $"{x.Code} - product: {x.Product?.Name}" }).OrderBy(x => x.ProductCode), "Id", "CodeDisplay");
             ViewData["StockId"] = new SelectList(_stockService.GetStocks(), "Id", "Name");
             return View();
         }
@@ -88,7 +88,7 @@ namespace RatioShop.Features
         {
             if (ModelState.IsValid)
             {
-                await _productVariantStockService.CreateProductVariantStock(productVariantStock);                
+                await _productVariantStockService.CreateProductVariantStock(productVariantStock);
                 return RedirectToAction(nameof(Index));
             }
             // return view if invalid
@@ -100,7 +100,7 @@ namespace RatioShop.Features
                     item.Product = _productService.GetProduct(item.ProductId).Product;
                 }
             }
-            ViewData["ProductVariantId"] = new SelectList(productVariants?.Select(x => new { Id = x.Id, Code = x.Code, ProductCode = x.Product.Code, CodeDisplay = $"{x.Code} - product: {x.Product?.Name}" }).OrderBy(x => x.ProductCode), "Id", "CodeDisplay");
+            ViewData["ProductVariantId"] = new SelectList(productVariants?.Select(x => new { x.Id, x.Code, ProductCode = x.Product.Code, CodeDisplay = $"{x.Code} - product: {x.Product?.Name}" }).OrderBy(x => x.ProductCode), "Id", "CodeDisplay");
             ViewData["StockId"] = new SelectList(_stockService.GetStocks(), "Id", "Name");
             return View(productVariantStock);
         }
@@ -128,7 +128,7 @@ namespace RatioShop.Features
                     item.Product = _productService.GetProduct(item.ProductId).Product;
                 }
             }
-            ViewData["ProductVariantId"] = new SelectList(productVariants?.Select(x => new { Id = x.Id, Code = x.Code, ProductCode = x.Product.Code, CodeDisplay = $"{x.Code} - product: {x.Product?.Name}" }).OrderBy(x => x.ProductCode), "Id", "CodeDisplay");
+            ViewData["ProductVariantId"] = new SelectList(productVariants?.Select(x => new { x.Id, x.Code, ProductCode = x.Product.Code, CodeDisplay = $"{x.Code} - product: {x.Product?.Name}" }).OrderBy(x => x.ProductCode), "Id", "CodeDisplay");
             ViewData["StockId"] = new SelectList(_stockService.GetStocks(), "Id", "Name");
             return View(productVariantStock);
         }

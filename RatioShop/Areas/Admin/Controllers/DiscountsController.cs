@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RatioShop.Constants;
 using RatioShop.Data.Models;
 using RatioShop.Services.Abstract;
+using System.Data;
 
-namespace RatioShop.Features
+namespace RatioShop.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class DiscountsController : Controller
     {
         private readonly IDiscountService _discountService;
@@ -19,7 +23,7 @@ namespace RatioShop.Features
         // GET: Discounts
         public async Task<IActionResult> Index()
         {
-            var discounts = _discountService.GetDiscounts().OrderBy(x=>x.IsDelete).ThenBy(x=>x.Status).ThenBy(x=>x.DiscountType).ThenBy(x=>x.Value).ThenByDescending(x=>x.CreatedDate);
+            var discounts = _discountService.GetDiscounts().OrderBy(x => x.IsDelete).ThenBy(x => x.Status).ThenBy(x => x.DiscountType).ThenBy(x => x.Value).ThenByDescending(x => x.CreatedDate);
             return View(discounts);
         }
 
@@ -111,7 +115,7 @@ namespace RatioShop.Features
                 return RedirectToAction(nameof(Index));
             }
             return View(discount);
-        }       
+        }
 
         // GET: Discounts/Delete/5
         public async Task<IActionResult> Delete(int? id)

@@ -23,7 +23,7 @@ using RatioShop.Data.Models;
 
 namespace RatioShop.Areas.Identity.Pages.Account
 {
-    [AllowAnonymous]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin")]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<ShopUser> _signInManager;

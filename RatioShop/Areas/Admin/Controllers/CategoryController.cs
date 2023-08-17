@@ -1,30 +1,34 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RatioShop.Data.Models;
 using RatioShop.Data.ViewModels;
 using RatioShop.Services.Abstract;
+using System.Data;
 
-namespace RatioShop.Features
+namespace RatioShop.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class CategoryController : Controller
     {
-        private readonly ICategoryService _categoryService;        
+        private readonly ICategoryService _categoryService;
 
         public CategoryController(ICategoryService categoryService)
         {
-            _categoryService = categoryService;            
+            _categoryService = categoryService;
         }
 
         // GET: CategoryController
         public ActionResult Index()
         {
-            var categories = _categoryService.GetCategoriesWithParentData().OrderBy(x=>x.ParentId).ToList();            
+            var categories = _categoryService.GetCategoriesWithParentData().OrderBy(x => x.ParentId).ToList();
             return View(categories);
         }
 
         // GET: CategoryController/Details/5
         public ActionResult Details(int id)
         {
-            var category = _categoryService.GetCategory(id);            
+            var category = _categoryService.GetCategory(id);
 
             return View(category);
         }
@@ -63,7 +67,7 @@ namespace RatioShop.Features
 
             var model = new CategoryViewModel();
             model.Category = category;
-            model.AvailableCategory = _categoryService.GetCategories().Where(x=>x.Id != id).OrderBy(x=>x.ParentId).ToDictionary(x => x.Id.ToString(), x => x.DisplayName);
+            model.AvailableCategory = _categoryService.GetCategories().Where(x => x.Id != id).OrderBy(x => x.ParentId).ToDictionary(x => x.Id.ToString(), x => x.DisplayName);
 
             return View(model);
         }

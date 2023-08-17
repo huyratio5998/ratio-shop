@@ -4,10 +4,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,6 +17,7 @@ using RatioShop.Data.Models;
 
 namespace RatioShop.Areas.Identity.Pages.Account.Manage
 {
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor,Employee,Shipper")]
     public class ExternalLoginsModel : PageModel
     {
         private readonly UserManager<ShopUser> _userManager;

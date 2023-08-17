@@ -38,7 +38,7 @@ const updateProductAdditionalInfor = async (data) => {
       removeProductCategories: RemoveProductCategories,
     };
     const response = await fetch(
-      "/products/UpdateProductAdditionalInformation",
+      "/admin/products/UpdateProductAdditionalInformation",
       {
         method: "POST",
         headers: {
@@ -309,7 +309,7 @@ const popupVariantsSubmitEvent = () => {
         data.append("variantImages", file);
       }
 
-      const response = await fetch("/products/SubmitVariantImages", {
+      const response = await fetch("/admin/products/SubmitVariantImages", {
         method: "POST",
         body: data,
       });

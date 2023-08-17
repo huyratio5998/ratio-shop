@@ -5,7 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace RatioShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "SuperAdmin,Manager,Admin,Shipper,Employee")]
+    [Authorize(Roles = "SuperAdmin,Manager,Admin,ContentEditor")]
     public class CacheManagerController : Controller
     {
         private IMemoryCache _memoryCache;
