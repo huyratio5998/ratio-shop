@@ -584,7 +584,6 @@ const ViewCartHeaderPannelEvent = () => {
 };
 
 const InitCart = async () => {
-  console.log("outside: cart-common.js");
   const isAuthentication = await LoginService.CheckIsAuthenticated();
   if (isAuthentication) RefreshCartView();
   AddToCartEvent();

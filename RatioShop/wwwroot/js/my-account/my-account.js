@@ -354,7 +354,6 @@ const ToggleFormUpdatePersonalInformationEvent = () => {
 };
 
 const Init = () => {
-  console.log("Init event my account");
   // add event when close popup.
   EventHideOrderDetailPopup();
   ChangeCityEvent();

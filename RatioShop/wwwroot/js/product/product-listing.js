@@ -5,7 +5,6 @@ import * as ProductSearchService from "./product-search-service.js";
 
 // Init
 const Init = () => {
-  console.log("product-listing.js");
   ProductItemsService.AddQuickViewProductEvent();
   PackageItemsService.AddQuickViewProductPackageEvent();
   ProductLoadMoreService.LoadMoreEvent();
