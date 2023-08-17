@@ -2,7 +2,7 @@
 ===========
 
 Design to solve basic commerce website.
-(Not a complete fnished project yet, but the core feature working well)
+(The core feature working well. Goals for practicing purpose)
 
 ### Technology used ###
 
@@ -49,6 +49,5 @@ Account: client1/Abc@123!|Account: RatioShopManager/4Bd7U4l8DYR&
 
 ### Ratio Shop reference ###
 
-* CozaStore Themes: 
-* Login/Registration form Theme:
+* CozaStore Themes: https://github.com/huyratio5998/resource-projects/blob/main/ratio-shop-resources.zip
 * Host for production demo: https://somee.com/
