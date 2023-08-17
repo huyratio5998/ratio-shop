@@ -8,6 +8,7 @@ _(The core feature working well. Goals for practicing purpose)_
 
 * Run on .net core 6.0
 * MS SQL server
+* Entity Framework
 * Monolith project, apply repository pattern, use Memory Cache ( has extention to use Distribute cache for further), Cache Tag Helper
 * Has Area for admin login, authorization by role, external authentication: google, facebook
 * Auto mapper
