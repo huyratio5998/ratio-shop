@@ -7,7 +7,6 @@ using RatioShop.Data.ViewModels;
 using RatioShop.Helpers.FileHelpers;
 using RatioShop.Services.Abstract;
 using RatioShop.Services.Implement;
-using System.Data;
 
 namespace RatioShop.Areas.Admin.Controllers
 {
@@ -26,12 +25,9 @@ namespace RatioShop.Areas.Admin.Controllers
         private readonly IMemoryCache _memoryCache;
         private readonly ISiteSettingService _siteSettingService;
 
-        private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         private const int pageSizeDefault = 5;
         private const int pageSizeClientDesktopDefault = 8;
         private const int pageSizeClientMobileDefault = 3;
-        private const int maxRelatedNumber = 8;
-        private const string productSettingKey = "plp-setting";
 
         public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService, IPackageService packageService, IMemoryCache memoryCache, ISiteSettingService siteSettingService)
         {
@@ -45,7 +41,7 @@ namespace RatioShop.Areas.Admin.Controllers
             _packageService = packageService;
             _memoryCache = memoryCache;
             _siteSettingService = siteSettingService;
-        }       
+        }
 
         //Admin
         public async Task<IActionResult> ProductSettings(string sortBy = "default", int page = 1)
@@ -71,7 +67,7 @@ namespace RatioShop.Areas.Admin.Controllers
 
             return View(listProductViewModel);
         }
-        
+
         // GET: Products/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {

@@ -50,7 +50,7 @@
     <div class="js_login-popup-area"></div>
     <partial name="_RegisterPopupPartial" model="@layoutSetting" />
 
-    <cache enabled="true" expires-after="@TimeSpan.FromDays(1)">
+    <cache enabled="true" vary-by="@layoutSetting.SiteSettings?.FooterSetting?.Id + @layoutSetting.SiteSettings?.FooterSetting?.ModifiedDate" expires-after="@TimeSpan.FromDays(1)">
         <!-- Footer -->
         <partial name="_FooterPartial" model="@layoutSetting" />
 

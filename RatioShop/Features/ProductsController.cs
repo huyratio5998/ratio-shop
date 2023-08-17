@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using RatioShop.Constants;
 using RatioShop.Data.ViewModels;
@@ -31,7 +32,7 @@ namespace RatioShop.Features
         private const int pageSizeClientDesktopDefault = 8;
         private const int pageSizeClientMobileDefault = 3;
         private const int maxRelatedNumber = 8;
-        private const string productSettingKey = "plp-setting";
+        private const string productSettingKey = CacheConstant.PLPKey;
 
         public ProductsController(IProductService productService, IWebHostEnvironment hostingEnvironment, IProductVariantService productVariantService, IProductCategoryService productCategoryService, ICategoryService categoryService, IProductVariantStockService productVariantStockService, ICommonService commonService, IPackageService packageService, IMemoryCache memoryCache, ISiteSettingService siteSettingService)
         {
@@ -58,7 +59,7 @@ namespace RatioShop.Features
             request.PageSize = CommonHelper.GetClientDevice(Request) == Enums.DeviceType.Desktop ? pageSizeDesktop : pageSizeMobile;
             request.IsSelectPreviousItems = true;
 
-            var productCacheKey = $"products-{JsonConvert.SerializeObject(request)}";
+            var productCacheKey = $"{CacheConstant.Products}-{JsonConvert.SerializeObject(request)}";
             if (!_memoryCache.TryGetValue(productCacheKey, out ListProductViewModel listProductViewModel))
             {
                 try
@@ -80,7 +81,8 @@ namespace RatioShop.Features
                             .SetSlidingExpiration(TimeSpan.FromSeconds(60))
                             .SetAbsoluteExpiration(TimeSpan.FromHours(1))
                             .SetPriority(CacheItemPriority.Normal)
-                            .SetSize(1024);
+                            .SetSize(1024)
+                            .AddExpirationToken(new CancellationChangeToken(CacheConstant.PLPCancellation.Token));
 
                         _memoryCache.Set(productCacheKey, listProductViewModel, cacheOption);
                     }
@@ -121,7 +123,7 @@ namespace RatioShop.Features
         {
             if (id == null) return NotFound();
 
-            var productCacheKey = $"product-{id}";
+            var productCacheKey = $"{CacheConstant.Products}-{id}";
             if (!_memoryCache.TryGetValue(productCacheKey, out ProductViewModel product))
             {
                 try
@@ -138,7 +140,8 @@ namespace RatioShop.Features
                             .SetSlidingExpiration(TimeSpan.FromSeconds(60))
                             .SetAbsoluteExpiration(TimeSpan.FromHours(1))
                             .SetPriority(CacheItemPriority.Normal)
-                            .SetSize(1024);
+                            .SetSize(1024)
+                            .AddExpirationToken(new CancellationChangeToken(CacheConstant.PDPCancellation.Token));
 
                         _memoryCache.Set(productCacheKey, product, cacheOption);
                     }

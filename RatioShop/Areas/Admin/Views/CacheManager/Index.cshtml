@@ -1,4 +1,5 @@
-﻿@{
+﻿@using RatioShop.Constants;
+@{
     ViewData["Title"] = "Index";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
     var message = ViewBag.Message;
@@ -27,7 +28,7 @@
                 <tbody>
                     <tr class="js_choose-item">
                         <td>
-                            <input type="checkbox" id="site-setting" name="cache-setting" value="site-setting" />
+                            <input type="checkbox" id="site-setting" name="cache-setting" value="@CacheConstant.SiteSettingKey" />
                             <span>
                                 Site Setting Common
                             </span>
@@ -35,7 +36,7 @@
                     </tr>
                     <tr class="js_choose-item">
                         <td>
-                            <input type="checkbox" id="plp-setting" name="cache-setting" value="plp-setting" />
+                            <input type="checkbox" id="plp-setting" name="cache-setting" value="@CacheConstant.PLPKey" />
                             <span>
                                 PLP Setting
                             </span>
@@ -43,7 +44,7 @@
                     </tr>
                     <tr class="js_choose-item">
                         <td>
-                            <input type="checkbox" id="pdp-setting" name="cache-setting" value="pdp-setting" />
+                            <input type="checkbox" id="pdp-setting" name="cache-setting" value="@CacheConstant.PDPKey" />
                             <span>
                                 PDP Setting
                             </span>
@@ -51,7 +52,7 @@
                     </tr>
                     <tr class="js_choose-item">
                         <td>
-                            <input type="checkbox" id="admin-site-setting" name="cache-setting" value="admin-site-setting" />
+                            <input type="checkbox" id="admin-site-setting" name="cache-setting" value="@CacheConstant.AdminSiteSettingKey" />
                             <span>
                                 Admin Site Setting Common
                             </span>
