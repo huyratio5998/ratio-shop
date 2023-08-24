@@ -203,10 +203,17 @@ namespace RatioShop.Services.Implement
                 //                                
                 var user = new ShopUser()
                 {
-                    AddressDetail = info.Principal.FindFirstValue(ClaimTypes.StreetAddress)
+                    AddressDetail = info.Principal.FindFirstValue(ClaimTypes.StreetAddress),
+                    FullName = info.Principal.FindFirstValue(ClaimTypes.Name)
                 };
                 string email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 string phoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone);
+
+                // check username exist
+                if(_shopUserRepository.GetShopUsers().FirstOrDefault(x=>x.UserName.Equals(email)) != null)
+                {
+                    email = $"{email}.{info.LoginProvider}".ToLower();
+                }
 
                 await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
