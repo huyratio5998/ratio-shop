@@ -18,7 +18,7 @@ _(The core feature working well. Goals for practicing purpose)_
 * Unit test: MSTest, Moq, FluentAssertions.
 * Js: Use ES6 module syntax. (Won't bundle, minify js for production yet)
 
-### Front End ###
+### Public Area ###
 * Product listing page: search, filter, sort, paging, preview product variants
 * Product: multi variant, multi image, price, discount, stock amount
 * Product Detail page, related products
@@ -43,7 +43,7 @@ _(The core feature working well. Goals for practicing purpose)_
 
 ## Store demo ##
 
-Front End | Admin area
+Public area | Admin area
 ----|------
 Account: client1/Abc@123!|Account: RatioShopManager/4Bd7U4l8DYR&
 [FrontEnd](https://www.ratio-shop.somee.com/)|[Admin](https://www.ratio-shop.somee.com/admin)
